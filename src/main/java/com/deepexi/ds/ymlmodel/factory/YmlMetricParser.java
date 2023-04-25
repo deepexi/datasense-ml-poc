@@ -2,6 +2,7 @@ package com.deepexi.ds.ymlmodel.factory;
 
 import static java.util.Collections.EMPTY_LIST;
 
+import com.deepexi.ds.ComponentType;
 import com.deepexi.ds.ymlmodel.YmlMetric;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -41,18 +42,19 @@ public class YmlMetricParser {
     if (!(resource instanceof String)) {
       return null;
     }
-    if (!Objects.equals("metric_def", resource)) {
+    if (!Objects.equals(ComponentType.METRICS_DEF.name, resource)) {
       return null;
     }
 
     String name = ParserUtils.getStringElseThrow(map, "name");
     String modelName = ParserUtils.getStringElseThrow(map, "model_name");
     String agg = ParserUtils.getStringElseThrow(map, "agg");
+    String dataType = ParserUtils.getStringElse(map, "dataType", null);
     // dimensions
     List<String> dim = (List<String>) (map.get("dimensions"));
     if (dim == null) {
       dim = EMPTY_LIST;
     }
-    return new YmlMetric(name, modelName, dim, agg);
+    return new YmlMetric(name, modelName, dim, agg, dataType);
   }
 }

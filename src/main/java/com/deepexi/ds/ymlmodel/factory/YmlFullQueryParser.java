@@ -1,38 +1,22 @@
 package com.deepexi.ds.ymlmodel.factory;
 
 import com.deepexi.ds.ModelException.IllegalYamlFileException;
+import com.deepexi.ds.ymlmodel.YmlFullQuery;
 import com.deepexi.ds.ymlmodel.YmlMetric;
 import com.deepexi.ds.ymlmodel.YmlMetricQuery;
 import com.deepexi.ds.ymlmodel.YmlModel;
-import com.google.common.collect.ImmutableList;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import lombok.Getter;
 import org.yaml.snakeyaml.Yaml;
 
-public class HybridComponentParser {
+public class YmlFullQueryParser {
 
-  private HybridComponentParser() {
+  private YmlFullQueryParser() {
   }
 
-  @Getter
-  public static class SelfContainedContext {
-
-    private final YmlMetricQuery query;
-    private final ImmutableList<YmlMetric> metrics;
-    private final ImmutableList<YmlModel> models;
-
-    public SelfContainedContext(YmlMetricQuery query, List<YmlMetric> metrics,
-        List<YmlModel> models) {
-      this.query = query;
-      this.metrics = ImmutableList.copyOf(metrics);
-      this.models = ImmutableList.copyOf(models);
-    }
-  }
-
-  public static SelfContainedContext loadFromRes(String resFile) {
+  public static YmlFullQuery loadFromRes(String resFile) {
     Yaml yaml = new Yaml();
     YmlMetricQuery query = null;
     final List<YmlMetric> metrics = new ArrayList<>();
@@ -55,7 +39,7 @@ public class HybridComponentParser {
         continue;
       }
       //
-      YmlMetricQuery query1 = YmlMetricQLParser.loadOneModel(item);
+      YmlMetricQuery query1 = YmlMetricQueryParser.loadOneModel(item);
       if (query1 == null) {
         System.out.println("skip something: yml has something not belongs to model");
         continue;
@@ -66,6 +50,6 @@ public class HybridComponentParser {
       query = query1;
     }
 
-    return new SelfContainedContext(query, metrics, models);
+    return new YmlFullQuery(query, metrics, models);
   }
 }

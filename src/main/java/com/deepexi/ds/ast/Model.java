@@ -1,5 +1,6 @@
 package com.deepexi.ds.ast;
 
+import com.deepexi.ds.ComponentType;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.source.Source;
 import com.google.common.collect.ImmutableList;
@@ -31,7 +32,7 @@ public class Model extends AstComponent {
 
   @Override
   public ComponentType getComponentType() {
-    return ComponentType.MODEL_ML;
+    return ComponentType.MODEL_DEF;
   }
 
   @Override

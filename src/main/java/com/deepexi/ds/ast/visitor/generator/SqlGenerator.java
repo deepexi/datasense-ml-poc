@@ -20,6 +20,7 @@ import com.deepexi.ds.ast.source.ModelSource;
 import com.deepexi.ds.ast.source.Source;
 import com.deepexi.ds.ast.source.TableSource;
 import com.deepexi.ds.ast.utils.ResUtils;
+import com.deepexi.ds.ast.utils.SqlTemplateId;
 import com.google.common.collect.ImmutableList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,10 +32,10 @@ import org.apache.commons.text.StringSubstitutor;
  */
 public class SqlGenerator implements ModelVisitor<String, SqlGeneratorContext> {
 
-  final String _TEMPLATE_ = ResUtils.getResourceFileAsString("sql_segment/01_with_clause.sql");
-
   @Override
   public String visitModel(Model node, SqlGeneratorContext context) {
+    final String sqlTemplate = ResUtils.getSqlTemplate(SqlTemplateId.with_clause_001,
+        context.getSqlDialect());
 
     final String ALL_COLUMN = "*";
 
@@ -68,7 +69,7 @@ public class SqlGenerator implements ModelVisitor<String, SqlGeneratorContext> {
     valuesMap.put("col_list", colSql);
 
     StringSubstitutor sub = new StringSubstitutor(valuesMap);
-    String withoutJoin = sub.replace(_TEMPLATE_);
+    String withoutJoin = sub.replace(sqlTemplate);
     if (node.getJoins() == null) {
       return withoutJoin;
     }

@@ -14,6 +14,7 @@ import com.deepexi.ds.ast.Column;
 import com.deepexi.ds.ast.ColumnDataType;
 import com.deepexi.ds.ast.Dimension;
 import com.deepexi.ds.ast.Model;
+import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.source.Source;
 import com.deepexi.ds.ast.source.TableSource;
 import com.deepexi.ds.ymlmodel.YmlModel;
@@ -49,13 +50,13 @@ public class AstModelBuilderTest {
         .collect(Collectors.toMap(Column::getAlias, Function.identity()));
     Column colA = columnLookup.get("d_date_sk");
     assertEquals(ColumnDataType.STRING, colA.getDataType());
-    assertEquals("date_dim", colA.getExpr().getPrefix());
-    assertEquals("d_date_sk", colA.getExpr().getValue());
+    assertEquals("date_dim", ((Identifier) colA.getExpr()).getPrefix());
+    assertEquals("d_date_sk", ((Identifier) colA.getExpr()).getValue());
 
     Column colB = columnLookup.get("d_date_id");
     assertEquals(ColumnDataType.INTEGER, colB.getDataType());
-    assertEquals("date_dim", colB.getExpr().getPrefix());
-    assertEquals("d_date_id", colB.getExpr().getValue());
+    assertEquals("date_dim", ((Identifier) colB.getExpr()).getPrefix());
+    assertEquals("d_date_id", ((Identifier) colB.getExpr()).getValue());
 
     // dimensions
     List<Dimension> dims = rootModel.getDimensions();

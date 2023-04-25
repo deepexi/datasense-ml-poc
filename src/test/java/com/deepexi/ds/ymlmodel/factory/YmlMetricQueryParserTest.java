@@ -8,11 +8,11 @@ import com.deepexi.ds.ymlmodel.YmlMetricQuery;
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
-public class YmlMetricQLParserTest {
+public class YmlMetricQueryParserTest {
 
   @Test
   void testParseMetricQueryFromResFile() {
-    YmlMetricQuery query = YmlMetricQLParser.loadOneModel("debug/09_metrics_query.yml");
+    YmlMetricQuery query = YmlMetricQueryParser.loadOneModel("debug/09_metrics_query.yml");
     assertNotNull(query);
 
     // name

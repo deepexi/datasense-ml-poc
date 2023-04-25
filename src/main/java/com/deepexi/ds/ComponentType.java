@@ -1,9 +1,9 @@
-package com.deepexi.ds.ast;
+package com.deepexi.ds;
 
 public enum ComponentType {
-  MODEL_ML("model_def"),
-  METRICS_ML("metrics_def"),
-  METRICS_QL("metrics_query");
+  MODEL_DEF("model_def"),
+  METRICS_DEF("metric_def"),
+  METRICS_QUERY("metrics_query");
 
   public final String name;
 

@@ -2,6 +2,7 @@ package com.deepexi.ds.ymlmodel.factory;
 
 import static java.util.Collections.EMPTY_LIST;
 
+import com.deepexi.ds.ComponentType;
 import com.deepexi.ds.ymlmodel.YmlMetricQuery;
 import java.io.InputStream;
 import java.util.List;
@@ -9,14 +10,15 @@ import java.util.Map;
 import java.util.Objects;
 import org.yaml.snakeyaml.Yaml;
 
-public class YmlMetricQLParser {
+public class YmlMetricQueryParser {
 
-  private YmlMetricQLParser() {
+  private YmlMetricQueryParser() {
   }
 
   public static YmlMetricQuery loadOneModel(String resFile) {
     Yaml yaml = new Yaml();
-    InputStream inputStream = YmlMetricQLParser.class.getClassLoader().getResourceAsStream(resFile);
+    InputStream inputStream = YmlMetricQueryParser.class.getClassLoader()
+        .getResourceAsStream(resFile);
     Map<String, Object> map = yaml.load(inputStream);
     return loadOneModel(map);
   }
@@ -26,7 +28,7 @@ public class YmlMetricQLParser {
     if (!(resource instanceof String)) {
       return null;
     }
-    if (!Objects.equals("metric_query", resource)) {
+    if (!Objects.equals(ComponentType.METRICS_QUERY.name, resource)) {
       return null;
     }
 
@@ -45,13 +47,13 @@ public class YmlMetricQLParser {
     }
 
     // model_filter
-    List<String> modelFilter = (List<String>) (map.get("model_filter"));
+    List<String> modelFilter = (List<String>) (map.get("model_filters"));
     if (modelFilter == null) {
       modelFilter = EMPTY_LIST;
     }
 
     // dimension_filter
-    List<String> dimFilter = (List<String>) (map.get("dimension_filter"));
+    List<String> dimFilter = (List<String>) (map.get("dimension_filters"));
     if (dimFilter == null) {
       dimFilter = EMPTY_LIST;
     }

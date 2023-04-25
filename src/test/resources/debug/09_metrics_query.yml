@@ -1,10 +1,10 @@
 ---
 version: v1
-resource: metric_query
+resource: metrics_query
 name: store_sales_count
 metric_names: [ store_sales_count, store_sales_count ]
 dimensions: [ s_store_name, i_product_name ]
-model_filter:
+model_filters:
   - quantity > 0
   - status='paid'
-dimension_filter: [ d_year >= 1990, d_year <= 1999 ]
+dimension_filters: [ d_year >= 1990, d_year <= 1999 ]

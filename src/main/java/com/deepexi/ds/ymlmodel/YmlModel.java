@@ -8,7 +8,7 @@ import lombok.Getter;
 public class YmlModel {
 
   private final String version = "v1";
-  private final String resource = "model_ml";
+  private final String resource = "model_def";
   private final String name;
   private final YmlSource source;
   private final ImmutableList<YmlJoin> joins;
@@ -26,5 +26,10 @@ public class YmlModel {
     this.joins = ImmutableList.copyOf(joins);
     this.columns = ImmutableList.copyOf(columns);
     this.dimensions = ImmutableList.copyOf(dimensions);
+  }
+
+  @Override
+  public String toString() {
+    return this.name;
   }
 }

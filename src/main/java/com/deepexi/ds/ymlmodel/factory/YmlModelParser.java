@@ -2,6 +2,7 @@ package com.deepexi.ds.ymlmodel.factory;
 
 import static java.util.Collections.EMPTY_LIST;
 
+import com.deepexi.ds.ComponentType;
 import com.deepexi.ds.ModelException;
 import com.deepexi.ds.ymlmodel.YmlColumn;
 import com.deepexi.ds.ymlmodel.YmlDimension;
@@ -24,7 +25,6 @@ import org.yaml.snakeyaml.Yaml;
 @SuppressWarnings("unchecked")
 public class YmlModelParser {
 
-  public static final String resource_value_model = "model_def";
   public static final String resource_key = "resource";
   public static final String source_key = "source";
   public static final String joins_key = "joins";
@@ -69,7 +69,7 @@ public class YmlModelParser {
     if (!(resource instanceof String)) {
       return null;
     }
-    if (!Objects.equals(resource_value_model, resource)) {
+    if (!Objects.equals(ComponentType.MODEL_DEF.name, resource)) {
       return null;
     }
 

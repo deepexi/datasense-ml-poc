@@ -70,7 +70,7 @@ public class AstModelBuilder {
     return builder.build();
   }
 
-  AstModelBuilder(List<YmlModel> models, YmlModel entry) {
+  public AstModelBuilder(List<YmlModel> models, YmlModel entry) {
     this.models = models;
     this.entry = entry;
     lookup = models.stream().collect(Collectors.toMap(YmlModel::getName, Function.identity()));

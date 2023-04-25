@@ -24,7 +24,7 @@ public class Dimension extends AstNode {
   }
 
   public String toString() {
-    return String.format("%s  =>  %s", expr, name);
+    return String.format("%s  AS  %s", expr, name);
   }
 
 }

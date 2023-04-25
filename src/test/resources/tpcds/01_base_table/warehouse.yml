@@ -1,0 +1,38 @@
+version: v1
+resource: model_ml
+name: warehouse
+source:
+  type: table
+  table: warehouse
+  datasource: ds_id_ck01
+joins:
+dimensions:
+columns:
+  - name: w_warehouse_sk
+    type: int
+  - name: w_warehouse_id
+    type: string
+  - name: w_warehouse_name
+    type: string
+  - name: w_warehouse_sq_ft
+    type: int
+  - name: w_street_number
+    type: string
+  - name: w_street_name
+    type: string
+  - name: w_street_type
+    type: string
+  - name: w_suite_number
+    type: string
+  - name: w_city
+    type: string
+  - name: w_county
+    type: string
+  - name: w_state
+    type: string
+  - name: w_zip
+    type: string
+  - name: w_country
+    type: string
+  - name: w_gmt_offset
+    type: decimal

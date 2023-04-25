@@ -1,0 +1,50 @@
+# ModelML - model_store
+version: v1
+resource: model_ml
+name: model_store
+source:
+  type: table
+  dialect: clickhouse
+  table: store
+  datasource: ds_id_ck01
+columns:
+  - name: s_store_id
+    expr: s_store_id
+    type: string
+  - name: s_store_name
+    type: string
+  - name: s_county
+    type: string
+  - name: s_city
+    type: string
+dimensions:
+  - name: s_store_id
+  - name: s_store_name
+  - name: s_county
+  - name: s_city
+
+---
+version: v1
+resource: model_ml
+name: model_item
+source:
+  type: table
+  dialect: clickhouse
+  table: item
+  datasource: ds_id_ck01
+columns:
+  - name: i_item_sk
+    type: string
+  - name: s_store_id
+    type: string
+  - name: s_store_name
+    type: string
+  - name: s_county
+    type: string
+  - name: s_city
+    type: string
+dimensions:
+  - name: s_store_id
+  - name: s_store_name
+  - name: s_county
+  - name: s_city

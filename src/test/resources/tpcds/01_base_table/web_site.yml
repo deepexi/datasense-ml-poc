@@ -1,0 +1,62 @@
+version: v1
+resource: model_ml
+name: web_site
+source:
+  type: table
+  table: web_site
+  datasource: ds_id_ck01
+joins:
+dimensions:
+columns:
+  - name: web_site_sk
+    type: int
+  - name: web_site_id
+    type: string
+  - name: web_rec_start_date
+    type: date
+  - name: web_rec_end_date
+    type: date
+  - name: web_name
+    type: string
+  - name: web_open_date_sk
+    type: int
+  - name: web_close_date_sk
+    type: int
+  - name: web_class
+    type: string
+  - name: web_manager
+    type: string
+  - name: web_mkt_id
+    type: int
+  - name: web_mkt_class
+    type: string
+  - name: web_mkt_desc
+    type: string
+  - name: web_market_manager
+    type: string
+  - name: web_company_id
+    type: int
+  - name: web_company_name
+    type: string
+  - name: web_street_number
+    type: string
+  - name: web_street_name
+    type: string
+  - name: web_street_type
+    type: string
+  - name: web_suite_number
+    type: string
+  - name: web_city
+    type: string
+  - name: web_county
+    type: string
+  - name: web_state
+    type: string
+  - name: web_zip
+    type: string
+  - name: web_country
+    type: string
+  - name: web_gmt_offset
+    type: decimal
+  - name: web_tax_percentage
+    type: decimal

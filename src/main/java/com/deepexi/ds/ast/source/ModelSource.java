@@ -1,0 +1,47 @@
+package com.deepexi.ds.ast.source;
+
+
+import com.deepexi.ds.ast.Column;
+import com.deepexi.ds.ast.Model;
+import com.deepexi.ds.ast.ModelVisitor;
+import com.deepexi.ds.ast.expression.Identifier;
+import java.util.List;
+import lombok.Getter;
+
+/**
+ * this source from another Model
+ */
+@Getter
+public class ModelSource extends Source {
+
+  private final Model model;
+
+  public ModelSource(Model model) {
+    this.model = model;
+  }
+
+  @Override
+  public <R, C> R accept(ModelVisitor<R, C> visitor, C context) {
+    return visitor.visitModelSource(this, context);
+  }
+
+  @Override
+  public String toString() {
+    return model.getName().getValue();
+  }
+
+  @Override
+  public Identifier getAlias() {
+    return model.getName();
+  }
+
+  @Override
+  public Identifier getTableName() {
+    return model.getName();
+  }
+
+  @Override
+  public List<Column> getColumns() {
+    return model.getColumns();
+  }
+}

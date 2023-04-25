@@ -1,0 +1,20 @@
+CREATE TABLE public.customer (
+c_customer_sk int8 NULL,
+c_customer_id varchar(16) NULL,
+c_current_cdemo_sk int8 NULL,
+c_current_hdemo_sk int8 NULL,
+c_current_addr_sk int8 NULL,
+c_first_shipto_date_sk int8 NULL,
+c_first_sales_date_sk int8 NULL,
+c_salutation varchar(10) NULL,
+c_first_name varchar(20) NULL,
+c_last_name varchar(30) NULL,
+c_preferred_cust_flag varchar(1) NULL,
+c_birth_day int4 NULL,
+c_birth_month int4 NULL,
+c_birth_year int4 NULL,
+c_birth_country varchar(20) NULL,
+c_login varchar(13) NULL,
+c_email_address varchar(50) NULL,
+c_last_review_date_sk int8 NULL
+);

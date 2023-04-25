@@ -1,0 +1,28 @@
+version: v1
+resource: model_ml
+name: catalog_page
+source:
+  type: table
+  table: catalog_page
+  datasource: ds_id_ck01
+joins:
+dimensions:
+columns:
+  - name: cp_catalog_page_sk
+    type: int
+  - name: cp_catalog_page_id
+    type: string
+  - name: cp_start_date_sk
+    type: int
+  - name: cp_end_date_sk
+    type: int
+  - name: cp_department
+    type: string
+  - name: cp_catalog_number
+    type: int
+  - name: cp_catalog_page_number
+    type: int
+  - name: cp_description
+    type: string
+  - name: cp_type
+    type: string

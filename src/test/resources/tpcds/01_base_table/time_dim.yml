@@ -1,0 +1,30 @@
+version: v1
+resource: model_ml
+name: time_dim
+source:
+  type: table
+  table: time_dim
+  datasource: ds_id_ck01
+joins:
+dimensions:
+columns:
+  - name: t_time_sk
+    type: int
+  - name: t_time_id
+    type: string
+  - name: t_time
+    type: int
+  - name: t_hour
+    type: int
+  - name: t_minute
+    type: int
+  - name: t_second
+    type: int
+  - name: t_am_pm
+    type: string
+  - name: t_shift
+    type: string
+  - name: t_sub_shift
+    type: string
+  - name: t_meal_time
+    type: string

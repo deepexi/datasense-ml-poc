@@ -1,0 +1,19 @@
+# store_sales join store
+version: v1
+resource: model_ml
+name: store_sales_join_store
+source:
+  type: model_ml
+  model_name: store_sales
+joins:
+  - model_name: store
+    join_type: inner
+    conditions:
+      - "store_sales.ss_store_sk=store.s_store_sk"
+      - "1=1"
+dimensions:
+columns:
+  - name: s_store_name
+    expr: store.s_store_name
+  - name: ss_store_sk
+

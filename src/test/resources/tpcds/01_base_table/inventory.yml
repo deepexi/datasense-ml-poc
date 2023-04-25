@@ -1,0 +1,18 @@
+version: v1
+resource: model_ml
+name: inventory
+source:
+  type: table
+  table: inventory
+  datasource: ds_id_ck01
+joins:
+dimensions:
+columns:
+  - name: inv_date_sk
+    type: int
+  - name: inv_item_sk
+    type: int
+  - name: inv_warehouse_sk
+    type: int
+  - name: inv_quantity_on_hand
+    type: int

@@ -1,0 +1,24 @@
+# store_sales join store join item
+version: v1
+resource: model_ml
+name: catalog_returns
+source:
+  type: model_ml
+  model_name: store_sales
+joins:
+  - model_name: store
+    join_type: inner
+    conditions: [ "store_sales.ss_store_sk=store.s_store_sk", "1=1" ]
+  - model_name: item
+    join_type: inner
+    conditions: ["1=1", "store_sales.ss_item_sk=item.i_item_sk"]
+dimensions:
+
+columns:
+  - name: s_store_name
+    expr: store.s_store_name
+  - name: i_product_name
+    expr: item.i_product_name
+  - name: ss_item_sk
+  - name: ss_store_sk
+

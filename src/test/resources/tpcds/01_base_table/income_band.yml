@@ -1,0 +1,16 @@
+version: v1
+resource: model_ml
+name: income_band
+source:
+  type: table
+  table: income_band
+  datasource: ds_id_ck01
+joins:
+dimensions:
+columns:
+  - name: ib_income_band_sk
+    type: int
+  - name: ib_lower_bound
+    type: int
+  - name: ib_upper_bound
+    type: int

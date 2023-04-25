@@ -1,0 +1,29 @@
+# two trees, without dependency
+---
+version: v1
+resource: model_ml
+name: store
+source:
+  type: table
+  table: store
+  datasource: ds_id_ck01
+joins:
+dimensions:
+columns:
+  - name: s_store_sk
+    type: int
+
+---
+version: v1
+resource: model_ml
+name: item
+source:
+  type: table
+  table: item
+  datasource: ds_id_ck01
+joins:
+dimensions:
+columns:
+  - name: i_item_sk
+
+

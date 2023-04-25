@@ -1,0 +1,54 @@
+version: v1
+resource: model_ml
+name: item
+source:
+  type: table
+  table: item
+  datasource: ds_id_ck01
+joins:
+dimensions:
+columns:
+  - name: i_item_sk
+    type: int
+  - name: i_item_id
+    type: string
+  - name: i_rec_start_date
+    type: date
+  - name: i_rec_end_date
+    type: date
+  - name: i_item_desc
+    type: string
+  - name: i_current_price
+    type: decimal
+  - name: i_wholesale_cost
+    type: decimal
+  - name: i_brand_id
+    type: int
+  - name: i_brand
+    type: string
+  - name: i_class_id
+    type: int
+  - name: i_class
+    type: string
+  - name: i_category_id
+    type: int
+  - name: i_category
+    type: string
+  - name: i_manufact_id
+    type: int
+  - name: i_manufact
+    type: string
+  - name: i_size
+    type: string
+  - name: i_formulation
+    type: string
+  - name: i_color
+    type: string
+  - name: i_units
+    type: string
+  - name: i_container
+    type: string
+  - name: i_manager_id
+    type: int
+  - name: i_product_name
+    type: string

@@ -1,0 +1,28 @@
+version: v1
+resource: model_ml
+name: customer_demographics
+source:
+  type: table
+  table: customer_demographics
+  datasource: ds_id_ck01
+joins:
+dimensions:
+columns:
+  - name: cd_demo_sk
+    type: int
+  - name: cd_gender
+    type: string
+  - name: cd_marital_status
+    type: string
+  - name: cd_education_status
+    type: string
+  - name: cd_purchase_estimate
+    type: int
+  - name: cd_credit_rating
+    type: string
+  - name: cd_dep_count
+    type: int
+  - name: cd_dep_employed_count
+    type: int
+  - name: cd_dep_college_count
+    type: int

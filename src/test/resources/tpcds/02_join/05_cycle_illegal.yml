@@ -1,0 +1,27 @@
+# 循环引用
+---
+version: v1
+resource: model_ml
+name: store
+source:
+  type: model_ml
+  model_name: item
+joins:
+dimensions:
+columns:
+  - name: s_store_sk
+    type: int
+
+---
+version: v1
+resource: model_ml
+name: item
+source:
+  type: model_ml
+  model_name: store
+joins:
+dimensions:
+columns:
+  - name: i_item_sk
+
+

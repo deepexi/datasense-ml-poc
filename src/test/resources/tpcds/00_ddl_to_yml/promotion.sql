@@ -1,0 +1,21 @@
+CREATE TABLE public.promotion (
+p_promo_sk int8 NULL,
+p_promo_id varchar(16) NULL,
+p_start_date_sk int8 NULL,
+p_end_date_sk int8 NULL,
+p_item_sk int8 NULL,
+p_cost numeric(15, 2) NULL,
+p_response_targe int4 NULL,
+p_promo_name varchar(50) NULL,
+p_channel_dmail varchar(1) NULL,
+p_channel_email varchar(1) NULL,
+p_channel_catalog varchar(1) NULL,
+p_channel_tv varchar(1) NULL,
+p_channel_radio varchar(1) NULL,
+p_channel_press varchar(1) NULL,
+p_channel_event varchar(1) NULL,
+p_channel_demo varchar(1) NULL,
+p_channel_details varchar(100) NULL,
+p_purpose varchar(15) NULL,
+p_discount_active varchar(1) NULL
+);

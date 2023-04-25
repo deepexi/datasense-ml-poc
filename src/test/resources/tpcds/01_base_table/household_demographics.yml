@@ -1,0 +1,20 @@
+version: v1
+resource: model_ml
+name: household_demographics
+source:
+  type: table
+  table: household_demographics
+  datasource: ds_id_ck01
+joins:
+dimensions:
+columns:
+  - name: hd_demo_sk
+    type: int
+  - name: hd_income_band_sk
+    type: int
+  - name: hd_buy_potential
+    type: string
+  - name: hd_dep_count
+    type: int
+  - name: hd_vehicle_count
+    type: int

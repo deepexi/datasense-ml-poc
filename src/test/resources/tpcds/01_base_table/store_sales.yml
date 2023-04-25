@@ -1,0 +1,56 @@
+version: v1
+resource: model_ml
+name: store_sales
+source:
+  type: table
+  table: store_sales
+  datasource: ds_id_ck01
+joins:
+dimensions:
+columns:
+  - name: ss_sold_date_sk
+    type: int
+  - name: ss_sold_time_sk
+    type: int
+  - name: ss_item_sk
+    type: int
+  - name: ss_customer_sk
+    type: int
+  - name: ss_cdemo_sk
+    type: int
+  - name: ss_hdemo_sk
+    type: int
+  - name: ss_addr_sk
+    type: int
+  - name: ss_store_sk
+    type: int
+  - name: ss_promo_sk
+    type: int
+  - name: ss_ticket_number
+    type: int
+  - name: ss_quantity
+    type: int
+  - name: ss_wholesale_cost
+    type: decimal
+  - name: ss_list_price
+    type: decimal
+  - name: ss_sales_price
+    type: decimal
+  - name: ss_ext_discount_amt
+    type: decimal
+  - name: ss_ext_sales_price
+    type: decimal
+  - name: ss_ext_wholesale_cost
+    type: decimal
+  - name: ss_ext_list_price
+    type: decimal
+  - name: ss_ext_tax
+    type: decimal
+  - name: ss_coupon_amt
+    type: decimal
+  - name: ss_net_paid
+    type: decimal
+  - name: ss_net_paid_inc_tax
+    type: decimal
+  - name: ss_net_profit
+    type: decimal

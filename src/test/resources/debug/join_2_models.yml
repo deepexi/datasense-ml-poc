@@ -1,0 +1,50 @@
+# store_sales join store
+version: v1
+resource: model_ml
+name: join1
+source:
+  type: model_ml
+  model_name: store_sales
+joins:
+  - model_name: store
+    join_type: inner
+    conditions: [ "ss_store_sk=store.s_store_sk" ]
+dimensions:
+columns:
+  - name: s_store_name
+    expr: store.s_store_name
+  - name: ss_item_sk
+
+---
+version: v1
+resource: model_ml
+name: store
+source:
+  type: table
+  table: store
+  datasource: ds_id_ck01
+joins:
+dimensions:
+columns:
+  - name: s_store_sk
+    type: int
+  - name: s_store_id
+    type: string
+  - name: s_store_name
+    type: string
+
+---
+version: v1
+resource: model_ml
+name: store_sales
+source:
+  type: table
+  table: store_sales
+  datasource: ds_id_ck01
+joins:
+dimensions:
+columns:
+  - name: ss_item_sk
+    type: int
+  - name: ss_store_sk
+    type: int

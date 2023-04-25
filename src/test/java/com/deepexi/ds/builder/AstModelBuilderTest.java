@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.deepexi.ds.ModelException;
+import com.deepexi.ds.ModelException.DataTypeMissException;
+import com.deepexi.ds.ModelException.ModelHasCycleException;
 import com.deepexi.ds.ModelException.ModelHasManyRootException;
 import com.deepexi.ds.ModelException.ModelNotFoundException;
 import com.deepexi.ds.ast.Column;
@@ -47,12 +49,12 @@ public class AstModelBuilderTest {
     Map<String, Column> columnLookup = columns.stream()
         .collect(Collectors.toMap(Column::getAlias, Function.identity()));
     Column colA = columnLookup.get("d_date_sk");
-    assertEquals(ColumnDataType.STRING, colA.getType());
+    assertEquals(ColumnDataType.STRING, colA.getDataType());
     assertEquals("date_dim", colA.getExpr().getPrefix());
     assertEquals("d_date_sk", colA.getExpr().getValue());
 
     Column colB = columnLookup.get("d_date_id");
-    assertEquals(ColumnDataType.INTEGER, colB.getType());
+    assertEquals(ColumnDataType.INTEGER, colB.getDataType());
     assertEquals("date_dim", colB.getExpr().getPrefix());
     assertEquals("d_date_id", colB.getExpr().getValue());
 
@@ -104,19 +106,20 @@ public class AstModelBuilderTest {
 
   @Test
   public void testBuild_stack_join_illegal() {
-    // join1 = store_sales join store
-    // join2 = join1 join item
     List<YmlModel> ymlModels = YmlModelParser.loadModels("tpcds/02_join/04_pile_join_illegal.yml");
     AstModelBuilder builder = AstModelBuilder.singleTreeModel(ymlModels);
-    assertThrows(ModelNotFoundException.class, () -> builder.build());
+    assertThrows(DataTypeMissException.class, () -> builder.build());
   }
-
 
   @Test
   public void testBuild_cycle_illegal() {
-    // join1 = store_sales join store
-    // join2 = join1 join item
-    List<YmlModel> ymlModels = YmlModelParser.loadModels("tpcds/02_join/06_two_trees.yml");
+    List<YmlModel> ymlModels = YmlModelParser.loadModels("debug/05_cycle_illegal.yml");
+    assertThrows(ModelHasCycleException.class, () -> AstModelBuilder.singleTreeModel(ymlModels));
+  }
+
+  @Test
+  public void testBuild_2_tree_illegal() {
+    List<YmlModel> ymlModels = YmlModelParser.loadModels("debug/06_two_trees.yml");
     assertThrows(ModelHasManyRootException.class, () -> AstModelBuilder.singleTreeModel(ymlModels));
   }
 }

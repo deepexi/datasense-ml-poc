@@ -9,8 +9,8 @@ joins:
 dimensions:
 columns:
   - name: ib_income_band_sk
-    type: int
+    data_type: int
   - name: ib_lower_bound
-    type: int
+    data_type: int
   - name: ib_upper_bound
-    type: int
+    data_type: int

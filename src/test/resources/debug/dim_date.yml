@@ -9,16 +9,16 @@ source:
 columns:                  # columns 是这个 Model暴露给外界的列
   - name: d_date_sk       # 某列名
     expr: d_date_sk       # expr默认 = name
-    type: string          # 列字段类型
+    data_type: string          # 列字段类型
   - name: d_date_id
     expr: date_dim.d_date_id
-    type: int
+    data_type: int
   - name: d_year
-    type: int
+    data_type: int
   - name: d_moy
-    type: int
+    data_type: int
   - name: d_dom
-    type: int
+    data_type: int
 dimensions:               # dimensions 是 该Model暴露的 维度
   - name: d_date_sk
     expr: d_date_sk

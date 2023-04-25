@@ -137,7 +137,7 @@ public class YmlModelParser {
     for (Map<String, Object> col : list) {
       String name = getStringElseThrow(col, "name");
       String expr = getStringElse(col, "expr", name);
-      String type = getStringElse(col, "type", null);
+      String type = getStringElse(col, "data_type", null);
       columns.add(new YmlColumn(name, expr, type));
     }
     return columns;

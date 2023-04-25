@@ -63,4 +63,11 @@ public class ModelException extends RuntimeException {
       super("model has many root, not a single tree?");
     }
   }
+
+  public static class DataTypeMissException extends ModelException {
+
+    public DataTypeMissException(String colName) {
+      super(String.format("lost data type for column[%s]", colName));
+    }
+  }
 }

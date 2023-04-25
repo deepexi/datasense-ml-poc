@@ -9,22 +9,22 @@ joins:
 dimensions:
 columns:
   - name: t_time_sk
-    type: int
+    data_type: int
   - name: t_time_id
-    type: string
+    data_type: string
   - name: t_time
-    type: int
+    data_type: int
   - name: t_hour
-    type: int
+    data_type: int
   - name: t_minute
-    type: int
+    data_type: int
   - name: t_second
-    type: int
+    data_type: int
   - name: t_am_pm
-    type: string
+    data_type: string
   - name: t_shift
-    type: string
+    data_type: string
   - name: t_sub_shift
-    type: string
+    data_type: string
   - name: t_meal_time
-    type: string
+    data_type: string

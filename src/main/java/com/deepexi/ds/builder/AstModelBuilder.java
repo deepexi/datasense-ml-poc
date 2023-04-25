@@ -5,6 +5,7 @@ import static java.util.Collections.EMPTY_LIST;
 
 import com.deepexi.ds.ModelException;
 import com.deepexi.ds.ModelException.ColumnNotExistException;
+import com.deepexi.ds.ModelException.DataTypeMissException;
 import com.deepexi.ds.ModelException.ModelNotFoundException;
 import com.deepexi.ds.ast.Column;
 import com.deepexi.ds.ast.ColumnDataType;
@@ -58,7 +59,6 @@ public class AstModelBuilder {
         sourceRelation = r;
       }
     }
-
   }
 
   private final List<YmlModel> models;
@@ -78,9 +78,7 @@ public class AstModelBuilder {
   public Model build() {
     Container ctx = new Container();
     buildRoot(entry, ctx);
-
-    Model build = ctx.build();
-    return build;
+    return ctx.build();
   }
 
   private void buildRoot(YmlModel root, Container ctx) {
@@ -168,12 +166,12 @@ public class AstModelBuilder {
     String srcTableName = srcRel.getTableName().getValue();
 
     for (YmlColumn col : list) {
-      String name = col.getName();
+      String colName = col.getName();
 
       // case: colName or table.colName
       String expr = col.getExpr();
       if (expr == null) {
-        expr = name;
+        expr = colName;
       }
       String[] fields = expr.split(RE_IDENTIFIER_SEPARATOR);
       Identifier fromCol = null;
@@ -192,16 +190,16 @@ public class AstModelBuilder {
       }
 
       // type: 可以由上下文推到得到
-      String type = col.getType();
+      String type = col.getDataType();
       ColumnDataType type1 = ColumnDataType.fromName(type);
       if (type1 == null && referColumn != null) {
-        type1 = referColumn.getType();
+        type1 = referColumn.getDataType();
       }
       if (type1 == null) {
-        throw new ModelException(String.format("cannot defer type for column [%s]", name));
+        throw new DataTypeMissException(colName);
       }
       // done
-      columns.add(new Column(name, fromCol, type1, col.getExpr()));
+      columns.add(new Column(colName, fromCol, type1, col.getExpr()));
     }
     ctx.setColumns(columns);
   }

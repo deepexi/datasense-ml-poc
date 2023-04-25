@@ -38,11 +38,11 @@ public class YmlModelParserTest {
     Map<String, YmlColumn> columnLookup = columns.stream()
         .collect(Collectors.toMap(YmlColumn::getName, Function.identity()));
     YmlColumn colA = columnLookup.get("d_date_sk");
-    assertEquals("string", colA.getType());
+    assertEquals("string", colA.getDataType());
     assertEquals("d_date_sk", colA.getExpr());
 
     YmlColumn colB = columnLookup.get("d_date_id");
-    assertEquals("int", colB.getType());
+    assertEquals("int", colB.getDataType());
     assertEquals("date_dim.d_date_id", colB.getExpr());
 
     // dimensions

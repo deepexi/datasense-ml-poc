@@ -10,13 +10,13 @@ source:
 columns:
   - name: s_store_id
     expr: s_store_id
-    type: string
+    data_type: string
   - name: s_store_name
-    type: string
+    data_type: string
   - name: s_county
-    type: string
+    data_type: string
   - name: s_city
-    type: string
+    data_type: string
 dimensions:
   - name: s_store_id
   - name: s_store_name
@@ -34,15 +34,15 @@ source:
   datasource: ds_id_ck01
 columns:
   - name: i_item_sk
-    type: string
+    data_type: string
   - name: s_store_id
-    type: string
+    data_type: string
   - name: s_store_name
-    type: string
+    data_type: string
   - name: s_county
-    type: string
+    data_type: string
   - name: s_city
-    type: string
+    data_type: string
 dimensions:
   - name: s_store_id
   - name: s_store_name

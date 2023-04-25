@@ -28,11 +28,11 @@ joins:
 dimensions:
 columns:
   - name: s_store_sk
-    type: int
+    data_type: int
   - name: s_store_id
-    type: string
+    data_type: string
   - name: s_store_name
-    type: string
+    data_type: string
 
 ---
 version: v1
@@ -46,6 +46,6 @@ joins:
 dimensions:
 columns:
   - name: ss_item_sk
-    type: int
+    data_type: int
   - name: ss_store_sk
-    type: int
+    data_type: int

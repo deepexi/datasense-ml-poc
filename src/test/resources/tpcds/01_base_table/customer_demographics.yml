@@ -9,20 +9,20 @@ joins:
 dimensions:
 columns:
   - name: cd_demo_sk
-    type: int
+    data_type: int
   - name: cd_gender
-    type: string
+    data_type: string
   - name: cd_marital_status
-    type: string
+    data_type: string
   - name: cd_education_status
-    type: string
+    data_type: string
   - name: cd_purchase_estimate
-    type: int
+    data_type: int
   - name: cd_credit_rating
-    type: string
+    data_type: string
   - name: cd_dep_count
-    type: int
+    data_type: int
   - name: cd_dep_employed_count
-    type: int
+    data_type: int
   - name: cd_dep_college_count
-    type: int
+    data_type: int

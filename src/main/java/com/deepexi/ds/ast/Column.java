@@ -9,13 +9,13 @@ public class Column extends AstNode {
   public static final Column ALL_COLUMN = new Column("*", Identifier.of("*"), null, "*");
   private final Identifier expr;
   private final String alias;
-  private final ColumnDataType type;
+  private final ColumnDataType dataType;
   private final String rawExpr;
 
-  public Column(String alias, Identifier expr, ColumnDataType type, String rawExpr) {
+  public Column(String alias, Identifier expr, ColumnDataType dataType, String rawExpr) {
     this.alias = alias;
     this.expr = expr;
-    this.type = type;
+    this.dataType = dataType;
     this.rawExpr = rawExpr;
   }
 
@@ -26,6 +26,6 @@ public class Column extends AstNode {
   }
 
   public String toString() {
-    return String.format("%s  =>  %s [%s ]", expr, alias, type);
+    return String.format("%s  =>  %s [%s ]", expr, alias, dataType);
   }
 }

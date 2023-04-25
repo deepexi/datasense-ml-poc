@@ -23,6 +23,7 @@ name: xxx
     - 不进行 filter, 因为这张 "大宽表" 是给后续操作提供资源, 无需在这一层进行 filter
 - 支持的操作
     - join
+      - join时候的条件约束未 tableA.colA = tableB.colB. 因为主要是 fact join dim 模式
     - 是否支持 union
 - 支持 Model join Model
 - 关于dimension

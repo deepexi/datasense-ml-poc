@@ -6,12 +6,12 @@
 #  1. 以 .sql 为后缀名
 #  2. 没有空行
 #  3. 每个 column 单独一行
-# 执行之后, 会生成一个 base_table 文件夹, 里面放着对应的 yml
+# 执行之后, 会生成一个 01_base_table 文件夹, 里面放着对应的 yml
 #####################
 
 cd `dirname $0`
 
-output_dir=base_table
+output_dir=01_base_table
 rm -rf $output_dir
 mkdir $output_dir
 
@@ -27,7 +27,7 @@ dimensions:
 columns:"
 
 column_pattern="  - name: _name_
-    type: _type_"
+    data_type: _type_"
 
 type_convert() {
   in_type="$1"

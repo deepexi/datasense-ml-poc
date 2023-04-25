@@ -9,14 +9,14 @@ joins:
 dimensions:
 columns:
   - name: sm_ship_mode_sk
-    type: int
+    data_type: int
   - name: sm_ship_mode_id
-    type: string
+    data_type: string
   - name: sm_type
-    type: string
+    data_type: string
   - name: sm_code
-    type: string
+    data_type: string
   - name: sm_carrier
-    type: string
+    data_type: string
   - name: sm_contract
-    type: string
+    data_type: string

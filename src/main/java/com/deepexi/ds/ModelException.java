@@ -64,10 +64,11 @@ public class ModelException extends RuntimeException {
     }
   }
 
-  public static class DataTypeMissException extends ModelException {
+  public static class FieldMissException extends ModelException {
 
-    public DataTypeMissException(String colName) {
-      super(String.format("lost data type for column[%s]", colName));
+    public FieldMissException(String missing) {
+      super(String.format("required [%s] but missing", missing));
     }
   }
+
 }

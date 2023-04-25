@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.deepexi.ds.ModelException;
-import com.deepexi.ds.ModelException.DataTypeMissException;
+import com.deepexi.ds.ModelException.FieldMissException;
 import com.deepexi.ds.ModelException.ModelHasCycleException;
 import com.deepexi.ds.ModelException.ModelHasManyRootException;
 import com.deepexi.ds.ModelException.ModelNotFoundException;
@@ -30,21 +30,20 @@ public class AstModelBuilderTest {
   @Test
   public void testBuild() {
     List<YmlModel> ymlModels = YmlModelParser.loadModels("debug/dim_date.yml");
-    AstModelBuilder builder = AstModelBuilder.singleTreeModel(ymlModels);
-    Model dimDate = builder.build();
-    assertNotNull(dimDate);
+    Model rootModel = AstModelBuilder.singleTreeModel(ymlModels);
+    assertNotNull(rootModel);
 
     // name
-    assertEquals("date_dim", dimDate.getName().getValue());
+    assertEquals("date_dim", rootModel.getName().getValue());
 
     // source
-    Source source = dimDate.getSource();
+    Source source = rootModel.getSource();
     assertTrue(source instanceof TableSource);
     TableSource ts = (TableSource) source;
     assertEquals("date_dim", ts.getTableName().getValue());
 
     // column
-    List<Column> columns = dimDate.getColumns();
+    List<Column> columns = rootModel.getColumns();
     assertEquals(5, columns.size());
     Map<String, Column> columnLookup = columns.stream()
         .collect(Collectors.toMap(Column::getAlias, Function.identity()));
@@ -59,7 +58,7 @@ public class AstModelBuilderTest {
     assertEquals("d_date_id", colB.getExpr().getValue());
 
     // dimensions
-    List<Dimension> dims = dimDate.getDimensions();
+    List<Dimension> dims = rootModel.getDimensions();
     assertEquals(5, dims.size());
     Map<String, Dimension> dimLookup = dims.stream()
         .collect(Collectors.toMap(Dimension::getName, Function.identity()));
@@ -73,15 +72,13 @@ public class AstModelBuilderTest {
   @Test
   void testBuild_illegal_table() {
     List<YmlModel> ymlModels = YmlModelParser.loadModels("debug/dim_date_illegal.yml");
-    AstModelBuilder builder = AstModelBuilder.singleTreeModel(ymlModels);
-    assertThrows(ModelException.class, () -> builder.build());
+    assertThrows(ModelException.class, () -> AstModelBuilder.singleTreeModel(ymlModels));
   }
 
   @Test
   void testBuild_join() {
     List<YmlModel> ymlModels = YmlModelParser.loadModels("debug/join_2_models.yml");
-    AstModelBuilder builder = AstModelBuilder.singleTreeModel(ymlModels);
-    Model rootModel = builder.build();
+    Model rootModel = AstModelBuilder.singleTreeModel(ymlModels);
     assertNotNull(rootModel);
   }
 
@@ -89,8 +86,7 @@ public class AstModelBuilderTest {
   void testBuild_join_illegal() {
     List<YmlModel> ymlModels = YmlModelParser.loadModels("debug/join_2_models_illegal.yml");
     assertEquals(3, ymlModels.size());
-    AstModelBuilder builder = AstModelBuilder.singleTreeModel(ymlModels);
-    assertThrows(ModelNotFoundException.class, () -> builder.build());
+    assertThrows(ModelNotFoundException.class, () -> AstModelBuilder.singleTreeModel(ymlModels));
   }
 
   @Test
@@ -98,7 +94,7 @@ public class AstModelBuilderTest {
     // miss store
     // YmlModel store = YmlModelParser.loadOneModel("tpcds/01_base_table/store.yml");
     YmlModel storeSales = YmlModelParser.loadOneModel("tpcds/01_base_table/store_sales.yml");
-    YmlModel root = YmlModelParser.loadOneModel("tpcds/02_join/01_2_model_join.yml");
+    YmlModel root = YmlModelParser.loadOneModel("debug/01_2_model_join.yml");
     List<YmlModel> ymlModels = Arrays.asList(/*store,*/ storeSales, root);
 
     assertThrows(ModelNotFoundException.class, () -> AstModelBuilder.singleTreeModel(ymlModels));
@@ -106,9 +102,8 @@ public class AstModelBuilderTest {
 
   @Test
   public void testBuild_stack_join_illegal() {
-    List<YmlModel> ymlModels = YmlModelParser.loadModels("tpcds/02_join/04_pile_join_illegal.yml");
-    AstModelBuilder builder = AstModelBuilder.singleTreeModel(ymlModels);
-    assertThrows(DataTypeMissException.class, () -> builder.build());
+    List<YmlModel> ymlModels = YmlModelParser.loadModels("debug/04_pile_join_illegal.yml");
+    assertThrows(FieldMissException.class, () -> AstModelBuilder.singleTreeModel(ymlModels));
   }
 
   @Test

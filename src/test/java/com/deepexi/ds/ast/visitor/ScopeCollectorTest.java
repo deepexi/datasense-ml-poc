@@ -17,9 +17,7 @@ public class ScopeCollectorTest {
   void testVisitModel() {
     List<YmlModel> ymlModels = YmlModelParser.loadModels("debug/join_2_models.yml");
     assertEquals(3, ymlModels.size());
-
-    AstModelBuilder builder = AstModelBuilder.singleTreeModel(ymlModels);
-    Model rootModel = builder.build();
+    Model rootModel = AstModelBuilder.singleTreeModel(ymlModels);
 
     // 准备 visit
     ScopeCollectorContext context = new ScopeCollectorContext(rootModel);

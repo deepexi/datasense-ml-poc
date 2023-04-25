@@ -15,9 +15,9 @@ import java.util.List;
  */
 class ExpressionParser {
 
-  final String literal;
-  final List<RelationMock> scope;
-  final RelationMock sourceRelation;
+  private final String literal;
+  private final List<RelationMock> scope;
+  private final RelationMock sourceRelation;
 
   ExpressionParser(String literal, List<RelationMock> scope, RelationMock sourceRelation) {
     this.literal = literal.trim();
@@ -57,7 +57,7 @@ class ExpressionParser {
     return StringLiteral.of(literal);
   }
 
-  Expression parseLiteral(String literal) {
+  private Expression parseLiteral(String literal) {
     literal = literal.trim();
     if (literal.contains(IDENTIFIER_SEPARATOR)) {
       String[] parts = literal.split(RE_IDENTIFIER_SEPARATOR);
@@ -87,7 +87,7 @@ class ExpressionParser {
   }
 
 
-  BinaryOperator parseBinary(String literal) {
+  private BinaryOperator parseBinary(String literal) {
     if (literal.contains(BinaryOperator.GTE.name)) {
       return BinaryOperator.GTE;
     }
@@ -124,7 +124,7 @@ class ExpressionParser {
     return true;
   }
 
-  boolean isFunction(String literal) {
+  private boolean isFunction(String literal) {
     final String Parentheses = "(";
     // TODO
     return false;

@@ -138,7 +138,8 @@ public class YmlModelParser {
       String name = getStringElseThrow(col, "name");
       String expr = getStringElse(col, "expr", name);
       String type = getStringElse(col, "data_type", null);
-      columns.add(new YmlColumn(name, expr, type));
+      String hint = getStringElse(col, "hint", YmlColumn.HINT_BASIC);
+      columns.add(new YmlColumn(name, expr, type, hint));
     }
     return columns;
   }

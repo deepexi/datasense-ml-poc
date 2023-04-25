@@ -15,7 +15,6 @@ import com.deepexi.ds.yml2pojo.YmlModel;
 import com.deepexi.ds.yml2pojo.YmlModelParser;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import org.junit.jupiter.api.Test;
 
 public class SqlGeneratorTest {
@@ -23,9 +22,7 @@ public class SqlGeneratorTest {
   @Test
   void testVisitModel() {
     List<YmlModel> ymlModels = YmlModelParser.loadModels("tpcds/01_base_table/reason.yml");
-    AstModelBuilder builder = AstModelBuilder.singleTreeModel(ymlModels);
-    Model rootModel = builder.build();
-
+    Model rootModel = AstModelBuilder.singleTreeModel(ymlModels);
     // 准备 visit
     SqlGenerator generator = new SqlGenerator();
     SqlGeneratorContext context = new SqlGeneratorContext(rootModel, SqlDialect.POSTGRES,
@@ -38,9 +35,7 @@ public class SqlGeneratorTest {
   @Test
   void testVisitModel_quote() {
     List<YmlModel> ymlModels = YmlModelParser.loadModels("tpcds/01_base_table/reason.yml");
-    AstModelBuilder builder = AstModelBuilder.singleTreeModel(ymlModels);
-
-    Model rootModel = builder.build();
+    Model rootModel = AstModelBuilder.singleTreeModel(ymlModels);
 
     // 准备 visit
     SqlGenerator generator = new SqlGenerator();
@@ -57,11 +52,10 @@ public class SqlGeneratorTest {
     // store_sales join store
     YmlModel store = YmlModelParser.loadOneModel("tpcds/01_base_table/store.yml");
     YmlModel storeSales = YmlModelParser.loadOneModel("tpcds/01_base_table/store_sales.yml");
-    YmlModel join = YmlModelParser.loadOneModel("tpcds/02_join/01_2_model_join.yml");
+    YmlModel join = YmlModelParser.loadOneModel("debug/01_2_model_join.yml");
     List<YmlModel> ymlModels = Arrays.asList(store, storeSales, join);
 
-    AstModelBuilder builder = AstModelBuilder.singleTreeModel(ymlModels);
-    Model rootModel = builder.build();
+    Model rootModel = AstModelBuilder.singleTreeModel(ymlModels);
 
     // 准备 visit
     SqlGenerator generator = new SqlGenerator();
@@ -80,11 +74,10 @@ public class SqlGeneratorTest {
     YmlModel store = YmlModelParser.loadOneModel("tpcds/01_base_table/store.yml");
     YmlModel item = YmlModelParser.loadOneModel("tpcds/01_base_table/item.yml");
     YmlModel storeSales = YmlModelParser.loadOneModel("tpcds/01_base_table/store_sales.yml");
-    YmlModel root = YmlModelParser.loadOneModel("tpcds/02_join/02_3_model_join.yml");
+    YmlModel root = YmlModelParser.loadOneModel("debug/02_3_model_join.yml");
     List<YmlModel> ymlModels = Arrays.asList(store, storeSales, item, root);
 
-    AstModelBuilder builder = AstModelBuilder.singleTreeModel(ymlModels);
-    Model rootModel = builder.build();
+    Model rootModel = AstModelBuilder.singleTreeModel(ymlModels);
 
     // generate sql
     SqlGenerator generator = new SqlGenerator();
@@ -99,9 +92,24 @@ public class SqlGeneratorTest {
   public void testVisitModel_stack_join() {
     // join1 = store_sales join store
     // join2 = join1 join item
-    List<YmlModel> ymlModels = YmlModelParser.loadModels("tpcds/02_join/03_pile_join.yml");
-    AstModelBuilder builder = AstModelBuilder.singleTreeModel(ymlModels);
-    Model rootModel = builder.build();
+    List<YmlModel> ymlModels = YmlModelParser.loadModels("debug/03_pile_join.yml");
+    Model rootModel = AstModelBuilder.singleTreeModel(ymlModels);
+
+    // generate sql
+    SqlGenerator generator = new SqlGenerator();
+    SqlGeneratorContext context = new SqlGeneratorPgContext(rootModel);
+    String sql = generator.visitModel(context.getRoot(), context);
+    assertNotNull(sql);
+    System.out.println(sql);
+    assertNotNull(sql);
+  }
+
+  @Test
+  public void testVisitModel_derived_column() {
+    // join1 = store_sales join store
+    // join2 = join1 join item
+    List<YmlModel> ymlModels = YmlModelParser.loadModels("debug/07_derived_column.yml");
+    Model rootModel = AstModelBuilder.singleTreeModel(ymlModels);
 
     // generate sql
     SqlGenerator generator = new SqlGenerator();

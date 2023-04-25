@@ -11,7 +11,8 @@ public enum ColumnDataType {
   INTEGER("int", Integer.class),
   DECIMAL("decimal", BigDecimal.class),
   DATE("date", Date.class),
-  Timestamp("timestamp", Timestamp.class);
+  TIMESTAMP("timestamp", Timestamp.class),
+  BOOL("bool", Boolean.class);
 
   public final String name;
   public final Class<?> clazz;

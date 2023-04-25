@@ -5,7 +5,7 @@ import static java.util.Collections.EMPTY_LIST;
 
 import com.deepexi.ds.ModelException;
 import com.deepexi.ds.ModelException.ColumnNotExistException;
-import com.deepexi.ds.ModelException.DataTypeMissException;
+import com.deepexi.ds.ModelException.FieldMissException;
 import com.deepexi.ds.ModelException.ModelNotFoundException;
 import com.deepexi.ds.ast.Column;
 import com.deepexi.ds.ast.ColumnDataType;
@@ -65,8 +65,9 @@ public class AstModelBuilder {
   private final Map<String, YmlModel> lookup;
   private final YmlModel entry;
 
-  public static AstModelBuilder singleTreeModel(List<YmlModel> models) {
-    return new AstModelBuilderFactory(models).create();
+  public static Model singleTreeModel(List<YmlModel> models) {
+    AstModelBuilder builder = new AstModelBuilderFactory(models).create();
+    return builder.build();
   }
 
   AstModelBuilder(List<YmlModel> models, YmlModel entry) {
@@ -162,46 +163,57 @@ public class AstModelBuilder {
       ctx.setColumns(EMPTY_LIST);
       return;
     }
+
     List<Column> columns = new ArrayList<>(list.size());
-    String srcTableName = srcRel.getTableName().getValue();
-
     for (YmlColumn col : list) {
-      String colName = col.getName();
-
-      // case: colName or table.colName
-      String expr = col.getExpr();
-      if (expr == null) {
-        expr = colName;
-      }
-      String[] fields = expr.split(RE_IDENTIFIER_SEPARATOR);
-      Identifier fromCol = null;
-      Column referColumn = null;
-      if (fields.length == 1) {
-        fromCol = new Identifier(srcTableName, fields[0].trim());
-        referColumn = assertColumnExistsInRelation(fields[0].trim(), srcRel);
-      } else if (fields.length == 2) {
-        String targetTable = fields[0].trim();
-        // targetTable should exists, column should in targetTable table
-        RelationMock relation = assertTableExists(targetTable, ctx.getScopes());
-        referColumn = assertColumnExistsInRelation(fields[1].trim(), relation);
-        fromCol = new Identifier(fields[0].trim(), fields[1].trim());
+      if (col.isBasic()) {
+        Column column = parseBasicColumn(col, srcRel, ctx);
+        columns.add(column);
       } else {
-        throw new ModelException("expr not support too many dot");
+        // not parse
+        ColumnDataType type1 = ColumnDataType.fromName(col.getDataType());
+        Column column = new Column(col.getName(), null, type1, col.getExpr());
+        columns.add(column);
       }
-
-      // type: 可以由上下文推到得到
-      String type = col.getDataType();
-      ColumnDataType type1 = ColumnDataType.fromName(type);
-      if (type1 == null && referColumn != null) {
-        type1 = referColumn.getDataType();
-      }
-      if (type1 == null) {
-        throw new DataTypeMissException(colName);
-      }
-      // done
-      columns.add(new Column(colName, fromCol, type1, col.getExpr()));
     }
     ctx.setColumns(columns);
+  }
+
+  private Column parseBasicColumn(YmlColumn col, RelationMock srcRel, Container ctx) {
+    String colName = col.getName();
+    String srcTableName = srcRel.getTableName().getValue();
+    // case: colName or table.colName
+    String expr = col.getExpr();
+    if (expr == null) {
+      expr = colName;
+    }
+    String[] fields = expr.split(RE_IDENTIFIER_SEPARATOR);
+    Identifier fromCol = null;
+    Column referColumn = null;
+    if (fields.length == 1) {
+      fromCol = new Identifier(srcTableName, fields[0].trim());
+      referColumn = assertColumnExistsInRelation(fields[0].trim(), srcRel);
+    } else if (fields.length == 2) {
+      String targetTable = fields[0].trim();
+      // targetTable should exists, column should in targetTable table
+      RelationMock relation = assertTableExists(targetTable, ctx.getScopes());
+      referColumn = assertColumnExistsInRelation(fields[1].trim(), relation);
+      fromCol = new Identifier(fields[0].trim(), fields[1].trim());
+    } else {
+      throw new ModelException("expr not support too many dot");
+    }
+
+    // type: 可以由上下文推到得到
+    String type = col.getDataType();
+    ColumnDataType type1 = ColumnDataType.fromName(type);
+    if (type1 == null && referColumn != null) {
+      type1 = referColumn.getDataType();
+    }
+    if (type1 == null) {
+      throw new FieldMissException("data_type of " + colName);
+    }
+    // done
+    return new Column(colName, fromCol, type1, col.getExpr());
   }
 
   private void parseDimension(RelationMock srcRel, List<YmlDimension> list, Container ctx) {

@@ -1,0 +1,22 @@
+# 循环引用
+---
+version: v1
+resource: model_ml
+name: store
+source:
+  source_type: table
+  table: date_dim
+  datasource: ds_id_ck01
+joins:
+dimensions:
+columns:
+  - name: d_date_sk
+    data_type: int
+  - name: is_spring
+    hint: derived
+    data_type: bool
+    expr: >-
+      case 
+        when d_dom <= 3 then true
+        else false
+      end

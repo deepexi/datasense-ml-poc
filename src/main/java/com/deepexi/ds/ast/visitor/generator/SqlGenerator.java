@@ -95,6 +95,9 @@ public class SqlGenerator implements ModelVisitor<String, SqlGeneratorContext> {
   public String visitColumn(Column node, SqlGeneratorContext context) {
     final String pattern = "%s as %s";
     String alias = node.getAlias();
+    if (node.getExpr() == null) {
+      return node.getRawExpr(); // use rawExpr
+    }
     String expr = process(node.getExpr(), context);
     return String.format(pattern, expr, alias);
   }

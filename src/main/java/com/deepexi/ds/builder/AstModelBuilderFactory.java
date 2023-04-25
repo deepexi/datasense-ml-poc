@@ -18,34 +18,32 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import lombok.Getter;
 
 public class AstModelBuilderFactory {
 
-  @Getter
-  private static class YmlNodeRef {
-
-    private String self;
-    private List<String> depends = new ArrayList<>();
-    private AtomicInteger referCount = new AtomicInteger(0);
-
-    public YmlNodeRef(String self) {
-      this.self = self;
-    }
-
-    public void addDepend(String depend) {
-      depends.add(depend);
-    }
-
-    public void incRefer() {
-      referCount.incrementAndGet();
-    }
-  }
+//  @Getter
+//  private static class YmlNodeRef {
+//
+//    private String self;
+//    private List<String> depends = new ArrayList<>();
+//    private AtomicInteger referCount = new AtomicInteger(0);
+//
+//    public YmlNodeRef(String self) {
+//      this.self = self;
+//    }
+//
+//    public void addDepend(String depend) {
+//      depends.add(depend);
+//    }
+//
+//    public void incRefer() {
+//      referCount.incrementAndGet();
+//    }
+//  }
 
   private final List<YmlModel> models;
   private final Map<String, YmlModel> lookup = new HashMap<>();
-  private final Map<String, YmlNodeRef> record = new HashMap<>();
+  //  private final Map<String, YmlNodeRef> record = new HashMap<>();
   private final List<String> leafNode = new ArrayList<>();
   private MutableGraph<String> graph = GraphBuilder.directed().build();
 
@@ -70,29 +68,37 @@ public class AstModelBuilderFactory {
       throw new ModelNotFoundException(depend);
     }
 
-    // self add depend
-    YmlNodeRef ref = record.get(self);
-    if (ref == null) {
-      ref = new YmlNodeRef(self);
-      record.put(self, ref);
-    }
-    ref.addDepend(depend);
-
-    // depend add referCount
-    YmlNodeRef ref2 = record.get(depend);
-    if (ref2 == null) {
-      ref2 = new YmlNodeRef(depend);
-      record.put(depend, ref2);
-    }
-    ref2.incRefer();
+//    // self add depend
+//    YmlNodeRef ref = record.get(self);
+//    if (ref == null) {
+//      ref = new YmlNodeRef(self);
+//      record.put(self, ref);
+//    }
+//    ref.addDepend(depend);
+//
+//    // depend add referCount
+//    YmlNodeRef ref2 = record.get(depend);
+//    if (ref2 == null) {
+//      ref2 = new YmlNodeRef(depend);
+//      record.put(depend, ref2);
+//    }
+//    ref2.incRefer();
 
     // graph
     graph.putEdge(self, depend);
   }
 
-  private void addLeaf(String name) {
-    graph.addNode(name);
-    leafNode.add(name);
+  private void addLeaf(String self, String externalSource) {
+    // since externalSource maybe same name as model, add ns
+    YmlModel selfNode = lookup.get(self);
+    if (selfNode == null) {
+      throw new ModelNotFoundException(self);
+    }
+    String nodeForExternal = "__ns_external__" + externalSource;
+
+    graph.addNode(nodeForExternal);
+    leafNode.add(nodeForExternal);
+    graph.putEdge(self, nodeForExternal);
   }
 
   /**
@@ -107,7 +113,7 @@ public class AstModelBuilderFactory {
       if (source instanceof YmlSourceModel) {
         addDepend(self, source.getAlias());
       } else {
-        addLeaf(source.getAlias());
+        addLeaf(self, source.getAlias());
       }
 
       // joins

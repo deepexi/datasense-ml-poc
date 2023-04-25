@@ -1,9 +1,9 @@
 # store_sales join store join item
 version: v1
-resource: model_ml
+resource: model_def
 name: catalog_returns
 source:
-  source_type: model_ml
+  source_type: model_def
   model_name: store_sales
 joins:
   - model_name: store

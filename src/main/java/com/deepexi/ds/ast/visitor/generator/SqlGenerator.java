@@ -19,6 +19,7 @@ import com.deepexi.ds.ast.expression.condition.BinaryExpression;
 import com.deepexi.ds.ast.source.ModelSource;
 import com.deepexi.ds.ast.source.Source;
 import com.deepexi.ds.ast.source.TableSource;
+import com.deepexi.ds.ast.utils.ResUtils;
 import com.google.common.collect.ImmutableList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,13 +31,10 @@ import org.apache.commons.text.StringSubstitutor;
  */
 public class SqlGenerator implements ModelVisitor<String, SqlGeneratorContext> {
 
+  final String _TEMPLATE_ = ResUtils.getResourceFileAsString("sql_segment/01_with_clause.sql");
+
   @Override
   public String visitModel(Model node, SqlGeneratorContext context) {
-    final String _TEMPLATE_ = """
-        with ${source_alias} as ( ${source_sql} )
-        select ${col_list}
-        from ${source_alias}
-        """;
 
     final String ALL_COLUMN = "*";
 

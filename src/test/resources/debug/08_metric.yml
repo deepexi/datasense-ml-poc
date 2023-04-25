@@ -1,0 +1,15 @@
+---
+version: v1
+resource: metric_def
+name: m1
+model_name: join2
+dimensions:
+agg: sum(*)
+
+---
+version: v1
+resource: metric_def
+name: m2
+model_name: foobar
+dimensions: [ colA, colB ]
+agg: avg(profit)

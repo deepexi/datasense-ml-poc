@@ -18,13 +18,13 @@ import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.source.ModelSource;
 import com.deepexi.ds.ast.source.Source;
 import com.deepexi.ds.ast.source.TableSource;
-import com.deepexi.ds.yml2pojo.YmlColumn;
-import com.deepexi.ds.yml2pojo.YmlDimension;
-import com.deepexi.ds.yml2pojo.YmlJoin;
-import com.deepexi.ds.yml2pojo.YmlModel;
-import com.deepexi.ds.yml2pojo.YmlSource;
-import com.deepexi.ds.yml2pojo.YmlSourceModel;
-import com.deepexi.ds.yml2pojo.YmlSourceTable;
+import com.deepexi.ds.ymlmodel.YmlColumn;
+import com.deepexi.ds.ymlmodel.YmlDimension;
+import com.deepexi.ds.ymlmodel.YmlJoin;
+import com.deepexi.ds.ymlmodel.YmlModel;
+import com.deepexi.ds.ymlmodel.YmlSource;
+import com.deepexi.ds.ymlmodel.YmlSourceModel;
+import com.deepexi.ds.ymlmodel.YmlSourceTable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -263,7 +263,7 @@ public class AstModelBuilder {
     Optional<RelationMock> anyRelation = scope.stream()
         .filter(t -> Objects.equals(t.getTableName().getValue(), tableName))
         .findAny();
-    if (anyRelation.isEmpty()) {
+    if (!anyRelation.isPresent()) {
       throw new ModelNotFoundException(tableName);
     }
     return anyRelation.get();

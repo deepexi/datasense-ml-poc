@@ -6,8 +6,8 @@ import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.visitor.analyzer.ScopeCollector;
 import com.deepexi.ds.ast.visitor.analyzer.ScopeCollectorContext;
 import com.deepexi.ds.builder.AstModelBuilder;
-import com.deepexi.ds.yml2pojo.YmlModel;
-import com.deepexi.ds.yml2pojo.YmlModelParser;
+import com.deepexi.ds.ymlmodel.YmlModel;
+import com.deepexi.ds.ymlmodel.factory.YmlModelParser;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 

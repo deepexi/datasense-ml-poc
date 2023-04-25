@@ -1,9 +1,9 @@
 # store_sales join store
 version: v1
-resource: model_ml
+resource: model_def
 name: join1
 source:
-  source_type: model_ml
+  source_type: model_def
   model_name: store_sales
 joins:
   - model_name: store
@@ -17,7 +17,7 @@ columns:
 
 ---
 version: v1
-resource: model_ml
+resource: model_def
 name: store
 source:
   source_type: table
@@ -35,7 +35,7 @@ columns:
 
 ---
 version: v1
-resource: model_ml
+resource: model_def
 name: store_sales
 source:
   source_type: table

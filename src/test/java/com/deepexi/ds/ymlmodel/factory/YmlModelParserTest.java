@@ -1,16 +1,15 @@
-package com.deepexi.ds.yaml2pojo;
+package com.deepexi.ds.ymlmodel.factory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.deepexi.ds.yml2pojo.YmlColumn;
-import com.deepexi.ds.yml2pojo.YmlDimension;
-import com.deepexi.ds.yml2pojo.YmlModel;
-import com.deepexi.ds.yml2pojo.YmlSource;
-import com.deepexi.ds.yml2pojo.YmlSourceTable;
-import com.deepexi.ds.yml2pojo.YmlModelParser;
+import com.deepexi.ds.ymlmodel.YmlColumn;
+import com.deepexi.ds.ymlmodel.YmlDimension;
+import com.deepexi.ds.ymlmodel.YmlModel;
+import com.deepexi.ds.ymlmodel.YmlSource;
+import com.deepexi.ds.ymlmodel.YmlSourceTable;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;

@@ -1,5 +1,5 @@
 version: v1
-resource: model_ml
+resource: model_def
 name: ship_mode
 source:
   source_type: table

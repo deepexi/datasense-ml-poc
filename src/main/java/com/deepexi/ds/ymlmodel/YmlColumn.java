@@ -1,10 +1,9 @@
-package com.deepexi.ds.yml2pojo;
+package com.deepexi.ds.ymlmodel;
 
 
 import com.deepexi.ds.ModelException.FieldMissException;
 import java.util.Objects;
 import lombok.Getter;
-import lombok.NonNull;
 
 @Getter
 public class YmlColumn {

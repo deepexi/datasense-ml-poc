@@ -1,0 +1,111 @@
+---
+version: v1
+resource: metric_def
+name: store_sales_count
+model_name: join2
+dimensions:
+agg: sum(*)
+
+
+---
+version: v1
+resource: metric_query
+name: store_sales_count
+metrics_name: [ store_sales_count ]
+dimensions: [ s_store_name, i_product_name ]
+
+
+
+---
+# first_join join item
+version: v1
+resource: model_def
+name: join2
+source:
+  source_type: model_def
+  model_name: join1
+joins:
+  - model_name: item
+    join_type: inner
+    conditions: [ "1=1", "ss_item_sk=item.i_item_sk" ]
+dimensions:
+  - name: s_store_name
+  - name: i_product_name
+#dimensions:
+#  - s_store_name
+#  - i_product_name
+columns:
+  - name: s_store_name
+  - name: ss_item_sk
+  - name: i_product_name
+    expr: item.i_product_name
+
+---
+# store_sales join store
+version: v1
+resource: model_def
+name: join1
+source:
+  source_type: model_def
+  model_name: store_sales
+joins:
+  - model_name: store
+    join_type: inner
+    conditions: [ "ss_store_sk=store.s_store_sk" ]
+dimensions:
+columns:
+  - name: s_store_name
+    expr: store.s_store_name
+  - name: ss_item_sk
+
+---
+version: v1
+resource: model_def
+name: store
+source:
+  source_type: table
+  table: store
+  datasource: ds_id_ck01
+joins:
+dimensions:
+columns:
+  - name: s_store_sk
+    data_type: int
+  - name: s_store_id
+    data_type: string
+  - name: s_store_name
+    data_type: string
+
+---
+version: v1
+resource: model_def
+name: item
+source:
+  source_type: table
+  table: item
+  datasource: ds_id_ck01
+joins:
+dimensions:
+columns:
+  - name: i_item_sk
+    data_type: int
+  - name: i_item_id
+    data_type: string
+  - name: i_product_name
+    data_type: string
+
+---
+version: v1
+resource: model_def
+name: store_sales
+source:
+  source_type: table
+  table: store_sales
+  datasource: ds_id_ck01
+joins:
+dimensions:
+columns:
+  - name: ss_item_sk
+    data_type: int
+  - name: ss_store_sk
+    data_type: int

@@ -1,6 +1,5 @@
 package com.deepexi.ds.ast;
 
-import com.deepexi.ds.ModelException;
 import com.deepexi.ds.ModelException.UnsupportedException;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;

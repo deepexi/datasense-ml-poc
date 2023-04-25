@@ -1,6 +1,6 @@
 # ModelML - model_store
 version: v1
-resource: model_ml
+resource: model_def
 name: model_store
 source:
   source_type: table
@@ -25,7 +25,7 @@ dimensions:
 
 ---
 version: v1
-resource: model_ml
+resource: model_def
 name: model_item
 source:
   source_type: table

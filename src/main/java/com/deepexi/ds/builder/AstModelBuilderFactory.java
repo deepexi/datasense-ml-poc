@@ -4,10 +4,10 @@ import com.deepexi.ds.ModelException.ModelHasCycleException;
 import com.deepexi.ds.ModelException.ModelHasManyRootException;
 import com.deepexi.ds.ModelException.ModelNotFoundException;
 import com.deepexi.ds.ModelException.NoModelException;
-import com.deepexi.ds.yml2pojo.YmlJoin;
-import com.deepexi.ds.yml2pojo.YmlModel;
-import com.deepexi.ds.yml2pojo.YmlSource;
-import com.deepexi.ds.yml2pojo.YmlSourceModel;
+import com.deepexi.ds.ymlmodel.YmlJoin;
+import com.deepexi.ds.ymlmodel.YmlModel;
+import com.deepexi.ds.ymlmodel.YmlSource;
+import com.deepexi.ds.ymlmodel.YmlSourceModel;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.common.graph.GraphBuilder;
@@ -21,29 +21,8 @@ import java.util.Set;
 
 public class AstModelBuilderFactory {
 
-//  @Getter
-//  private static class YmlNodeRef {
-//
-//    private String self;
-//    private List<String> depends = new ArrayList<>();
-//    private AtomicInteger referCount = new AtomicInteger(0);
-//
-//    public YmlNodeRef(String self) {
-//      this.self = self;
-//    }
-//
-//    public void addDepend(String depend) {
-//      depends.add(depend);
-//    }
-//
-//    public void incRefer() {
-//      referCount.incrementAndGet();
-//    }
-//  }
-
   private final List<YmlModel> models;
   private final Map<String, YmlModel> lookup = new HashMap<>();
-  //  private final Map<String, YmlNodeRef> record = new HashMap<>();
   private final List<String> leafNode = new ArrayList<>();
   private MutableGraph<String> graph = GraphBuilder.directed().build();
 
@@ -67,22 +46,6 @@ public class AstModelBuilderFactory {
     if (dependNode == null) {
       throw new ModelNotFoundException(depend);
     }
-
-//    // self add depend
-//    YmlNodeRef ref = record.get(self);
-//    if (ref == null) {
-//      ref = new YmlNodeRef(self);
-//      record.put(self, ref);
-//    }
-//    ref.addDepend(depend);
-//
-//    // depend add referCount
-//    YmlNodeRef ref2 = record.get(depend);
-//    if (ref2 == null) {
-//      ref2 = new YmlNodeRef(depend);
-//      record.put(depend, ref2);
-//    }
-//    ref2.incRefer();
 
     // graph
     graph.putEdge(self, depend);

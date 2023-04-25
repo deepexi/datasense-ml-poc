@@ -1,9 +1,9 @@
 # store_sales join store
 version: v1
-resource: model_ml
+resource: model_def
 name: join1
 source:
-  source_type: model_ml
+  source_type: model_def
   model_name: store_sales
 joins:
   - model_name: store
@@ -18,10 +18,10 @@ columns:
 ---
 # first_join join item
 version: v1
-resource: model_ml
+resource: model_def
 name: join2
 source:
-  source_type: model_ml
+  source_type: model_def
   model_name: join1
 joins:
   - model_name: item
@@ -36,7 +36,7 @@ columns:
 
 ---
 version: v1
-resource: model_ml
+resource: model_def
 name: store
 source:
   source_type: table
@@ -54,7 +54,7 @@ columns:
 
 ---
 version: v1
-resource: model_ml
+resource: model_def
 name: item
 source:
   source_type: table
@@ -72,7 +72,7 @@ columns:
 
 ---
 version: v1
-resource: model_ml
+resource: model_def
 name: store_sales
 source:
   source_type: table

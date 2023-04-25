@@ -16,7 +16,7 @@ rm -rf $output_dir
 mkdir $output_dir
 
 header="version: v1
-resource: model_ml
+resource: model_def
 name: _name_
 source:
   source_type: table

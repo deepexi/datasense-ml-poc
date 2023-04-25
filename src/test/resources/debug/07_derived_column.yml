@@ -1,7 +1,7 @@
 # 循环引用
 ---
 version: v1
-resource: model_ml
+resource: model_def
 name: store
 source:
   source_type: table

@@ -1,4 +1,4 @@
-package com.deepexi.ds.yml2pojo;
+package com.deepexi.ds.ymlmodel;
 
 
 import lombok.Getter;

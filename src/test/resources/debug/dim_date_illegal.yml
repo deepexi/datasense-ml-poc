@@ -1,6 +1,6 @@
 # ModelML - date_dim.yml
 version: v1
-resource: model_ml
+resource: model_def
 name: date_dim
 source:
   source_type: table

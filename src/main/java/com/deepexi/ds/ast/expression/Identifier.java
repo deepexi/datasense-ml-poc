@@ -41,9 +41,10 @@ public class Identifier extends Expression {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof Identifier that)) {
+    if (!(o instanceof Identifier)) {
       return false;
     }
+    Identifier that = (Identifier) o;
     return Objects.equal(prefix, that.prefix)
         && Objects.equal(value, that.value);
   }

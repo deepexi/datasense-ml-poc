@@ -71,4 +71,10 @@ public class ModelException extends RuntimeException {
     }
   }
 
+  public static class IllegalYamlFileException extends ModelException {
+
+    public IllegalYamlFileException(String missing) {
+      super(String.format("yml file illegal:%s", missing));
+    }
+  }
 }

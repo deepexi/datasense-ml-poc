@@ -4,7 +4,7 @@ version: v1
 resource: model_ml
 name: store
 source:
-  type: model_ml
+  source_type: model_ml
   model_name: item
 joins:
 dimensions:
@@ -17,7 +17,7 @@ version: v1
 resource: model_ml
 name: item
 source:
-  type: model_ml
+  source_type: model_ml
   model_name: store
 joins:
 dimensions:

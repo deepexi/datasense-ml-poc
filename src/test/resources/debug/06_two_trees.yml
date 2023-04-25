@@ -4,7 +4,7 @@ version: v1
 resource: model_ml
 name: store
 source:
-  type: table
+  source_type: table
   table: store
   datasource: ds_id_ck01
 joins:
@@ -18,7 +18,7 @@ version: v1
 resource: model_ml
 name: item
 source:
-  type: table
+  source_type: table
   table: item
   datasource: ds_id_ck01
 joins:

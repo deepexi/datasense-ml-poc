@@ -3,7 +3,7 @@ version: v1
 resource: model_ml
 name: date_dim
 source:
-  type: table
+  source_type: table
   table: date_dim
   datasource: ds_id_ck01
 columns:                  # columns 是这个 Model暴露给外界的列

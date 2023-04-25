@@ -3,7 +3,7 @@ version: v1
 resource: model_ml
 name: join1
 source:
-  type: model_ml
+  source_type: model_ml
   model_name: store_sales
 joins:
   - model_name: store
@@ -20,7 +20,7 @@ version: v1
 resource: model_ml
 name: store
 source:
-  type: table
+  source_type: table
   table: store
   datasource: ds_id_ck01
 joins:
@@ -38,7 +38,7 @@ version: v1
 resource: model_ml
 name: store_sales
 source:
-  type: table
+  source_type: table
   table: store_sales
   datasource: ds_id_ck01
 joins:

@@ -3,7 +3,7 @@ version: v1
 resource: model_ml
 name: model_store
 source:
-  type: table
+  source_type: table
   dialect: clickhouse
   table: store
   datasource: ds_id_ck01
@@ -28,7 +28,7 @@ version: v1
 resource: model_ml
 name: model_item
 source:
-  type: table
+  source_type: table
   dialect: clickhouse
   table: item
   datasource: ds_id_ck01

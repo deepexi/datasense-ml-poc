@@ -3,7 +3,7 @@ version: v1
 resource: model_ml
 name: catalog_returns
 source:
-  type: model_ml
+  source_type: model_ml
   model_name: store_sales
 joins:
   - model_name: store

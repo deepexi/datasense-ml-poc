@@ -19,7 +19,7 @@ header="version: v1
 resource: model_ml
 name: _name_
 source:
-  type: table
+  source_type: table
   table: _name_
   datasource: ds_id_ck01
 joins:

@@ -25,7 +25,7 @@ public class YmlModelParser {
   public static final String dimensions_key = "dimensions";
 
   // source
-  public static final String source_key_type = "type";
+  public static final String source_key_type = "source_type";
   public static final String source_key_table = "table";
   public static final String source_key_datasource = "datasource";
   public static final String source_key_model_name = "model_name";

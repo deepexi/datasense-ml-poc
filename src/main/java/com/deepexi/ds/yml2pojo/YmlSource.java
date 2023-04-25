@@ -4,20 +4,20 @@ import java.util.Objects;
 
 public abstract class YmlSource {
 
-  protected final String type;
+  protected final String sourceType;
 
   public abstract String getAlias();
 
   protected YmlSource(String type) {
-    this.type = type;
+    this.sourceType = type;
   }
 
-  public String getType() {
-    return type;
+  public String getSourceType() {
+    return sourceType;
   }
 
-  public boolean matchType(String type) {
-    return Objects.equals(this.type, type);
+  public boolean matchSourceType(String sourceType) {
+    return Objects.equals(this.sourceType, sourceType);
   }
 
 }

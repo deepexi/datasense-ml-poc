@@ -18,6 +18,7 @@ import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.source.ModelSource;
 import com.deepexi.ds.ast.source.Source;
 import com.deepexi.ds.ast.source.TableSource;
+import com.deepexi.ds.builder.express.JoinConditionExpressionParser;
 import com.deepexi.ds.ymlmodel.YmlColumn;
 import com.deepexi.ds.ymlmodel.YmlDimension;
 import com.deepexi.ds.ymlmodel.YmlJoin;
@@ -36,7 +37,7 @@ import lombok.Data;
 import lombok.Getter;
 
 @Getter
-public class AstModelBuilder {
+public class ModelBuilder {
 
   @Data
   private static class Container {
@@ -66,11 +67,11 @@ public class AstModelBuilder {
   private final YmlModel entry;
 
   public static Model singleTreeModel(List<YmlModel> models) {
-    AstModelBuilder builder = new AstModelBuilderFactory(models).create();
+    ModelBuilder builder = new ModelBuilderFactory(models).create();
     return builder.build();
   }
 
-  public AstModelBuilder(List<YmlModel> models, YmlModel entry) {
+  public ModelBuilder(List<YmlModel> models, YmlModel entry) {
     this.models = models;
     this.entry = entry;
     lookup = models.stream().collect(Collectors.toMap(YmlModel::getName, Function.identity()));
@@ -148,7 +149,8 @@ public class AstModelBuilder {
           // 目前 literal中是一个 原子条件
           // 多个条件之间是 Logic.AND 运算
           String literal = conditions.get(j);
-          Expression expr = new ExpressionParser(literal, ctx.getScopes(), srcRel).parse();
+          Expression expr = new JoinConditionExpressionParser(literal, ctx.getScopes(),
+              srcRel).parse();
           expressions.add(expr);
         }
       }

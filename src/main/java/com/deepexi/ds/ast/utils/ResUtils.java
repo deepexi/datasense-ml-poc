@@ -60,4 +60,8 @@ public class ResUtils {
   public static boolean noPlaceHolder(String sql) {
     return !(sql.matches("\\$\\{.*?\\}"));
   }
+
+  public static String indent(String in) {
+    return in.replaceAll("\n", "\n    ");
+  }
 }

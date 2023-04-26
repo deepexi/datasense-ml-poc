@@ -38,51 +38,77 @@ public class SqlGenerator implements ModelVisitor<String, SqlGeneratorContext> {
   @Override
   public String visitMetricBindQuery(MetricBindQuery node, SqlGeneratorContext context) {
     String modelSql = process(node.getModel(), context);
-    String modelAlias = process(node.getModel().getName(), context);
+    String aliasSql = process(node.getModel().getName(), context);
 
-    StringBuilder whereBuilder = new StringBuilder();
-    for (int i = 0; i < node.getModelFilters().size(); i++) {
-      Expression ele = node.getModelFilters().get(i);
-      String oneWhere = process(ele, context);
-      if (i > 0) {
-        whereBuilder.append(" and ");
+    String whereSql = ""; // where optional
+    if (node.getModelFilters().size() > 0) {
+      StringBuilder whereBuilder = new StringBuilder();
+      whereBuilder.append("where ");
+      for (int i = 0; i < node.getModelFilters().size(); i++) {
+        Expression ele = node.getModelFilters().get(i);
+        String oneWhere = process(ele, context);
+        if (i > 0) {
+          whereBuilder.append(" and ");
+        }
+        whereBuilder.append(oneWhere);
       }
-      whereBuilder.append(oneWhere);
+      whereSql = whereBuilder.toString();
     }
-    String whereSql = whereBuilder.toString();
 
-    // selectSql, groupBy
-    StringBuilder selectBuilder = new StringBuilder();
+    // groupBy
     StringBuilder groupByBuilder = new StringBuilder();
     for (int i = 0; i < node.getDimensions().size(); i++) {
       Dimension ele = node.getDimensions().get(i);
       String expr = ele.getRawExpr(); // TODO 仅有表达式
-      String oneDim = process(ele, context); // 有别名
-
       if (i > 0) {
         groupByBuilder.append(", ");
-        selectBuilder.append(", ");
       }
       groupByBuilder.append(expr);
-      selectBuilder.append(oneDim);
     }
     String groupBySql = groupByBuilder.toString();
+
+    // selectSql
+    StringBuilder selectBuilder = new StringBuilder();
+    for (int i = 0; i < node.getDimensions().size(); i++) {
+      Dimension ele = node.getDimensions().get(i);
+      String oneDim = process(ele, context); // 有别名
+      if (i > 0) {
+        selectBuilder.append(", \n");
+      }
+      selectBuilder.append(oneDim);
+    }
     for (int i = 0; i < node.getMetrics().size(); i++) {
       Column column = node.getMetrics().get(i);
       String colStr = process(column, context);
-      selectBuilder.append(", ").append(colStr);
+      selectBuilder.append(", \n").append(colStr);
     }
     String selectSql = selectBuilder.toString();
 
+    // havingSql
+    String havingSql = "";
+    if (node.getMetricFilters().size() > 0) {
+      StringBuilder havingBuilder = new StringBuilder();
+      havingBuilder.append("having ");
+      for (int i = 0; i < node.getMetricFilters().size(); i++) {
+        if (i > 0) {
+          havingBuilder.append(" and ");
+        }
+        Expression expression = node.getMetricFilters().get(i);
+        String expr = process(expression, context);
+        havingBuilder.append(expr);
+      }
+      havingSql = havingBuilder.toString();
+    }
     // 组装模板
     final String sqlTemplate = ResUtils.getSqlTemplate(metric_bind_query_001,
         context.getSqlDialect());
     Map<String, String> valuesMap = new HashMap<>();
-    valuesMap.put("modelAlias", modelAlias);
-    valuesMap.put("modelSql", modelSql);
-    valuesMap.put("selectSql", selectSql);
+    valuesMap.put("aliasSql", aliasSql);
+    valuesMap.put("modelSql", ResUtils.indent(modelSql));
+    valuesMap.put("selectSql", ResUtils.indent(selectSql));
     valuesMap.put("whereSql", whereSql);
     valuesMap.put("groupBySql", groupBySql);
+    valuesMap.put("havingSql", havingSql);
 
     StringSubstitutor sub = new StringSubstitutor(valuesMap);
     return sub.replace(sqlTemplate);
@@ -100,11 +126,11 @@ public class SqlGenerator implements ModelVisitor<String, SqlGeneratorContext> {
     // sourceSql
     String sourceSql = process(source, context);
 
-    // columnSql
-    String columnSql = null;
+    // selectSql
+    String selectSql = null;
     List<Column> columns = node.getColumns();
     if (columns == null || columns.size() == 0) {
-      columnSql = ALL_COLUMN;
+      selectSql = ALL_COLUMN;
     } else {
       // get = "colA, colB, colC"
       StringBuilder builder = new StringBuilder();
@@ -113,10 +139,10 @@ public class SqlGenerator implements ModelVisitor<String, SqlGeneratorContext> {
         String oneColStr = process(col, context);
         builder.append(oneColStr);
         if (i < columns.size() - 1) {
-          builder.append(", ");
+          builder.append(", \n");
         }
       }
-      columnSql = builder.toString();
+      selectSql = builder.toString();
     }
 
     // joinSql
@@ -135,8 +161,8 @@ public class SqlGenerator implements ModelVisitor<String, SqlGeneratorContext> {
     final String sqlTemplate = ResUtils.getSqlTemplate(model_001, context.getSqlDialect());
     Map<String, String> valuesMap = new HashMap<>();
     valuesMap.put("aliasSql", aliasSql);
-    valuesMap.put("sourceSql", sourceSql);
-    valuesMap.put("columnSql", columnSql);
+    valuesMap.put("sourceSql", ResUtils.indent(sourceSql));
+    valuesMap.put("selectSql", ResUtils.indent(selectSql));
     valuesMap.put("joinSql", joinSql);
     StringSubstitutor sub = new StringSubstitutor(valuesMap);
     return sub.replace(sqlTemplate);
@@ -160,7 +186,7 @@ public class SqlGenerator implements ModelVisitor<String, SqlGeneratorContext> {
 
   @Override
   public String visitJoin(Join node, SqlGeneratorContext context) {
-    final String pattern = " %s join %s ";
+    final String pattern = "\n%s join %s";
     String beforeCondition = String.format(pattern, node.getJoinType().name,
         node.getModel().getName().getValue());
     ImmutableList<? extends Expression> conditions = node.getConditions();

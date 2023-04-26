@@ -19,14 +19,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class AstModelBuilderFactory {
+public class ModelBuilderFactory {
 
   private final List<YmlModel> models;
   private final Map<String, YmlModel> lookup = new HashMap<>();
   private final List<String> leafNode = new ArrayList<>();
   private MutableGraph<String> graph = GraphBuilder.directed().build();
 
-  public AstModelBuilderFactory(List<YmlModel> models) {
+  public ModelBuilderFactory(List<YmlModel> models) {
     if (models == null || models.size() == 0) {
       throw new NoModelException();
     }
@@ -109,11 +109,11 @@ public class AstModelBuilderFactory {
     }
   }
 
-  public AstModelBuilder create() {
+  public ModelBuilder create() {
     parse();
     assertNoGraph();
     String rootModelName = assertSingleTree();
     YmlModel rootModel = lookup.get(rootModelName);
-    return new AstModelBuilder(models, rootModel);
+    return new ModelBuilder(models, rootModel);
   }
 }

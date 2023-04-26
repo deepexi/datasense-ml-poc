@@ -7,4 +7,4 @@ dimensions: [ s_store_name, i_product_name ]
 model_filters:
   - quantity > 0
   - status='paid'
-dimension_filters: [ d_year >= 1990, d_year <= 1999 ]
+metric_filters: [ d_year >= 1990, d_year <= 1999 ]

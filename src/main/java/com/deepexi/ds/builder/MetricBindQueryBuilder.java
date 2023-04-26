@@ -10,6 +10,7 @@ import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.StringLiteral;
+import com.deepexi.ds.builder.express.MetricExpressionParser;
 import com.deepexi.ds.ymlmodel.YmlFullQuery;
 import com.deepexi.ds.ymlmodel.YmlMetric;
 import com.deepexi.ds.ymlmodel.YmlMetricQuery;
@@ -23,7 +24,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class FullAstBuilder {
+public class MetricBindQueryBuilder {
 
   private YmlMetricQuery metricQuery;
 
@@ -33,7 +34,7 @@ public class FullAstBuilder {
   // 关联的 model, 如果一个孤立的model 不被引用, 将不会出现在此集合中
   private Set<Model> models;
 
-  public FullAstBuilder(YmlFullQuery ymlFullQuery) {
+  public MetricBindQueryBuilder(YmlFullQuery ymlFullQuery) {
     checkIntegrity(ymlFullQuery);
   }
 
@@ -77,7 +78,7 @@ public class FullAstBuilder {
         throw new ModelException(String.format("query[%s] 包含的维度 超过 metric=[%s]的预设范围",
             this.metricQuery.getName(), ele.getName()));
       }
-      AstModelBuilder b = new AstModelBuilder(ymlFullQuery.getModels(),
+      ModelBuilder b = new ModelBuilder(ymlFullQuery.getModels(),
           existModels.get(ele.getModelName()));
       models.add(b.build());
     }
@@ -127,12 +128,12 @@ public class FullAstBuilder {
       dimensions.add(dim);
     });
 
-    // dimFilters
-    final List<Expression> dimFilters = new ArrayList<>();
-    metricQuery.getDimFilters().forEach(f -> {
-      // TODO： 解析过滤条件
-      Expression expr = StringLiteral.of(f);
-      dimFilters.add(expr);
+    // metricFilters
+    final List<Expression> metricFilters = new ArrayList<>();
+    metricQuery.getMetricFilters().forEach(metricFilter -> {
+      MetricExpressionParser parser = new MetricExpressionParser(metrics, metricFilter);
+      Expression expr = parser.parse();
+      metricFilters.add(expr);
     });
 
     // modelFilters
@@ -145,7 +146,7 @@ public class FullAstBuilder {
     return new MetricBindQuery(
         metricQueryName,
         model,
-        dimFilters,
+        metricFilters,
         dimensions,
         modelFilters,
         columns);

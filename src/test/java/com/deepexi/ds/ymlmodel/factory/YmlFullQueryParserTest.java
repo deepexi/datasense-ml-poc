@@ -29,9 +29,9 @@ public class YmlFullQueryParserTest {
     assertEquals(2, query.getModelFilters().size());
     assertEquals("a=1", query.getModelFilters().get(0));
     assertEquals("b=2", query.getModelFilters().get(1));
-    assertEquals(2, query.getDimFilters().size());
-    assertEquals("c=3", query.getDimFilters().get(0));
-    assertEquals("d=4", query.getDimFilters().get(1));
+    assertEquals(2, query.getMetricFilters().size());
+    assertEquals("c=3", query.getMetricFilters().get(0));
+    assertEquals("d=4", query.getMetricFilters().get(1));
 
     // metrics
     ImmutableList<YmlMetric> metrics = ctx.getMetrics();

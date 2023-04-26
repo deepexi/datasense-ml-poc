@@ -26,12 +26,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
-public class AstModelBuilderTest {
+public class ModelBuilderTest {
 
   @Test
   public void testBuild() {
     List<YmlModel> ymlModels = YmlModelParser.loadModels("debug/dim_date.yml");
-    Model rootModel = AstModelBuilder.singleTreeModel(ymlModels);
+    Model rootModel = ModelBuilder.singleTreeModel(ymlModels);
     assertNotNull(rootModel);
 
     // name
@@ -73,13 +73,13 @@ public class AstModelBuilderTest {
   @Test
   void testBuild_illegal_table() {
     List<YmlModel> ymlModels = YmlModelParser.loadModels("debug/dim_date_illegal.yml");
-    assertThrows(ModelException.class, () -> AstModelBuilder.singleTreeModel(ymlModels));
+    assertThrows(ModelException.class, () -> ModelBuilder.singleTreeModel(ymlModels));
   }
 
   @Test
   void testBuild_join() {
     List<YmlModel> ymlModels = YmlModelParser.loadModels("debug/join_2_models.yml");
-    Model rootModel = AstModelBuilder.singleTreeModel(ymlModels);
+    Model rootModel = ModelBuilder.singleTreeModel(ymlModels);
     assertNotNull(rootModel);
   }
 
@@ -87,7 +87,7 @@ public class AstModelBuilderTest {
   void testBuild_join_illegal() {
     List<YmlModel> ymlModels = YmlModelParser.loadModels("debug/join_2_models_illegal.yml");
     assertEquals(3, ymlModels.size());
-    assertThrows(ModelNotFoundException.class, () -> AstModelBuilder.singleTreeModel(ymlModels));
+    assertThrows(ModelNotFoundException.class, () -> ModelBuilder.singleTreeModel(ymlModels));
   }
 
   @Test
@@ -95,27 +95,27 @@ public class AstModelBuilderTest {
     // miss store
     // YmlModel store = YmlModelParser.loadOneModel("tpcds/01_base_table/store.yml");
     YmlModel storeSales = YmlModelParser.loadOneModel("tpcds/01_base_table/store_sales.yml");
-    YmlModel root = YmlModelParser.loadOneModel("debug/01_2_model_join.yml");
+    YmlModel root = YmlModelParser.loadOneModel("debug/01_model_join_model.yml");
     List<YmlModel> ymlModels = Arrays.asList(/*store,*/ storeSales, root);
 
-    assertThrows(ModelNotFoundException.class, () -> AstModelBuilder.singleTreeModel(ymlModels));
+    assertThrows(ModelNotFoundException.class, () -> ModelBuilder.singleTreeModel(ymlModels));
   }
 
   @Test
   public void testBuild_stack_join_illegal() {
     List<YmlModel> ymlModels = YmlModelParser.loadModels("debug/04_pile_join_illegal.yml");
-    assertThrows(FieldMissException.class, () -> AstModelBuilder.singleTreeModel(ymlModels));
+    assertThrows(FieldMissException.class, () -> ModelBuilder.singleTreeModel(ymlModels));
   }
 
   @Test
   public void testBuild_cycle_illegal() {
     List<YmlModel> ymlModels = YmlModelParser.loadModels("debug/05_cycle_illegal.yml");
-    assertThrows(ModelHasCycleException.class, () -> AstModelBuilder.singleTreeModel(ymlModels));
+    assertThrows(ModelHasCycleException.class, () -> ModelBuilder.singleTreeModel(ymlModels));
   }
 
   @Test
   public void testBuild_2_tree_illegal() {
     List<YmlModel> ymlModels = YmlModelParser.loadModels("debug/06_two_trees.yml");
-    assertThrows(ModelHasManyRootException.class, () -> AstModelBuilder.singleTreeModel(ymlModels));
+    assertThrows(ModelHasManyRootException.class, () -> ModelBuilder.singleTreeModel(ymlModels));
   }
 }

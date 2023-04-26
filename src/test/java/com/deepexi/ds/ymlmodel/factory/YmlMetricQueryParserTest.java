@@ -33,7 +33,7 @@ public class YmlMetricQueryParserTest {
 
     assertIterableEquals(
         Arrays.asList("d_year >= 1990", "d_year <= 1999"),
-        query.getDimFilters());
+        query.getMetricFilters());
 
   }
 

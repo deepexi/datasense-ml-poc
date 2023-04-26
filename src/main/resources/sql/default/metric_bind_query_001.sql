@@ -5,15 +5,18 @@
 --! 占位符方式: ${变量名}, 如 ${source_alias}
 --! ============= 以下用于描述 sql模板 ======
 --! sql用途: 解析 metric_bind_query 节点sql
---! modelAlias
+--! aliasSql
 --! modelSql
 --! selectSql
 --! whereSql
 --! groupBySql
 
-with ${modelAlias} as ( ${modelSql} )
-select ${selectSql}
-from ${modelAlias}
-where ${whereSql}
+with ${aliasSql} as (
+    ${modelSql}
+)
+select
+    ${selectSql}
+from ${aliasSql}
+${whereSql}
 group by ${groupBySql}
-
+${havingSql}

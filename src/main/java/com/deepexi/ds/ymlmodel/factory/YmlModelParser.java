@@ -4,6 +4,7 @@ import static java.util.Collections.EMPTY_LIST;
 
 import com.deepexi.ds.ComponentType;
 import com.deepexi.ds.ModelException;
+import com.deepexi.ds.ast.JoinType;
 import com.deepexi.ds.ymlmodel.YmlColumn;
 import com.deepexi.ds.ymlmodel.YmlDimension;
 import com.deepexi.ds.ymlmodel.YmlJoin;
@@ -121,7 +122,7 @@ public class YmlModelParser {
     List<YmlJoin> joins = new ArrayList<>(list.size());
     for (Map<String, Object> j : list) {
       String modelName = ParserUtils.getStringElseThrow(j, "model_name");
-      String joinType = ParserUtils.getStringElseThrow(j, "join_type");
+      String joinType = ParserUtils.getStringElse(j, "join_type", JoinType.INNER.name);
       List<String> conditions = (List<String>) (j.get("conditions"));
       YmlJoin oneJoin = new YmlJoin(modelName, joinType, conditions);
       joins.add(oneJoin);

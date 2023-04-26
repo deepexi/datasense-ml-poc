@@ -65,7 +65,9 @@ name: xxx
       - join时候的条件约束未 tableA.colA = tableB.colB. 因为主要是 fact join dim 模式
     - 是否支持 union
 - 支持 Model join Model
+- column: 可以是计算列
 - 关于dimension
+  - 必须是 column的某一列
 
 ## metrics
 

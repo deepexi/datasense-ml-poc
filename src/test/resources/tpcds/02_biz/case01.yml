@@ -1,0 +1,68 @@
+# 业务: 按照 year, month 统计 sales_order 销售额
+# 手写sql
+#select
+#  d_year, d_moy, sum(ss_net_paid)
+#from
+#  store_sales ss join date_dim dd on ss.ss_sold_date_sk=dd.d_date_sk
+#group by d_year, d_moy
+---
+version: v1
+resource: model_def
+name: date_dim
+source:
+  source_type: table
+  table: date_dim
+  datasource: ds_id_ck01
+joins:
+dimensions:
+columns:
+  - name: d_date_sk
+    data_type: int
+  - name: d_year
+    data_type: int
+  - name: d_moy
+    data_type: int
+
+---
+version: v1
+resource: model_def
+name: store_sales
+source:
+  source_type: table
+  table: store_sales
+  datasource: ds_id_ck01
+joins:
+  - model_name: date_dim
+    # join_type: inner # default join=inner
+    conditions: [ ss_sold_date_sk=date_dim.d_date_sk ]
+dimensions:
+  - name: d_year
+  - name: d_moy
+columns:
+  #  - name: ss_sold_date_sk
+  #    data_type: int
+  - name: ss_net_paid
+    data_type: decimal
+  - name: d_year
+    expr: date_dim.d_year
+  - name: d_moy
+    expr: date_dim.d_moy
+
+---
+version: v1
+resource: metric_def
+name: metric_sum_ss_net_paid__store_sales # 命名规范 metric_[聚合描述]__[model]
+model_name: store_sales
+dimensions: [ d_year, d_moy ]
+agg: sum(ss_net_paid)
+
+
+---
+version: v1
+resource: metrics_query
+# 命名规范 query_[query描述]__[metric_name]
+name: query_by_month__metric_sum_ss_net_paid__store_sales
+metric_names: [ metric_sum_ss_net_paid__store_sales ]
+dimensions: [ d_year, d_moy ]
+model_filters: []
+metric_filters: []

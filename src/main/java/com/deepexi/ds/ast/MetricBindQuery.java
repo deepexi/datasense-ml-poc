@@ -12,20 +12,20 @@ public class MetricBindQuery extends AstComponent {
 
   private final Identifier name;
   private final Model model;
-  private final ImmutableList<Expression> dimFilters;
+  private final ImmutableList<Expression> metricFilters;
   private final ImmutableList<Dimension> dimensions;
   private final ImmutableList<Expression> modelFilters;
   private final ImmutableList<Column> metrics;
 
   public MetricBindQuery(Identifier queryName, Model model,
-      List<Expression> dimFilters,
+      List<Expression> metricFilters,
       List<Dimension> dimensions,
       List<Expression> modelFilters,
       List<Column> metrics
   ) {
     this.name = queryName;
     this.model = model;
-    this.dimFilters = ImmutableList.copyOf(dimFilters);
+    this.metricFilters = ImmutableList.copyOf(metricFilters);
     this.dimensions = ImmutableList.copyOf(dimensions);
     this.modelFilters = ImmutableList.copyOf(modelFilters);
     this.metrics = ImmutableList.copyOf(metrics);

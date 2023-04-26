@@ -9,18 +9,18 @@ import com.deepexi.ds.ymlmodel.YmlFullQuery;
 import com.deepexi.ds.ymlmodel.factory.YmlFullQueryParser;
 import org.junit.jupiter.api.Test;
 
-public class FullAstBuilderTest {
+public class MetricBindQueryBuilderTest {
 
   @Test
   public void testBuild() {
     YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("debug/10_full.yml");
-    MetricBindQuery fullAst = new FullAstBuilder(ctx).build();
+    MetricBindQuery fullAst = new MetricBindQueryBuilder(ctx).build();
     assertNotNull(fullAst);
   }
 
   @Test
   public void testBuild_illegal_1_dim() {
     YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("debug/11_full_illegal_1.yml");
-    assertThrows(ModelException.class, () -> new FullAstBuilder(ctx).build());
+    assertThrows(ModelException.class, () -> new MetricBindQueryBuilder(ctx).build());
   }
 }

@@ -14,7 +14,7 @@ name: metric_1_query
 metric_names: [ metric_1 ]
 dimensions: [ s_store_name, i_product_name ]
 model_filters: [ "a=1", b=2 ]
-dimension_filters: [ "c=3", d=4 ]
+metric_filters: [ "c=3", d=4 ]
 
 
 ---

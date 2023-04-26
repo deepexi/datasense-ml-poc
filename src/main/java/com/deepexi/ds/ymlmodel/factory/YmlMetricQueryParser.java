@@ -53,10 +53,10 @@ public class YmlMetricQueryParser {
     }
 
     // dimension_filter
-    List<String> dimFilter = (List<String>) (map.get("dimension_filters"));
-    if (dimFilter == null) {
-      dimFilter = EMPTY_LIST;
+    List<String> metricFilter = (List<String>) (map.get("metric_filters"));
+    if (metricFilter == null) {
+      metricFilter = EMPTY_LIST;
     }
-    return new YmlMetricQuery(name, metricNames, dim, modelFilter, dimFilter);
+    return new YmlMetricQuery(name, metricNames, dim, modelFilter, metricFilter);
   }
 }

@@ -1,4 +1,4 @@
-package com.deepexi.ds.builder;
+package com.deepexi.ds.builder.express;
 
 import static com.deepexi.ds.ast.expression.Identifier.IDENTIFIER_SEPARATOR;
 import static com.deepexi.ds.ast.expression.Identifier.RE_IDENTIFIER_SEPARATOR;
@@ -8,24 +8,27 @@ import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.StringLiteral;
 import com.deepexi.ds.ast.expression.condition.BinaryExpression;
 import com.deepexi.ds.ast.expression.condition.BinaryExpression.BinaryOperator;
+import com.deepexi.ds.builder.ModelBuilder;
+import com.deepexi.ds.builder.RelationMock;
 import java.util.List;
 
 /**
  * 待优化, 表达式非常灵活, 暂时做不到很好的分析
  */
-class ExpressionParser {
+public class JoinConditionExpressionParser {
 
   private final String literal;
   private final List<RelationMock> scope;
   private final RelationMock sourceRelation;
 
-  ExpressionParser(String literal, List<RelationMock> scope, RelationMock sourceRelation) {
+  public JoinConditionExpressionParser(String literal, List<RelationMock> scope,
+      RelationMock sourceRelation) {
     this.literal = literal.trim();
     this.scope = scope;
     this.sourceRelation = sourceRelation;
   }
 
-  Expression parse() {
+  public Expression parse() {
     return tryParse();
   }
 
@@ -41,7 +44,7 @@ class ExpressionParser {
       return StringLiteral.of(literal);
     }
 
-    BinaryOperator op = parseBinary(literal);
+    BinaryOperator op = ExpressionParseUtils.extractBinaryOperator(literal);
     if (op != null) {
       String[] parts = literal.split(op.name);
       if (parts.length != 2) {
@@ -65,8 +68,8 @@ class ExpressionParser {
       String colName = parts[1].trim();
 
       // check tableName, tupleName legal
-      RelationMock rel = AstModelBuilder.assertTableExists(tableName, scope);
-      AstModelBuilder.assertColumnExistsInRelation(colName, rel);
+      RelationMock rel = ModelBuilder.assertTableExists(tableName, scope);
+      ModelBuilder.assertColumnExistsInRelation(colName, rel);
 
       // 校验该字段 存在于此表中
       return new Identifier(tableName, colName);
@@ -82,35 +85,10 @@ class ExpressionParser {
     }
 
     // this is a colX, check colX exists in defTable
-    AstModelBuilder.assertColumnExistsInRelation(literal, sourceRelation);
+    ModelBuilder.assertColumnExistsInRelation(literal, sourceRelation);
     return new Identifier(sourceRelation.getTableName().getValue(), literal);
   }
 
-
-  private BinaryOperator parseBinary(String literal) {
-    if (literal.contains(BinaryOperator.GTE.name)) {
-      return BinaryOperator.GTE;
-    }
-    if (literal.contains(BinaryOperator.LTE.name)) {
-      return BinaryOperator.LTE;
-    }
-    if (literal.contains(BinaryOperator.NOT_EQUAL.name)) {
-      return BinaryOperator.NOT_EQUAL;
-    }
-
-    // 多字母匹配放在前面, 少的放在后面
-    if (literal.contains(BinaryOperator.GT.name)) {
-      return BinaryOperator.GT;
-    }
-    if (literal.contains(BinaryOperator.LT.name)) {
-      return BinaryOperator.LT;
-    }
-    if (literal.contains(BinaryOperator.EQUAL.name)) {
-      return BinaryOperator.EQUAL;
-    }
-
-    return null;
-  }
 
   private static boolean isNumeric(String strNum) {
     if (strNum == null) {

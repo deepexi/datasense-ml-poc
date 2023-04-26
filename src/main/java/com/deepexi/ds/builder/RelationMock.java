@@ -14,7 +14,7 @@ import lombok.Getter;
  * 记录一张表基础信息= 表名 + 字段, 用于临时分析
  */
 @Getter
-class RelationMock {
+public class RelationMock {
 
   private final Identifier tableName;
   private final List<Column> columns;

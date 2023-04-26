@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.visitor.analyzer.ScopeCollector;
 import com.deepexi.ds.ast.visitor.analyzer.ScopeCollectorContext;
-import com.deepexi.ds.builder.AstModelBuilder;
+import com.deepexi.ds.builder.ModelBuilder;
 import com.deepexi.ds.ymlmodel.YmlModel;
 import com.deepexi.ds.ymlmodel.factory.YmlModelParser;
 import java.util.List;
@@ -17,7 +17,7 @@ public class ScopeCollectorTest {
   void testVisitModel() {
     List<YmlModel> ymlModels = YmlModelParser.loadModels("debug/join_2_models.yml");
     assertEquals(3, ymlModels.size());
-    Model rootModel = AstModelBuilder.singleTreeModel(ymlModels);
+    Model rootModel = ModelBuilder.singleTreeModel(ymlModels);
 
     // 准备 visit
     ScopeCollectorContext context = new ScopeCollectorContext(rootModel);

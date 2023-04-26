@@ -10,6 +10,9 @@
 --!    sourceSql
 --!    columnSql
 --!    joinSql
-with ${aliasSql} as ( ${sourceSql} )
-select ${columnSql}
+with ${aliasSql} as (
+    ${sourceSql}
+)
+select
+    ${selectSql}
 from ${aliasSql} ${joinSql}

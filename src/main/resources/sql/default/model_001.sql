@@ -6,10 +6,12 @@
 --! ============= 以下用于描述 sql模板 ======
 --! sql用途: 解析Model节点时 生成整体sql
 --! sql变量:
---!    aliasSql
---!    sourceSql
---!    columnSql
---!    joinSql
+--!     aliasSql
+--!     sourceSql
+--!     columnSql
+--!     joinSql
+
+-- dialect: default --
 with ${aliasSql} as (
     ${sourceSql}
 )

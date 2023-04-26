@@ -12,8 +12,8 @@ import com.deepexi.ds.ast.expression.IdentifierPolicy.IdentifierPolicyNoQuote;
 import com.deepexi.ds.ast.visitor.generator.SqlGenerator;
 import com.deepexi.ds.ast.visitor.generator.SqlGeneratorContext;
 import com.deepexi.ds.ast.visitor.generator.SqlGeneratorPgContext;
-import com.deepexi.ds.builder.ModelBuilder;
 import com.deepexi.ds.builder.MetricBindQueryBuilder;
+import com.deepexi.ds.builder.ModelBuilder;
 import com.deepexi.ds.ymlmodel.YmlFullQuery;
 import com.deepexi.ds.ymlmodel.YmlModel;
 import com.deepexi.ds.ymlmodel.factory.YmlFullQueryParser;
@@ -36,6 +36,7 @@ public class SqlGeneratorTest {
     assertNotNull(sql);
 
     assertTrue(noPlaceHolder(sql)); // 所有占位符都已被替换
+    assertTrue(sql.contains("dialect: postgres")); // 这个是 sql模板中保留的
     System.out.println(sql);
   }
 

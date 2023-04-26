@@ -11,10 +11,10 @@
 --!     columnSql
 --!     joinSql
 
--- dialect: default [保留, 用于检测是否命中了正确的dialect]
+-- dialect: postgres --
 with ${aliasSql} as (
     ${sourceSql}
-    )
+)
 select
     ${selectSql}
 from ${aliasSql} ${joinSql}

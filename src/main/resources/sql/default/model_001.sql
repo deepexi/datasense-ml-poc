@@ -10,8 +10,7 @@
 --!     sourceSql
 --!     columnSql
 --!     joinSql
-
--- dialect: default --
+-- dialect: default, model_001.sql --
 with ${aliasSql} as (
     ${sourceSql}
 )

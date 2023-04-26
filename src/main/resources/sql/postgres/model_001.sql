@@ -10,8 +10,7 @@
 --!     sourceSql
 --!     columnSql
 --!     joinSql
-
--- dialect: postgres --
+-- dialect: postgres, model_001.sql --
 with ${aliasSql} as (
     ${sourceSql}
 )

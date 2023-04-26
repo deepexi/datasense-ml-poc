@@ -10,8 +10,7 @@
 --!     selectSql
 --!     whereSql
 --!     groupBySql
-
--- dialect: default --
+-- dialect: default, metric_bind_query_001.sql --
 with ${aliasSql} as (
     ${modelSql}
 )

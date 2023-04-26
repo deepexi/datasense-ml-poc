@@ -10,8 +10,7 @@
 --!     sourceSql
 --!     columnSql
 --!     joinSql
-
--- dialect: default [保留, 用于检测是否命中了正确的dialect]
+-- dialect: default, template.sql [保留, 用于检测是否命中了正确的dialect]
 with ${aliasSql} as (
     ${sourceSql}
     )

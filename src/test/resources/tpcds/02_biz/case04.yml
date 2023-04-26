@@ -78,4 +78,28 @@ name: query_by_month__metric_sum_ss_net_paid__store_sales
 metric_names: [ metric_sum_ss_net_paid__store_sales ]
 dimensions: [ d_year, d_moy, s_store_name ]
 model_filters: [ d_year>=200, d_year<=2001 ]
-metric_filters: [ metric_sum_ss_net_paid__store_sales > 1000000] # 填写指标名称
+metric_filters: [ metric_sum_ss_net_paid__store_sales > 1000000 ] # 填写指标名称
+
+---
+version: v1
+resource: model_debug
+sql: >-
+  with cte as (
+    select
+      ss_net_paid,
+      date_dim.d_year,
+      date_dim.d_moy,
+      store.s_store_name
+    from store_sales 
+      inner join date_dim on ss_sold_date_sk=date_dim.d_date_sk
+      inner join store on ss_store_sk=store.s_store_sk
+  )
+  select 
+    d_year,
+    d_moy,
+    s_store_name,
+    sum(ss_net_paid) as metric_sum_ss_net_paid__store_sales
+  from cte
+  where d_year>=200 and d_year<=2001
+  group by d_year, d_moy, s_store_name
+  having sum(ss_net_paid) > 1000000

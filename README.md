@@ -83,7 +83,9 @@ name: xxx
 - 二级计算对应 窗口函数
 - 支持的操作
     - filter: 对最终结果的筛选
-
+# 设计思路
+- 首先构建一颗 AST
+- 
 # 扩展规范
 - 定义一个 Expression子类, 如 MyExpression extends com.deepexi.ds.ast.expression.Expression
 - 在 com.deepexi.ds.ast.visitor.generator.SqlGenerator中实现 visitMyExpression(MyExpression node, Context ctx)

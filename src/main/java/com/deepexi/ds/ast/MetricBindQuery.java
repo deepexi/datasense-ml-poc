@@ -1,7 +1,6 @@
 package com.deepexi.ds.ast;
 
 import com.deepexi.ds.ComponentType;
-import com.deepexi.ds.ModelException.TODOException;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.google.common.collect.ImmutableList;
@@ -18,14 +17,13 @@ public class MetricBindQuery extends AstComponent {
   private final ImmutableList<Expression> modelFilters;
   private final ImmutableList<Column> metrics;
 
-  public MetricBindQuery(Identifier name,
-      Model model,
+  public MetricBindQuery(Identifier queryName, Model model,
       List<Expression> dimFilters,
       List<Dimension> dimensions,
       List<Expression> modelFilters,
       List<Column> metrics
   ) {
-    this.name = name;
+    this.name = queryName;
     this.model = model;
     this.dimFilters = ImmutableList.copyOf(dimFilters);
     this.dimensions = ImmutableList.copyOf(dimensions);
@@ -40,6 +38,6 @@ public class MetricBindQuery extends AstComponent {
 
   @Override
   public <R, C> R accept(ModelVisitor<R, C> visitor, C context) {
-    throw new TODOException("稍后完成");
+    return visitor.visitMetricBindQuery(this, context);
   }
 }

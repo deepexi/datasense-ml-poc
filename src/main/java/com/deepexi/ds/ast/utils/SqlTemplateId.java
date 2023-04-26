@@ -2,7 +2,10 @@ package com.deepexi.ds.ast.utils;
 
 public enum SqlTemplateId {
 
-  with_clause_001("with_clause_001");
+  model_001("model_001"),
+  metric_bind_query_001("metric_bind_query_001"),
+
+  ;
 
   public final String fileName;
 

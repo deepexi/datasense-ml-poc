@@ -1,6 +1,5 @@
 package com.deepexi.ds.ast.expression;
 
-import com.deepexi.ds.ModelException;
 import com.deepexi.ds.ModelException.UnsupportedException;
 
 /**
@@ -12,10 +11,10 @@ public interface IdentifierPolicy {
 
   String quoteString();
 
+  IdentifierPolicy NO_QUOTE = new IdentifierPolicyNoQuote();
+  IdentifierPolicy BACK_TICK = new IdentifierPolicyBackTick();
 
-  public static final class IdentifierPolicyNoQuote implements IdentifierPolicy {
-
-    public static final IdentifierPolicyNoQuote INSTANCE = new IdentifierPolicyNoQuote();
+  final class IdentifierPolicyNoQuote implements IdentifierPolicy {
 
     @Override
     public boolean hasQuote() {
@@ -28,9 +27,7 @@ public interface IdentifierPolicy {
     }
   }
 
-  public static final class IdentifierPolicyBackTick implements IdentifierPolicy {
-
-    public static final IdentifierPolicyBackTick INSTANCE = new IdentifierPolicyBackTick();
+  final class IdentifierPolicyBackTick implements IdentifierPolicy {
 
     @Override
     public boolean hasQuote() {

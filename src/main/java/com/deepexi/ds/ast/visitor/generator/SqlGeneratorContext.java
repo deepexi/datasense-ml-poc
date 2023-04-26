@@ -1,8 +1,7 @@
 package com.deepexi.ds.ast.visitor.generator;
 
 
-import com.deepexi.ds.ast.BasicContext;
-import com.deepexi.ds.ast.Model;
+import com.deepexi.ds.ast.AstNode;
 import com.deepexi.ds.ast.SqlDialect;
 import com.deepexi.ds.ast.expression.IdentifierPolicy;
 import java.util.Objects;
@@ -10,19 +9,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Getter;
 
 @Getter
-public class SqlGeneratorContext extends BasicContext {
+public class SqlGeneratorContext {
 
+  protected final AstNode root;
   private final SqlDialect sqlDialect;
   private final IdentifierPolicy identifierPolicy;
   private final AtomicInteger sequence;
 
-  public SqlGeneratorContext(Model root, SqlDialect sqlDialect,
-      IdentifierPolicy identifierPolicy) {
-    super(root);
-    this.identifierPolicy = identifierPolicy;
-    Objects.requireNonNull(sqlDialect, "ModelML %s not found in QueryContext");
+  public SqlGeneratorContext(AstNode root, SqlDialect sqlDialect, IdentifierPolicy policy) {
+    Objects.requireNonNull(root, "Model %s not found in QueryContext");
+    Objects.requireNonNull(sqlDialect, "dialect should provide");
+
+    this.root = root;
+    this.identifierPolicy = policy;
     this.sqlDialect = sqlDialect;
-    sequence = new AtomicInteger(0);
+    this.sequence = new AtomicInteger(0);
   }
 
   public int nextId() {

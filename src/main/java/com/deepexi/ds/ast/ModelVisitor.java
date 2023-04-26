@@ -52,4 +52,6 @@ public interface ModelVisitor<R, C> {
   R visitRelationFromModelSource(RelationFromModelSource node, C context);
 
   R visitRelationFromTableSource(RelationFromTableSource node, C context);
+
+  R visitMetricBindQuery(MetricBindQuery node, C context);
 }

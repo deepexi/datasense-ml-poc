@@ -11,6 +11,9 @@ import java.util.stream.Collectors;
 
 public class ResUtils {
 
+  /**
+   * all lines start with --! will be removed
+   */
   public static Predicate<String> NOT_COMMENT = line -> !line.startsWith("--!");
 
   public static String getResourceFileAsString(String fileName) throws ModelException {
@@ -51,5 +54,10 @@ public class ResUtils {
               templateId.fileName));
     }
     return getResourceFileAsString(path4Default);
+  }
+
+  // 检测sql中是否有占位符 ${.*?}
+  public static boolean noPlaceHolder(String sql) {
+    return !(sql.matches("\\$\\{.*?\\}"));
   }
 }

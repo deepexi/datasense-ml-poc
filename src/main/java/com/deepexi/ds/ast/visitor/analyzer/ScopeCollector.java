@@ -1,10 +1,10 @@
 package com.deepexi.ds.ast.visitor.analyzer;
 
-import com.deepexi.ds.ModelException;
 import com.deepexi.ds.ModelException.UnsupportedException;
 import com.deepexi.ds.ast.Column;
 import com.deepexi.ds.ast.Dimension;
 import com.deepexi.ds.ast.Join;
+import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.ModelVisitor;
 import com.deepexi.ds.ast.Relation;
@@ -87,6 +87,16 @@ public class ScopeCollector implements ModelVisitor<Void, ScopeCollectorContext>
   public Void visitRelationFromTableSource(RelationFromTableSource node,
       ScopeCollectorContext context) {
     throw new UnsupportedException("this node should not be visit");
+  }
+
+  @Override
+  public Void visitMetricBindQuery(MetricBindQuery node, ScopeCollectorContext context) {
+    Model model = node.getModel();
+    ScopeCollectorContext subContext = new ScopeCollectorContext(model);
+    process(model, subContext);
+    // 处理完毕收集
+    context.getRegistry().putAll(subContext.getRegistry());
+    return null;
   }
 
   @Override

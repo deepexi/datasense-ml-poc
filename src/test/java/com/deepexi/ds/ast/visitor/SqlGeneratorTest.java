@@ -1,8 +1,14 @@
 package com.deepexi.ds.ast.visitor;
 
+import static com.deepexi.ds.ast.utils.ResUtils.noPlaceHolder;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.deepexi.ds.ModelException;
+import com.deepexi.ds.ast.AstNode;
+import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.SqlDialect;
 import com.deepexi.ds.ast.expression.IdentifierPolicy.IdentifierPolicyBackTick;
@@ -11,7 +17,10 @@ import com.deepexi.ds.ast.visitor.generator.SqlGenerator;
 import com.deepexi.ds.ast.visitor.generator.SqlGeneratorContext;
 import com.deepexi.ds.ast.visitor.generator.SqlGeneratorPgContext;
 import com.deepexi.ds.builder.AstModelBuilder;
+import com.deepexi.ds.builder.FullAstBuilder;
+import com.deepexi.ds.ymlmodel.YmlFullQuery;
 import com.deepexi.ds.ymlmodel.YmlModel;
+import com.deepexi.ds.ymlmodel.factory.YmlFullQueryParser;
 import com.deepexi.ds.ymlmodel.factory.YmlModelParser;
 import java.util.Arrays;
 import java.util.List;
@@ -26,9 +35,11 @@ public class SqlGeneratorTest {
     // 准备 visit
     SqlGenerator generator = new SqlGenerator();
     SqlGeneratorContext context = new SqlGeneratorContext(rootModel, SqlDialect.POSTGRES,
-        IdentifierPolicyNoQuote.INSTANCE);
-    String sql = generator.visitModel(context.getRoot(), context);
+        IdentifierPolicyNoQuote.NO_QUOTE);
+    String sql = generator.process(context.getRoot(), context);
     assertNotNull(sql);
+
+    assertTrue(noPlaceHolder(sql)); // 所有占位符都已被替换
     System.out.println(sql);
   }
 
@@ -39,11 +50,11 @@ public class SqlGeneratorTest {
 
     // 准备 visit
     SqlGenerator generator = new SqlGenerator();
-    SqlGeneratorContext context = new SqlGeneratorContext(rootModel,
-        SqlDialect.POSTGRES,
-        IdentifierPolicyBackTick.INSTANCE);
-    String sql = generator.visitModel(context.getRoot(), context);
+    SqlGeneratorContext context = new SqlGeneratorContext(rootModel, SqlDialect.POSTGRES,
+        IdentifierPolicyBackTick.BACK_TICK);
+    String sql = generator.process(context.getRoot(), context);
     System.out.println(sql);
+    assertTrue(noPlaceHolder(sql)); // 所有占位符都已被替换
     assertTrue(sql.indexOf("`") > 0);
   }
 
@@ -60,8 +71,9 @@ public class SqlGeneratorTest {
     // 准备 visit
     SqlGenerator generator = new SqlGenerator();
     SqlGeneratorContext context = new SqlGeneratorPgContext(rootModel);
-    String sql = generator.visitModel(context.getRoot(), context);
+    String sql = generator.process(context.getRoot(), context);
     assertNotNull(sql);
+    assertTrue(noPlaceHolder(sql)); // 所有占位符都已被替换
     System.out.println(sql);
     assertNotNull(sql);
   }
@@ -82,8 +94,9 @@ public class SqlGeneratorTest {
     // generate sql
     SqlGenerator generator = new SqlGenerator();
     SqlGeneratorContext context = new SqlGeneratorPgContext(rootModel);
-    String sql = generator.visitModel(context.getRoot(), context);
+    String sql = generator.process(context.getRoot(), context);
     assertNotNull(sql);
+    assertTrue(noPlaceHolder(sql)); // 所有占位符都已被替换
     System.out.println(sql);
     assertNotNull(sql);
   }
@@ -98,8 +111,9 @@ public class SqlGeneratorTest {
     // generate sql
     SqlGenerator generator = new SqlGenerator();
     SqlGeneratorContext context = new SqlGeneratorPgContext(rootModel);
-    String sql = generator.visitModel(context.getRoot(), context);
+    String sql = generator.process(context.getRoot(), context);
     assertNotNull(sql);
+    assertTrue(noPlaceHolder(sql)); // 所有占位符都已被替换
     System.out.println(sql);
     assertNotNull(sql);
   }
@@ -114,8 +128,24 @@ public class SqlGeneratorTest {
     // generate sql
     SqlGenerator generator = new SqlGenerator();
     SqlGeneratorContext context = new SqlGeneratorPgContext(rootModel);
-    String sql = generator.visitModel(context.getRoot(), context);
+    String sql = generator.process(context.getRoot(), context);
     assertNotNull(sql);
+    assertTrue(noPlaceHolder(sql)); // 所有占位符都已被替换
+    System.out.println(sql);
+    assertNotNull(sql);
+  }
+
+  @Test
+  public void testVisitMetricBindQuery() {
+    YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("debug/10_full.yml");
+    AstNode node = new FullAstBuilder(ctx).build();
+
+    // generate sql
+    SqlGenerator generator = new SqlGenerator();
+    SqlGeneratorContext context = new SqlGeneratorPgContext(node);
+    String sql = generator.process(context.getRoot(), context);
+    assertNotNull(sql);
+    assertTrue(noPlaceHolder(sql)); // 所有占位符都已被替换
     System.out.println(sql);
     assertNotNull(sql);
   }

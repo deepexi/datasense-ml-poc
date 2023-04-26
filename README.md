@@ -1,4 +1,43 @@
-# model + metrics + query = sql
+# model + metrics + query => sql
+- 计算订单中, 截止12月31日, 每天销售额和门店名
+```sql
+with dwd_order as (
+    select
+      ods_order.id          as order_id,
+      ods_order.amount      as amount,
+      ods_order.created_at  as created_at,
+      ods_shop.shop_name    as order_id
+    from ods_order 
+        inner join ods_shop on ods_order.shop_id = ods_shop.id
+),
+day_amount as (
+select
+    shop_name,
+    sum(amount) as day_amount,
+    EXTRACT(day FROM created_at) day,
+from dwd_order
+    where created_at > '2020-12-31'
+    group by shop_name, EXTRACT(day FROM created_at);
+)
+select * from day_amount;
+```
+
+- model: 可以看成一张大宽表
+  - 这张大宽表可以由很多小表(如事实表/维度表) 进行 join得到
+  - 例子中的 dwd_order, ods_order, ods_shop
+
+- metric: 可以看成基于这张大宽表进行的聚合
+  - sum(amount) as day_amount, day_amount 就是一个指标, 其计算逻辑是 sum(amount)
+
+- metric_query: 针对 metric的一些更细致的描述条件
+  - 计算时考虑的维度 group by 中的条件, 如 group by model.shop_name, model.product_id
+  - 窗口函数(可选), 如 window(3 days include today). 这里是语义层面的描述, 需要转换成sql
+  - 针对model的过滤条件(可选), 如 model.colA = 'x'
+  - 针对指标的过滤条件, 如 total_profit > 1000
+  - 上文例子中的:
+    - created_at > '2020-12-31'
+    - group by shop_name, EXTRACT(day FROM created_at);
+
 
 # specification v0.1
 
@@ -45,3 +84,8 @@ name: xxx
 - 支持的操作
     - filter: 对最终结果的筛选
 
+# 扩展规范
+- 定义一个 Expression子类, 如 MyExpression extends com.deepexi.ds.ast.expression.Expression
+- 在 com.deepexi.ds.ast.visitor.generator.SqlGenerator中实现 visitMyExpression(MyExpression node, Context ctx)
+  - 这里可以实现对自定义表达式的 特定解析, 生成 特定的 sql
+- 需要的 sql 片段 放到 `res/{dialect}/{sql_id}.sql`

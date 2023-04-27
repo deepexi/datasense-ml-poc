@@ -2,6 +2,6 @@ package com.deepexi.ds.ast;
 
 public abstract class AstNode {
 
-  public abstract <R, C> R accept(ModelVisitor<R, C> visitor, C context);
+  public abstract <R, C> R accept(AstNodeVisitor<R, C> visitor, C context);
 
 }

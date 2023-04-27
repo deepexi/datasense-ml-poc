@@ -2,7 +2,6 @@ package com.deepexi.ds.ast.visitor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.deepexi.ds.ast.AstNode;
 import com.deepexi.ds.ast.visitor.generator.SqlGenerator;
@@ -37,6 +36,7 @@ public class SqlValidateTest {
 
     int count1 = JdbcUtils.queryCount(manualSql);
     int count2 = JdbcUtils.queryCount(autoSql);
+    System.out.println("count1=" + count1 + ", count2=" + count2);
     assertEquals(count1, count2);
   }
 }

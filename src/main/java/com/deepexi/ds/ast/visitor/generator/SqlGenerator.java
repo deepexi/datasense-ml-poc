@@ -10,7 +10,7 @@ import com.deepexi.ds.ast.Dimension;
 import com.deepexi.ds.ast.Join;
 import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
-import com.deepexi.ds.ast.ModelVisitor;
+import com.deepexi.ds.ast.AstNodeVisitor;
 import com.deepexi.ds.ast.RelationFromModel;
 import com.deepexi.ds.ast.RelationFromModelSource;
 import com.deepexi.ds.ast.RelationFromTableSource;
@@ -33,7 +33,7 @@ import org.apache.commons.text.StringSubstitutor;
 /**
  * this visit traverse the whole ModelML, then generate full sql
  */
-public class SqlGenerator implements ModelVisitor<String, SqlGeneratorContext> {
+public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext> {
 
   @Override
   public String visitMetricBindQuery(MetricBindQuery node, SqlGeneratorContext context) {

@@ -13,7 +13,7 @@ import com.deepexi.ds.ast.source.TableSource;
 /**
  * R = Result, C = Context
  */
-public interface ModelVisitor<R, C> {
+public interface AstNodeVisitor<R, C> {
 
   default R process(AstNode node, C context) {
     return node.accept(this, context);

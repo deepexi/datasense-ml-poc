@@ -1,6 +1,6 @@
 package com.deepexi.ds.ast.expression.condition;
 
-import com.deepexi.ds.ast.ModelVisitor;
+import com.deepexi.ds.ast.AstNodeVisitor;
 import com.deepexi.ds.ast.expression.Expression;
 import lombok.Getter;
 
@@ -18,7 +18,7 @@ public class BinaryExpression extends Expression {
   }
 
   @Override
-  public <R, C> R accept(ModelVisitor<R, C> visitor, C context) {
+  public <R, C> R accept(AstNodeVisitor<R, C> visitor, C context) {
     return visitor.visitCompareExpression(this, context);
   }
 

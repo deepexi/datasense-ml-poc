@@ -1,7 +1,6 @@
 package com.deepexi.ds.ast;
 
 import com.deepexi.ds.ast.expression.Expression;
-import com.deepexi.ds.ast.expression.StringLiteral;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import lombok.Getter;
@@ -23,7 +22,7 @@ public class Join extends AstNode {
   }
 
   @Override
-  public <R, C> R accept(ModelVisitor<R, C> visitor, C context) {
+  public <R, C> R accept(AstNodeVisitor<R, C> visitor, C context) {
     return visitor.visitJoin(this, context);
   }
 

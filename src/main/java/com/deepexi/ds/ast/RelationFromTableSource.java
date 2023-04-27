@@ -30,7 +30,7 @@ public class RelationFromTableSource extends Relation {
   }
 
   @Override
-  public <R, C> R accept(ModelVisitor<R, C> visitor, C context) {
+  public <R, C> R accept(AstNodeVisitor<R, C> visitor, C context) {
     return visitor.visitRelationFromTableSource(this, context);
   }
 }

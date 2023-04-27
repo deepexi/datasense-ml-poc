@@ -6,7 +6,7 @@ import com.deepexi.ds.ast.Dimension;
 import com.deepexi.ds.ast.Join;
 import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
-import com.deepexi.ds.ast.ModelVisitor;
+import com.deepexi.ds.ast.AstNodeVisitor;
 import com.deepexi.ds.ast.Relation;
 import com.deepexi.ds.ast.RelationFromModel;
 import com.deepexi.ds.ast.RelationFromModelSource;
@@ -23,7 +23,7 @@ import com.deepexi.ds.ast.source.TableSource;
 /**
  * visit node=[source, join], get all available scope
  */
-public class ScopeCollector implements ModelVisitor<Void, ScopeCollectorContext> {
+public class ScopeCollector implements AstNodeVisitor<Void, ScopeCollectorContext> {
 
   @Override
   public Void visitModel(Model node, ScopeCollectorContext context) {

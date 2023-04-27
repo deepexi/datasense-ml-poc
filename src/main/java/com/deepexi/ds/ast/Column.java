@@ -21,7 +21,7 @@ public class Column extends AstNode {
   }
 
   @Override
-  public <R, C> R accept(ModelVisitor<R, C> visitor, C context) {
+  public <R, C> R accept(AstNodeVisitor<R, C> visitor, C context) {
     return visitor.visitColumn(this, context);
   }
 

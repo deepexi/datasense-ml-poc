@@ -1,7 +1,6 @@
 package com.deepexi.ds.ast;
 
 import com.deepexi.ds.ast.expression.Expression;
-import com.deepexi.ds.ast.expression.Identifier;
 import lombok.Getter;
 
 @Getter
@@ -19,7 +18,7 @@ public class Dimension extends AstNode {
 
 
   @Override
-  public <R, C> R accept(ModelVisitor<R, C> visitor, C context) {
+  public <R, C> R accept(AstNodeVisitor<R, C> visitor, C context) {
     return visitor.visitDimension(this, context);
   }
 

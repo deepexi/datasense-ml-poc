@@ -1,43 +1,40 @@
 # model + metrics + query => sql
+
 - 计算订单中, 截止12月31日, 每天销售额和门店名
+
 ```sql
-with dwd_order as (
-    select
-      ods_order.id          as order_id,
-      ods_order.amount      as amount,
-      ods_order.created_at  as created_at,
-      ods_shop.shop_name    as order_id
-    from ods_order 
-        inner join ods_shop on ods_order.shop_id = ods_shop.id
-),
-day_amount as (
-select
-    shop_name,
-    sum(amount) as day_amount,
-    EXTRACT(day FROM created_at) day,
-from dwd_order
-    where created_at > '2020-12-31'
-    group by shop_name, EXTRACT(day FROM created_at);
+with dwd_order as (select ods_order.id         as order_id,
+                          ods_order.amount     as amount,
+                          ods_order.created_at as created_at,
+                          ods_shop.shop_name   as order_id
+                   from ods_order
+                            inner join ods_shop on ods_order.shop_id = ods_shop.id),
+     day_amount as (select shop_name,
+                           sum(amount) as day_amount,
+                           EXTRACT(day FROM created_at) day,
+                    from dwd_order
+                    where created_at > '2020-12-31'
+                    group by shop_name, EXTRACT(day FROM created_at);
 )
-select * from day_amount;
+select *
+from day_amount;
 ```
 
 - model: 可以看成一张大宽表
-  - 这张大宽表可以由很多小表(如事实表/维度表) 进行 join得到
-  - 例子中的 dwd_order, ods_order, ods_shop
+    - 这张大宽表可以由很多小表(如事实表/维度表) 进行 join得到
+    - 例子中的 dwd_order, ods_order, ods_shop
 
 - metric: 可以看成基于这张大宽表进行的聚合
-  - sum(amount) as day_amount, day_amount 就是一个指标, 其计算逻辑是 sum(amount)
+    - sum(amount) as day_amount, day_amount 就是一个指标, 其计算逻辑是 sum(amount)
 
 - metric_query: 针对 metric的一些更细致的描述条件
-  - 计算时考虑的维度 group by 中的条件, 如 group by model.shop_name, model.product_id
-  - 窗口函数(可选), 如 window(3 days include today). 这里是语义层面的描述, 需要转换成sql
-  - 针对model的过滤条件(可选), 如 model.colA = 'x'
-  - 针对指标的过滤条件, 如 total_profit > 1000
-  - 上文例子中的:
-    - created_at > '2020-12-31'
-    - group by shop_name, EXTRACT(day FROM created_at);
-
+    - 计算时考虑的维度 group by 中的条件, 如 group by model.shop_name, model.product_id
+    - 窗口函数(可选), 如 window(3 days include today). 这里是语义层面的描述, 需要转换成sql
+    - 针对model的过滤条件(可选), 如 model.colA = 'x'
+    - 针对指标的过滤条件, 如 total_profit > 1000
+    - 上文例子中的:
+        - created_at > '2020-12-31'
+        - group by shop_name, EXTRACT(day FROM created_at);
 
 # specification v0.1
 
@@ -62,12 +59,12 @@ name: xxx
     - 不进行 filter, 因为这张 "大宽表" 是给后续操作提供资源, 无需在这一层进行 filter
 - 支持的操作
     - join
-      - join时候的条件约束未 tableA.colA = tableB.colB. 因为主要是 fact join dim 模式
+        - join时候的条件约束未 tableA.colA = tableB.colB. 因为主要是 fact join dim 模式
     - 是否支持 union
 - 支持 Model join Model
 - column: 可以是计算列
 - 关于dimension
-  - 必须是 column的某一列
+    - 必须是 column的某一列
 
 ## metrics
 
@@ -85,11 +82,23 @@ name: xxx
 - 二级计算对应 窗口函数
 - 支持的操作
     - filter: 对最终结果的筛选
+
 # 设计思路
-- 首先构建一颗 AST
-- 
+
+- 第一步, 手写或者工具, 生成一个 Yml文件, 这些yml文件包含
+    - 多个model, 这些model形成一个完整的树, 只有一个 root
+    - 多个metrics(但是基于同一个model), 依赖的model是上面定义的root
+    - 一个 model_query, 里面的metrics 在上面有定义
+    - 里面的操作, 是描述性的(与特定sql方言无关)
+- 使用上面的yml, 构建一棵 yml tree(字面构建, 不进行校验)
+- 使用 ymlTree 构建一棵 AstTree
+    - 校验AstTree的完整性, 比如 model是否缺失, 字段是否存在
+    - YmlTree 与 AstTree大体相当, 但是不严格相同
+- 使用遍历器 对 AstTree进行遍历, 每个节点生成一段 sql片段, 进行组装后得到 整个sql
+    - 对于特定语义Expression, 在解析时, 根据sql方言不同进行解析
+
 # 扩展规范
-- 定义一个 Expression子类, 如 MyExpression extends com.deepexi.ds.ast.expression.Expression
-- 在 com.deepexi.ds.ast.visitor.generator.SqlGenerator中实现 visitMyExpression(MyExpression node, Context ctx)
-  - 这里可以实现对自定义表达式的 特定解析, 生成 特定的 sql
-- 需要的 sql 片段 放到 `res/{dialect}/{sql_id}.sql`
+
+- 在SqlGenerator 中处理所有 sql的生成
+- 需要的 sql 片段 放到 `res/{dialect}/{sql_id}.sql`, 如 res/sql/postgres/model_001.sql,
+  具体规范见  `res/sql/template.sql`

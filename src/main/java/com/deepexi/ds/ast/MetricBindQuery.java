@@ -9,14 +9,17 @@ import lombok.Getter;
 @Getter
 public class MetricBindQuery extends Relation {
 
-  private final Identifier name;
-  private final Model model;
+  private final Identifier name;                  // 该 metric 名
+  private final Model model;                      // 目前可以是 Model 和 Metric
+  private final ImmutableList<Column> metrics;    // 每个指标的
+  // 查询有关的条件
   private final ImmutableList<Expression> metricFilters;
   private final ImmutableList<Column> dimensions;
   private final ImmutableList<Expression> modelFilters;
-  private final ImmutableList<Column> metrics;
 
-  public MetricBindQuery(Identifier queryName, Model model,
+  public MetricBindQuery(
+      Identifier queryName,
+      Model model,
       List<Expression> metricFilters,
       List<Column> dimensions,
       List<Expression> modelFilters,

@@ -18,4 +18,9 @@ public class YmlSourceModel extends YmlSource {
     super(type);
     this.modelName = modelName;
   }
+
+  @Override
+  public String toString() {
+    return modelName;
+  }
 }

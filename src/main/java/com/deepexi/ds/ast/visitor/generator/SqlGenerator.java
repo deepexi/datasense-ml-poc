@@ -5,12 +5,11 @@ import static com.deepexi.ds.ast.utils.SqlTemplateId.model_001;
 
 import com.deepexi.ds.ModelException;
 import com.deepexi.ds.ast.AstNode;
+import com.deepexi.ds.ast.AstNodeVisitor;
 import com.deepexi.ds.ast.Column;
-import com.deepexi.ds.ast.Dimension;
 import com.deepexi.ds.ast.Join;
 import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
-import com.deepexi.ds.ast.AstNodeVisitor;
 import com.deepexi.ds.ast.RelationFromModel;
 import com.deepexi.ds.ast.RelationFromModelSource;
 import com.deepexi.ds.ast.RelationFromTableSource;
@@ -58,8 +57,8 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
     // groupBy
     StringBuilder groupByBuilder = new StringBuilder();
     for (int i = 0; i < node.getDimensions().size(); i++) {
-      Dimension ele = node.getDimensions().get(i);
-      String expr = ele.getRawExpr(); // TODO 仅有表达式
+      Column ele = node.getDimensions().get(i);
+      String expr = process(ele.getExpr(),context); // TODO 仅有表达式
       if (i > 0) {
         groupByBuilder.append(", ");
       }
@@ -70,7 +69,7 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
     // selectSql
     StringBuilder selectBuilder = new StringBuilder();
     for (int i = 0; i < node.getDimensions().size(); i++) {
-      Dimension ele = node.getDimensions().get(i);
+      Column ele = node.getDimensions().get(i);
       String oneDim = process(ele, context); // 有别名
       if (i > 0) {
         selectBuilder.append(", \n");
@@ -204,19 +203,6 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
       builder.append(aCondition);
     }
     return builder.toString();
-  }
-
-  @Override
-  public String visitDimension(Dimension node, SqlGeneratorContext context) {
-    // throw new ModelException("TODO");
-    String pattern = "%s as %s";
-    String alias = node.getName();
-    String exprStr = node.getRawExpr();
-
-    if (node.getExpr() != null) {
-      exprStr = process(node.getExpr(), context);
-    }
-    return String.format(pattern, exprStr, alias);
   }
 
   @Override

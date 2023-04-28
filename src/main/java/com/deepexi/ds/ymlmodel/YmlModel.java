@@ -2,6 +2,7 @@ package com.deepexi.ds.ymlmodel;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.Getter;
 
 @Getter
@@ -30,6 +31,8 @@ public class YmlModel {
 
   @Override
   public String toString() {
-    return this.name;
+    return String.format("%s = [ %s ]  joins  [ %s ]", name, source.getAlias(),
+        joins.stream().map(YmlJoin::getModelName).collect(Collectors.joining(", "))
+    );
   }
 }

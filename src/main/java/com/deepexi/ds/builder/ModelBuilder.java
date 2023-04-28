@@ -9,7 +9,6 @@ import com.deepexi.ds.ModelException.FieldMissException;
 import com.deepexi.ds.ModelException.ModelNotFoundException;
 import com.deepexi.ds.ast.Column;
 import com.deepexi.ds.ast.ColumnDataType;
-import com.deepexi.ds.ast.Dimension;
 import com.deepexi.ds.ast.Join;
 import com.deepexi.ds.ast.JoinType;
 import com.deepexi.ds.ast.Model;
@@ -36,6 +35,7 @@ import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.Getter;
 
+@SuppressWarnings("unchecked")
 @Getter
 public class ModelBuilder {
 
@@ -46,7 +46,7 @@ public class ModelBuilder {
     private Source source;
     private List<Join> joins;
     private List<Column> columns;
-    private List<Dimension> dimensions;
+    private List<Column> dimensions;
     private List<RelationMock> scopes = new ArrayList<RelationMock>();
     private RelationMock sourceRelation;
 
@@ -149,8 +149,8 @@ public class ModelBuilder {
           // 目前 literal中是一个 原子条件
           // 多个条件之间是 Logic.AND 运算
           String literal = conditions.get(j);
-          Expression expr = new JoinConditionExpressionParser(literal, ctx.getScopes(),
-              srcRel).parse();
+          Expression expr = new JoinConditionExpressionParser(literal, ctx.getScopes(), srcRel)
+              .parse();
           expressions.add(expr);
         }
       }
@@ -198,7 +198,7 @@ public class ModelBuilder {
     } else if (fields.length == 2) {
       String targetTable = fields[0].trim();
       // targetTable should exists, column should in targetTable table
-      RelationMock relation = assertTableExists(targetTable, ctx.getScopes());
+      RelationMock relation = assertTableInScope(targetTable, ctx.getScopes());
       referColumn = assertColumnExistsInRelation(fields[1].trim(), relation);
       fromCol = new Identifier(fields[0].trim(), fields[1].trim());
     } else {
@@ -223,32 +223,24 @@ public class ModelBuilder {
       ctx.setDimensions(EMPTY_LIST);
       return;
     }
-    List<Dimension> dims = new ArrayList<>(list.size());
-    String srcTableName = srcRel.getTableName().getValue();
+    List<Column> dims = new ArrayList<>(list.size());
 
     for (YmlDimension col : list) {
       String name = col.getName();
-
-      // case: colName or table.colName
-      String expr = col.getExpr();
-      if (expr == null) {
-        expr = name;
+      Column refCol = ctx.getColumns().stream()
+          .filter(column -> column.getAlias().equals(name))
+          .findAny().orElse(null);
+      if (refCol == null) {
+        throw new ModelException(String.format("dimension [%s] not exists in columns", name));
       }
-      String[] fields = expr.split("\\.");
-      Identifier fromCol = null;
-      if (fields.length == 1) {
-        fromCol = new Identifier(srcTableName, fields[0].trim());
-      } else if (fields.length == 2) {
-        String targetTable = fields[0].trim();
-        // targetTable should exists, column should in targetTable table
-        RelationMock relation = assertTableExists(targetTable, ctx.getScopes());
-        fromCol = new Identifier(fields[0].trim(), fields[1].trim());
-      } else {
-        throw new ModelException("expr not support too many dot");
-      }
+      Identifier refExpr = (Identifier)refCol.getExpr(); // TODO maybe 出问题
+      String refTable = refExpr.getPrefix();
+      // 重新组装 dimension, 比如 原来引用 tableA.colA => {currentTable}.colA
+      Identifier expr = new Identifier(ctx.getName().getValue(), refExpr.getValue());
 
-      // done
-      dims.add(new Dimension(name, fromCol, col.getExpr()));
+      Column dim = new Column(refCol.getAlias(), expr, refCol.getDataType(),
+          refCol.getRawExpr());
+      dims.add(dim);
     }
     ctx.setDimensions(dims);
   }
@@ -261,12 +253,13 @@ public class ModelBuilder {
     return ymlModel;
   }
 
-  public static RelationMock assertTableExists(String tableName, List<RelationMock> scope) {
+  public static RelationMock assertTableInScope(String tableName, List<RelationMock> scope) {
     Optional<RelationMock> anyRelation = scope.stream()
         .filter(t -> Objects.equals(t.getTableName().getValue(), tableName))
         .findAny();
     if (!anyRelation.isPresent()) {
-      throw new ModelNotFoundException(tableName);
+      throw new ModelException(String.format(
+          "table [%s] not accessible, either not define or illegal reference", tableName));
     }
     return anyRelation.get();
   }

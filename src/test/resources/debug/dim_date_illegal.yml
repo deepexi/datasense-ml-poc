@@ -21,7 +21,7 @@ columns:                  # columns 是这个 Model暴露给外界的列
     data_type: int
 dimensions:               # dimensions 是 该Model暴露的 维度
   - name: d_date_sk
-    expr: d_date_sk
+#    expr: d_date_sk
   - name: d_date_id       # 默认expr=name, name值引用columns中的name值
   - name: d_year
   - name: d_moy

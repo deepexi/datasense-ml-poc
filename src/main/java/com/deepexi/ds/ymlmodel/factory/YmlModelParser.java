@@ -14,6 +14,7 @@ import com.deepexi.ds.ymlmodel.YmlSourceModel;
 import com.deepexi.ds.ymlmodel.YmlSourceTable;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -130,12 +131,20 @@ public class YmlModelParser {
     return joins;
   }
 
+  private static final List<String> COLUMN_KEYS_SET = Arrays.asList("name", "expr", "hint",
+      "data_type");
+
   private static List<YmlColumn> parseColumn(List<Map<String, Object>> list) {
     if (list == null || list.isEmpty()) {
       return EMPTY_LIST;
     }
     List<YmlColumn> columns = new ArrayList<>(list.size());
     for (Map<String, Object> col : list) {
+      for (String key : col.keySet()) {
+        if (!COLUMN_KEYS_SET.contains(key)) {
+          throw new ModelException(String.format("key:[%s] is not allowed", key));
+        }
+      }
       String name = ParserUtils.getStringElseThrow(col, "name");
       String expr = ParserUtils.getStringElse(col, "expr", name);
       String type = ParserUtils.getStringElse(col, "data_type", null);
@@ -145,6 +154,8 @@ public class YmlModelParser {
     return columns;
   }
 
+  private static final List<String> DIM_KEYS_SET = Arrays.asList("name");
+
   private static List<YmlDimension> parseDimension(List<Object> list) {
     if (list == null || list.isEmpty()) {
       return EMPTY_LIST;
@@ -152,17 +163,22 @@ public class YmlModelParser {
 
     List<YmlDimension> dims = new ArrayList<>(list.size());
     Object obj = list.get(0);
+
     if (obj instanceof String) {
       for (Object name : list) {
-        dims.add(new YmlDimension((String) name, null, null));
+        dims.add(new YmlDimension((String) name));
       }
     } else if (obj instanceof Map) {
       for (Object kv : list) {
         Map<String, Object> dim = (Map<String, Object>) kv;
-        String name = ParserUtils.getStringElseThrow(dim, "name");
-        String expr = ParserUtils.getStringElse(dim, "expr", name);
-        String type = ParserUtils.getStringElse(dim, "type", null);
-        dims.add(new YmlDimension(name, expr, type));
+        for (String key : dim.keySet()) {
+          if (!DIM_KEYS_SET.contains(key)) {
+            throw new ModelException(String.format("key:[%s] is not allowed", key));
+          }
+          if (Objects.equals(key, "name")) {
+            dims.add(new YmlDimension((String) dim.get(key)));
+          }
+        }
       }
     }
 

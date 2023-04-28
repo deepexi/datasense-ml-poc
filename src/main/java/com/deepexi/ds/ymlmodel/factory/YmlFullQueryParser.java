@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import org.yaml.snakeyaml.Yaml;
 
+@SuppressWarnings("unchecked")
 public class YmlFullQueryParser {
 
   private YmlFullQueryParser() {

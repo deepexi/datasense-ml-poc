@@ -1,6 +1,5 @@
 package com.deepexi.ds.ast;
 
-import com.deepexi.ds.ComponentType;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.source.Source;
 import com.google.common.collect.ImmutableList;
@@ -8,16 +7,16 @@ import java.util.List;
 import lombok.Getter;
 
 @Getter
-public class Model extends AstComponent {
+public class Model extends Relation {
 
   protected final Identifier name;
   protected final Source source;
   protected final ImmutableList<Join> joins;
   protected final ImmutableList<Column> columns;
-  protected final ImmutableList<Dimension> dimensions;
+  protected final ImmutableList<Column> dimensions;
 
   public Model(Identifier name, Source source, List<Join> joins, List<Column> columns,
-      List<Dimension> dimensions) {
+      List<Column> dimensions) {
     this.name = name;
     this.columns = ImmutableList.copyOf(columns);
     this.dimensions = ImmutableList.copyOf(dimensions);
@@ -31,12 +30,12 @@ public class Model extends AstComponent {
   }
 
   @Override
-  public ComponentType getComponentType() {
-    return ComponentType.MODEL_DEF;
+  public String toString() {
+    return name.toString();
   }
 
   @Override
-  public String toString() {
-    return name.toString();
+  public Identifier getTableName() {
+    return name;
   }
 }

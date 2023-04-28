@@ -29,8 +29,6 @@ public interface AstNodeVisitor<R, C> {
 
   R visitJoin(Join node, C context);
 
-  R visitDimension(Dimension node, C context);
-
   R visitExpression(Expression node, C context);
 
   R visitSource(Source node, C context);

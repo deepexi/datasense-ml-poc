@@ -18,4 +18,9 @@ public class YmlJoin {
     this.joinType = joinType;
     this.conditions = ImmutableList.copyOf(conditions);
   }
+
+  @Override
+  public String toString() {
+    return joinType + " join " + modelName;
+  }
 }

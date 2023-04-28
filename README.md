@@ -63,7 +63,7 @@ name: xxx
 - 支持 Model join Model
 - column: 可以是计算列
 - 关于dimension
-    - 必须是 column的某一列
+    - 必须是 column的某一列, 如果 dimension需要计算的, 比如 1/0 => 男/女, 可以在 column中增加这样的一列
 
 ## metrics
 

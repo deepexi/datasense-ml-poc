@@ -8,6 +8,7 @@ import com.deepexi.ds.ast.visitor.analyzer.ScopeCollectorContext;
 import java.util.List;
 import lombok.Getter;
 
+@SuppressWarnings("unchecked")
 @Getter
 public class RelationFromTableSource extends Relation {
 

@@ -12,7 +12,6 @@ import com.deepexi.ds.ModelException.ModelHasManyRootException;
 import com.deepexi.ds.ModelException.ModelNotFoundException;
 import com.deepexi.ds.ast.Column;
 import com.deepexi.ds.ast.ColumnDataType;
-import com.deepexi.ds.ast.Dimension;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.source.Source;
@@ -59,14 +58,14 @@ public class ModelBuilderTest {
     assertEquals("d_date_id", ((Identifier) colB.getExpr()).getValue());
 
     // dimensions
-    List<Dimension> dims = rootModel.getDimensions();
+    List<Column> dims = rootModel.getDimensions();
     assertEquals(5, dims.size());
-    Map<String, Dimension> dimLookup = dims.stream()
-        .collect(Collectors.toMap(Dimension::getName, Function.identity()));
-    Dimension dimA = dimLookup.get("d_date_sk");
+    Map<String, Column> dimLookup = dims.stream()
+        .collect(Collectors.toMap(Column::getAlias, Function.identity()));
+    Column dimA = dimLookup.get("d_date_sk");
     assertEquals("d_date_sk", dimA.getRawExpr());
 
-    Dimension dimB = dimLookup.get("d_year");
+    Column dimB = dimLookup.get("d_year");
     assertEquals("d_year", dimB.getRawExpr());
   }
 
@@ -87,7 +86,7 @@ public class ModelBuilderTest {
   void testBuild_join_illegal() {
     List<YmlModel> ymlModels = YmlModelParser.loadModels("debug/join_2_models_illegal.yml");
     assertEquals(3, ymlModels.size());
-    assertThrows(ModelNotFoundException.class, () -> ModelBuilder.singleTreeModel(ymlModels));
+    assertThrows(ModelException.class, () -> ModelBuilder.singleTreeModel(ymlModels));
   }
 
   @Test
@@ -104,7 +103,7 @@ public class ModelBuilderTest {
   @Test
   public void testBuild_stack_join_illegal() {
     List<YmlModel> ymlModels = YmlModelParser.loadModels("debug/04_pile_join_illegal.yml");
-    assertThrows(FieldMissException.class, () -> ModelBuilder.singleTreeModel(ymlModels));
+    assertThrows(ModelException.class, () -> ModelBuilder.singleTreeModel(ymlModels));
   }
 
   @Test

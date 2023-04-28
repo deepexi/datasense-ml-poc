@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 import org.yaml.snakeyaml.Yaml;
 
+@SuppressWarnings("unchecked")
 public class YmlMetricQueryParser {
 
   private YmlMetricQueryParser() {

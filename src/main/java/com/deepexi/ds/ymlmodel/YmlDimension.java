@@ -7,12 +7,13 @@ import lombok.Getter;
 public class YmlDimension {
 
   private final String name;
-  private final String expr;
-  private final String type;
 
-  public YmlDimension(String name, String expr, String type) {
+  public YmlDimension(String name) {
     this.name = name;
-    this.expr = expr;
-    this.type = type;
+  }
+
+  @Override
+  public String toString() {
+    return name;
   }
 }

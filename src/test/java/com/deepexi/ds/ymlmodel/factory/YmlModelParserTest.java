@@ -50,12 +50,10 @@ public class YmlModelParserTest {
     Map<String, YmlDimension> dimLookup = dims.stream()
         .collect(Collectors.toMap(YmlDimension::getName, Function.identity()));
     YmlDimension dimA = dimLookup.get("d_date_sk");
-    assertNull(dimA.getType());
-    assertEquals("d_date_sk", dimA.getExpr());
+    assertNotNull(dimA);
 
     YmlDimension dimB = dimLookup.get("d_year");
-    assertNull(dimB.getType());
-    assertEquals("d_year", dimB.getExpr());
+    assertNotNull(dimB);
   }
 
   @Test

@@ -1,6 +1,5 @@
 package com.deepexi.ds.ast;
 
-import com.deepexi.ds.ComponentType;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.google.common.collect.ImmutableList;
@@ -8,18 +7,18 @@ import java.util.List;
 import lombok.Getter;
 
 @Getter
-public class MetricBindQuery extends AstComponent {
+public class MetricBindQuery extends Relation {
 
   private final Identifier name;
   private final Model model;
   private final ImmutableList<Expression> metricFilters;
-  private final ImmutableList<Dimension> dimensions;
+  private final ImmutableList<Column> dimensions;
   private final ImmutableList<Expression> modelFilters;
   private final ImmutableList<Column> metrics;
 
   public MetricBindQuery(Identifier queryName, Model model,
       List<Expression> metricFilters,
-      List<Dimension> dimensions,
+      List<Column> dimensions,
       List<Expression> modelFilters,
       List<Column> metrics
   ) {
@@ -32,12 +31,17 @@ public class MetricBindQuery extends AstComponent {
   }
 
   @Override
-  public ComponentType getComponentType() {
-    return ComponentType.METRICS_DEF;
+  public <R, C> R accept(AstNodeVisitor<R, C> visitor, C context) {
+    return visitor.visitMetricBindQuery(this, context);
   }
 
   @Override
-  public <R, C> R accept(AstNodeVisitor<R, C> visitor, C context) {
-    return visitor.visitMetricBindQuery(this, context);
+  public Identifier getTableName() {
+    return getName();
+  }
+
+  @Override
+  public List<Column> getColumns() {
+    return null;
   }
 }

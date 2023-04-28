@@ -4,7 +4,6 @@ import com.deepexi.ds.ModelException;
 import com.deepexi.ds.ModelException.TODOException;
 import com.deepexi.ds.ast.Column;
 import com.deepexi.ds.ast.ColumnDataType;
-import com.deepexi.ds.ast.Dimension;
 import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.expression.Expression;
@@ -120,11 +119,17 @@ public class MetricBindQueryBuilder {
     Identifier metricQueryName = Identifier.of(metricQuery.getName());
 
     // dimension的处理策略: 取 YmlMetricQuery.query对象中的 dimension
-    final List<Dimension> dimensions = new ArrayList<>();
+    final List<Column> dimensions = new ArrayList<>();
     metricQuery.getDimensions().forEach(d -> {
-      // 解析维度
-      Expression expr = StringLiteral.of(d);
-      Dimension dim = new Dimension(d, expr, d);
+      // 解析维度, 该维度在 metric对应的 model上
+      Column dim = model.getDimensions().stream()
+          .filter(c -> c.getAlias().equals(d))
+          .findAny()
+          .orElse(null);
+      if (dim == null) {
+        throw new ModelException(String.format("dim [%s] not found in columns of model[%s]", d,
+            model.getName().getValue()));
+      }
       dimensions.add(dim);
     });
 

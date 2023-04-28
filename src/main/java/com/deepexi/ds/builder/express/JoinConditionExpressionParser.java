@@ -68,7 +68,7 @@ public class JoinConditionExpressionParser {
       String colName = parts[1].trim();
 
       // check tableName, tupleName legal
-      RelationMock rel = ModelBuilder.assertTableExists(tableName, scope);
+      RelationMock rel = ModelBuilder.assertTableInScope(tableName, scope);
       ModelBuilder.assertColumnExistsInRelation(colName, rel);
 
       // 校验该字段 存在于此表中

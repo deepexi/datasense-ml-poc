@@ -20,4 +20,8 @@ public abstract class YmlSource {
     return Objects.equals(this.sourceType, sourceType);
   }
 
+  @Override
+  public String toString() {
+    return getAlias();
+  }
 }

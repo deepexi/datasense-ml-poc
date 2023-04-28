@@ -11,7 +11,7 @@ public class Column extends AstNode {
   private final Expression expr;
   private final String alias;
   private final ColumnDataType dataType;
-  private final String rawExpr;
+  private final String rawExpr; // 这个字段最终要去掉的
 
   public Column(String alias, Expression expr, ColumnDataType dataType, String rawExpr) {
     this.alias = alias;

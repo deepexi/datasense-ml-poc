@@ -1,12 +1,11 @@
 package com.deepexi.ds.ast.visitor.analyzer;
 
 import com.deepexi.ds.ModelException.UnsupportedException;
+import com.deepexi.ds.ast.AstNodeVisitor;
 import com.deepexi.ds.ast.Column;
-import com.deepexi.ds.ast.Dimension;
 import com.deepexi.ds.ast.Join;
 import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
-import com.deepexi.ds.ast.AstNodeVisitor;
 import com.deepexi.ds.ast.Relation;
 import com.deepexi.ds.ast.RelationFromModel;
 import com.deepexi.ds.ast.RelationFromModelSource;
@@ -101,11 +100,6 @@ public class ScopeCollector implements AstNodeVisitor<Void, ScopeCollectorContex
 
   @Override
   public Void visitColumn(Column node, ScopeCollectorContext context) {
-    throw new UnsupportedException("this node should not be visit");
-  }
-
-  @Override
-  public Void visitDimension(Dimension node, ScopeCollectorContext context) {
     throw new UnsupportedException("this node should not be visit");
   }
 

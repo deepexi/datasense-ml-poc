@@ -51,7 +51,7 @@ columns:
   - name: s_store_id
     data_type: string
   - name: s_store_name
-    type: string
+    data_type: string
 
 ---
 version: v1

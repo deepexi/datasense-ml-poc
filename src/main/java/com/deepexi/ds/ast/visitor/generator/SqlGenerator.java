@@ -10,9 +10,6 @@ import com.deepexi.ds.ast.Column;
 import com.deepexi.ds.ast.Join;
 import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
-import com.deepexi.ds.ast.RelationFromModel;
-import com.deepexi.ds.ast.RelationFromModelSource;
-import com.deepexi.ds.ast.RelationFromTableSource;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.IdentifierPolicy;
@@ -244,23 +241,6 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
   }
 
   @Override
-  public String visitRelationFromModel(RelationFromModel node, SqlGeneratorContext context) {
-    throw new ModelException("TODO");
-  }
-
-  @Override
-  public String visitRelationFromModelSource(RelationFromModelSource node,
-      SqlGeneratorContext context) {
-    throw new ModelException("TODO");
-  }
-
-  @Override
-  public String visitRelationFromTableSource(RelationFromTableSource node,
-      SqlGeneratorContext context) {
-    throw new ModelException("TODO");
-  }
-
-  @Override
   public String visitIdentifier(Identifier node, SqlGeneratorContext context) {
     IdentifierPolicy policy = context.getIdentifierPolicy();
 
@@ -284,7 +264,6 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
     }
 
   }
-
 
   @Override
   public String visitExpression(Expression node, SqlGeneratorContext context) {

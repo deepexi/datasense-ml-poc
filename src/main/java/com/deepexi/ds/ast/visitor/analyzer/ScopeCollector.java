@@ -7,9 +7,6 @@ import com.deepexi.ds.ast.Join;
 import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.Relation;
-import com.deepexi.ds.ast.RelationFromModel;
-import com.deepexi.ds.ast.RelationFromModelSource;
-import com.deepexi.ds.ast.RelationFromTableSource;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.IntegerLiteral;
@@ -37,18 +34,10 @@ public class ScopeCollector implements AstNodeVisitor<Void, ScopeCollectorContex
   }
 
   @Override
-  public Void visitTableSource(TableSource node, ScopeCollectorContext context) {
-    Relation tableLike = new RelationFromTableSource(node, context);
-    context.registerTableLike(node, tableLike);
-    context.registerSourceTableLike(tableLike);
-    return null;
-  }
-
-  @Override
   public Void visitModelSource(ModelSource node, ScopeCollectorContext context) {
-    Relation tableLike = new RelationFromModelSource(node, context);
-    context.registerTableLike(node, tableLike);
-    context.registerSourceTableLike(tableLike);
+    Relation relation = node.getModel();
+    context.registerRelation(node, relation);
+    context.registerSourceRelation(relation);
 
     // 递归处理
     ScopeCollectorContext subContext = new ScopeCollectorContext(node.getModel());
@@ -59,20 +48,18 @@ public class ScopeCollector implements AstNodeVisitor<Void, ScopeCollectorContex
   }
 
   @Override
-  public Void visitRelationFromModel(RelationFromModel node, ScopeCollectorContext context) {
-    throw new UnsupportedException("this node should not be visit");
-  }
-
-  @Override
-  public Void visitRelationFromModelSource(RelationFromModelSource node,
-      ScopeCollectorContext context) {
-    throw new UnsupportedException("this node should not be visit");
+  public Void visitTableSource(TableSource node, ScopeCollectorContext context) {
+    Relation relation = node;
+    context.registerRelation(node, relation);
+    context.registerSourceRelation(relation);
+    return null;
   }
 
   @Override
   public Void visitJoin(Join node, ScopeCollectorContext context) {
-    Model joinModel = node.getModel();
-    context.registerTableLike(node, new RelationFromModel(joinModel, context));
+    // Model joinModel = node.getModel();
+    // context.registerRelation(node, new RelationFromModel(joinModel, context));
+    context.registerRelation(node, node.getModel());
 
     // 递归处理
     ScopeCollectorContext subContext = new ScopeCollectorContext(node.getModel());
@@ -80,12 +67,6 @@ public class ScopeCollector implements AstNodeVisitor<Void, ScopeCollectorContex
     // 处理完毕收集
     context.getRegistry().putAll(subContext.getRegistry());
     return null;
-  }
-
-  @Override
-  public Void visitRelationFromTableSource(RelationFromTableSource node,
-      ScopeCollectorContext context) {
-    throw new UnsupportedException("this node should not be visit");
   }
 
   @Override

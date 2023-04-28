@@ -14,17 +14,17 @@ import lombok.Getter;
 public class ScopeCollectorContext {
   protected final Model root;
   private final Map<ModelNodeRef, Relation> registry = new HashMap<>();
-  private Relation sourceTableLike;
+  private Relation sourceRelation;
 
   public ScopeCollectorContext(Model root) {
     this.root = root;
   }
 
-  void registerTableLike(AstNode node, Relation tableLike) {
-    registry.put(new ModelNodeRef(node), tableLike);
+  void registerRelation(AstNode node, Relation relation) {
+    registry.put(new ModelNodeRef(node), relation);
   }
 
-  void registerSourceTableLike(Relation tableLike) {
-    this.sourceTableLike = tableLike;
+  void registerSourceRelation(Relation tableLike) {
+    this.sourceRelation = tableLike;
   }
 }

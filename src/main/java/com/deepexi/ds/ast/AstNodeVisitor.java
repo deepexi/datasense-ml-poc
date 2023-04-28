@@ -45,11 +45,5 @@ public interface AstNodeVisitor<R, C> {
 
   R visitCompareExpression(BinaryExpression node, C context);
 
-  R visitRelationFromModel(RelationFromModel node, C context);
-
-  R visitRelationFromModelSource(RelationFromModelSource node, C context);
-
-  R visitRelationFromTableSource(RelationFromTableSource node, C context);
-
   R visitMetricBindQuery(MetricBindQuery node, C context);
 }

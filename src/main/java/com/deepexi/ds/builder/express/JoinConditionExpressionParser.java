@@ -6,8 +6,8 @@ import static com.deepexi.ds.ast.expression.Identifier.RE_IDENTIFIER_SEPARATOR;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.StringLiteral;
-import com.deepexi.ds.ast.expression.condition.BinaryExpression;
-import com.deepexi.ds.ast.expression.condition.BinaryExpression.BinaryOperator;
+import com.deepexi.ds.ast.expression.CompareExpression;
+import com.deepexi.ds.ast.expression.CompareOperator;
 import com.deepexi.ds.builder.ModelBuilder;
 import com.deepexi.ds.builder.RelationMock;
 import java.util.List;
@@ -44,7 +44,7 @@ public class JoinConditionExpressionParser {
       return StringLiteral.of(literal);
     }
 
-    BinaryOperator op = ExpressionParseUtils.extractBinaryOperator(literal);
+    CompareOperator op = ExpressionParseUtils.extractBinaryOperator(literal);
     if (op != null) {
       String[] parts = literal.split(op.name);
       if (parts.length != 2) {
@@ -53,7 +53,7 @@ public class JoinConditionExpressionParser {
       }
       Expression left = parseLiteral(parts[0].trim());
       Expression right = parseLiteral(parts[1].trim());
-      return new BinaryExpression(left, right, op);
+      return new CompareExpression(left, right, op);
     }
 
     // throw new ModelException("TODO not support yet: condition");

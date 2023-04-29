@@ -11,7 +11,7 @@ import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.IntegerLiteral;
 import com.deepexi.ds.ast.expression.StringLiteral;
-import com.deepexi.ds.ast.expression.condition.BinaryExpression;
+import com.deepexi.ds.ast.expression.CompareExpression;
 import com.deepexi.ds.ast.source.ModelSource;
 import com.deepexi.ds.ast.source.Source;
 import com.deepexi.ds.ast.source.TableSource;
@@ -105,7 +105,7 @@ public class ScopeCollector implements AstNodeVisitor<Void, ScopeCollectorContex
   }
 
   @Override
-  public Void visitCompareExpression(BinaryExpression node, ScopeCollectorContext context) {
+  public Void visitCompareExpression(CompareExpression node, ScopeCollectorContext context) {
     throw new UnsupportedException("this node should not be visit");
   }
 

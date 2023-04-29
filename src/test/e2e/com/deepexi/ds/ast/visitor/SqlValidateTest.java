@@ -1,10 +1,10 @@
-package com.deepexi.ds.ast.visitor.e2e;
+package com.deepexi.ds.ast.visitor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.deepexi.ds.ast.AstNode;
-import com.deepexi.ds.ast.visitor.JdbcUtils;
+import com.deepexi.ds.JdbcUtils;
 import com.deepexi.ds.ast.visitor.generator.SqlGenerator;
 import com.deepexi.ds.ast.visitor.generator.SqlGeneratorContext;
 import com.deepexi.ds.ast.visitor.generator.SqlGeneratorPgContext;

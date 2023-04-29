@@ -1,10 +1,7 @@
 package com.deepexi.ds.builder.express;
 
-import com.deepexi.ds.ModelException.TODOException;
-import com.deepexi.ds.ast.expression.Expression;
-import com.deepexi.ds.ast.expression.StringLiteral;
-import com.deepexi.ds.ast.expression.condition.BinaryExpression;
-import com.deepexi.ds.ast.expression.condition.BinaryExpression.BinaryOperator;
+
+import com.deepexi.ds.ast.expression.CompareOperator;
 
 public class ExpressionParseUtils {
 
@@ -26,26 +23,26 @@ public class ExpressionParseUtils {
 //    throw new TODOException("TODO");
 //  }
 
-  public static BinaryOperator extractBinaryOperator(String literal) {
-    if (literal.contains(BinaryOperator.GTE.name)) {
-      return BinaryOperator.GTE;
+  public static CompareOperator extractBinaryOperator(String literal) {
+    if (literal.contains(CompareOperator.GTE.name)) {
+      return CompareOperator.GTE;
     }
-    if (literal.contains(BinaryOperator.LTE.name)) {
-      return BinaryOperator.LTE;
+    if (literal.contains(CompareOperator.LTE.name)) {
+      return CompareOperator.LTE;
     }
-    if (literal.contains(BinaryOperator.NOT_EQUAL.name)) {
-      return BinaryOperator.NOT_EQUAL;
+    if (literal.contains(CompareOperator.NOT_EQUAL.name)) {
+      return CompareOperator.NOT_EQUAL;
     }
 
     // 多字母匹配放在前面, 少的放在后面
-    if (literal.contains(BinaryOperator.GT.name)) {
-      return BinaryOperator.GT;
+    if (literal.contains(CompareOperator.GT.name)) {
+      return CompareOperator.GT;
     }
-    if (literal.contains(BinaryOperator.LT.name)) {
-      return BinaryOperator.LT;
+    if (literal.contains(CompareOperator.LT.name)) {
+      return CompareOperator.LT;
     }
-    if (literal.contains(BinaryOperator.EQUAL.name)) {
-      return BinaryOperator.EQUAL;
+    if (literal.contains(CompareOperator.EQUAL.name)) {
+      return CompareOperator.EQUAL;
     }
 
     return null;

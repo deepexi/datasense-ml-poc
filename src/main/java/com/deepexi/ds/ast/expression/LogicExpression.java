@@ -1,4 +1,4 @@
-package com.deepexi.ds.ast.expression.condition;
+package com.deepexi.ds.ast.expression;
 
 import com.deepexi.ds.ast.expression.Expression;
 import lombok.Data;

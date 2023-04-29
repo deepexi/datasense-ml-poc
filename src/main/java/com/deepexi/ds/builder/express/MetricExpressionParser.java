@@ -3,8 +3,8 @@ package com.deepexi.ds.builder.express;
 import com.deepexi.ds.ModelException.TODOException;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.StringLiteral;
-import com.deepexi.ds.ast.expression.condition.BinaryExpression;
-import com.deepexi.ds.ast.expression.condition.BinaryExpression.BinaryOperator;
+import com.deepexi.ds.ast.expression.CompareExpression;
+import com.deepexi.ds.ast.expression.CompareOperator;
 import com.deepexi.ds.ymlmodel.YmlMetric;
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
@@ -30,7 +30,7 @@ public class MetricExpressionParser {
 
   public Expression parse() {
     // String dimFilter = "metric_sum_ss_net_paid__store_sales > 1000000";
-    BinaryOperator op = ExpressionParseUtils.extractBinaryOperator(dimFilter);
+    CompareOperator op = ExpressionParseUtils.extractBinaryOperator(dimFilter);
     if (op == null) {
       throw new TODOException(String.format("目前仅支持 比较表达式, 当前表达式=%s", dimFilter));
     }
@@ -42,7 +42,7 @@ public class MetricExpressionParser {
 
     Expression left = parseOperator(parts[0].trim());
     Expression right = parseOperator(parts[1].trim());
-    return new BinaryExpression(left, right, op);
+    return new CompareExpression(left, right, op);
   }
 
   private Expression parseOperator(String name) {

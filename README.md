@@ -101,3 +101,12 @@ name: xxx
 - 在SqlGenerator 中处理所有 sql的生成
 - 需要的 sql 片段 放到 `res/{dialect}/{sql_id}.sql`, 如 res/sql/postgres/model_001.sql,
   具体规范见  `res/sql/template.sql`
+
+# 项目结构说明
+- 首先要 `mvn clean generate-sources`, 生成一些 java代码
+
+- src/main/java   ====> 常规java目录
+- src/main/antlr4 ====> 这里存放 antlr4 生成的代码
+- src/test/java   ====> 常规单元测试
+- src/test/e2e    ====> 端到端测试, 需要配置一些数据库地址等, 如果这些不配置会测试失败
+- src/test/antlr4 ====> antlr4 相关的测试

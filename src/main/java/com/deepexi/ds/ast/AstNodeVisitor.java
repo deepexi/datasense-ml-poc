@@ -5,7 +5,7 @@ import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.IntegerLiteral;
 import com.deepexi.ds.ast.expression.StringLiteral;
-import com.deepexi.ds.ast.expression.condition.BinaryExpression;
+import com.deepexi.ds.ast.expression.CompareExpression;
 import com.deepexi.ds.ast.source.ModelSource;
 import com.deepexi.ds.ast.source.Source;
 import com.deepexi.ds.ast.source.TableSource;
@@ -43,7 +43,7 @@ public interface AstNodeVisitor<R, C> {
 
   R visitIntegerLiteral(IntegerLiteral node, C context);
 
-  R visitCompareExpression(BinaryExpression node, C context);
+  R visitCompareExpression(CompareExpression node, C context);
 
   R visitMetricBindQuery(MetricBindQuery node, C context);
 }

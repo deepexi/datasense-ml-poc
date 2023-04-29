@@ -1,4 +1,4 @@
-package com.deepexi.ds.ast.visitor;
+package com.deepexi.ds;
 
 import com.deepexi.ds.ModelException;
 import java.sql.Connection;

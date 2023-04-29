@@ -15,7 +15,7 @@ import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.IdentifierPolicy;
 import com.deepexi.ds.ast.expression.IntegerLiteral;
 import com.deepexi.ds.ast.expression.StringLiteral;
-import com.deepexi.ds.ast.expression.condition.BinaryExpression;
+import com.deepexi.ds.ast.expression.CompareExpression;
 import com.deepexi.ds.ast.source.ModelSource;
 import com.deepexi.ds.ast.source.Source;
 import com.deepexi.ds.ast.source.TableSource;
@@ -234,7 +234,7 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
   }
 
   @Override
-  public String visitCompareExpression(BinaryExpression node, SqlGeneratorContext context) {
+  public String visitCompareExpression(CompareExpression node, SqlGeneratorContext context) {
     String left = process(node.getLeft(), context);
     String right = process(node.getRight(), context);
     return left + node.getOp().name + right;

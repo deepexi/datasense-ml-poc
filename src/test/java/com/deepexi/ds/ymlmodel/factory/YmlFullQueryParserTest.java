@@ -27,11 +27,11 @@ public class YmlFullQueryParserTest {
     assertEquals("s_store_name", query.getDimensions().get(0));
     assertEquals("i_product_name", query.getDimensions().get(1));
     assertEquals(2, query.getModelFilters().size());
-    assertEquals("a=1", query.getModelFilters().get(0));
-    assertEquals("b=2", query.getModelFilters().get(1));
+    assertEquals("s_store_name=1", query.getModelFilters().get(0));
+    assertEquals("s_store_name=2", query.getModelFilters().get(1));
     assertEquals(2, query.getMetricFilters().size());
-    assertEquals("c=3", query.getMetricFilters().get(0));
-    assertEquals("d=4", query.getMetricFilters().get(1));
+    assertEquals("metric_1=3", query.getMetricFilters().get(0));
+    assertEquals("metric_1=4", query.getMetricFilters().get(1));
 
     // metrics
     ImmutableList<YmlMetric> metrics = ctx.getMetrics();
@@ -41,5 +41,10 @@ public class YmlFullQueryParserTest {
     // models
     assertNotNull(ctx.getModels());
     assertEquals(5, ctx.getModels().size());
+  }
+  @Test
+  void testParseMetricFromResFile_orderby() {
+    YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("debug/case06_order_by_e2e.yml");
+    assertNotNull(ctx);
   }
 }

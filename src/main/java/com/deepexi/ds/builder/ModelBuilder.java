@@ -17,7 +17,7 @@ import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.source.ModelSource;
 import com.deepexi.ds.ast.source.Source;
 import com.deepexi.ds.ast.source.TableSource;
-import com.deepexi.ds.builder.express.JoinConditionParser;
+import com.deepexi.ds.builder.express.BoolConditionParser;
 import com.deepexi.ds.ymlmodel.YmlColumn;
 import com.deepexi.ds.ymlmodel.YmlDimension;
 import com.deepexi.ds.ymlmodel.YmlJoin;
@@ -149,7 +149,7 @@ public class ModelBuilder {
           // 目前 literal中是一个 原子条件
           // 多个条件之间是 Logic.AND 运算
           String literal = conditions.get(j);
-          Expression expr = new JoinConditionParser(literal, ctx.getScopes(), srcRel).parse();
+          Expression expr = new BoolConditionParser(literal, ctx.getScopes(), srcRel).parse();
 
           expressions.add(expr);
         }

@@ -1,10 +1,12 @@
 package com.deepexi.ds.ast.visitor;
 
 import static com.deepexi.ds.ast.utils.ResUtils.noPlaceHolder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.deepexi.ds.ast.AstNode;
+import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.SqlDialect;
 import com.deepexi.ds.ast.expression.IdentifierPolicy.IdentifierPolicyBackTick;
@@ -195,8 +197,40 @@ public class SqlGeneratorTest {
 
   @Test
   public void testVisitMetricBindQuery_case04() {
-    YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("tpcds/02_biz/case04.yml");
+    YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("tpcds/02_biz/case04_e2e.yml");
     AstNode node = new MetricBindQueryBuilder(ctx).build();
+
+    // generate sql
+    SqlGenerator generator = new SqlGenerator();
+    SqlGeneratorContext context = new SqlGeneratorPgContext(node);
+    String sql = generator.process(context.getRoot(), context);
+    assertNotNull(sql);
+    assertTrue(noPlaceHolder(sql)); // 所有占位符都已被替换
+    System.out.println(sql);
+    assertNotNull(sql);
+  }
+
+  @Test
+  public void testVisitMetricBindQuery_case05() {
+    YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("tpcds/02_biz/case05_e2e.yml");
+    MetricBindQuery node = new MetricBindQueryBuilder(ctx).build();
+    assertEquals(2, node.getMetrics().size());
+
+    // generate sql
+    SqlGenerator generator = new SqlGenerator();
+    SqlGeneratorContext context = new SqlGeneratorPgContext(node);
+    String sql = generator.process(context.getRoot(), context);
+    assertNotNull(sql);
+    assertTrue(noPlaceHolder(sql)); // 所有占位符都已被替换
+    System.out.println(sql);
+    assertNotNull(sql);
+  }
+
+  @Test
+  public void testVisitMetricBindQuery_case06() {
+    YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("tpcds/02_biz/case06_order_by_e2e.yml");
+    MetricBindQuery node = new MetricBindQueryBuilder(ctx).build();
+    assertEquals(2, node.getMetrics().size());
 
     // generate sql
     SqlGenerator generator = new SqlGenerator();

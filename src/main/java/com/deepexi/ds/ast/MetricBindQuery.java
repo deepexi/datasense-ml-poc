@@ -17,20 +17,30 @@ public class MetricBindQuery extends Relation {
   private final ImmutableList<Column> dimensions;
   private final ImmutableList<Expression> modelFilters;
 
+  // orderBy / limit /offset
+  private final ImmutableList<OrderBy> orderBys;
+  private final Integer limit;
+  private final Integer offset;
+
   public MetricBindQuery(
       Identifier queryName,
       Model model,
       List<Expression> metricFilters,
       List<Column> dimensions,
       List<Expression> modelFilters,
-      List<Column> metrics
-  ) {
+      List<Column> metrics,
+      List<OrderBy> orderBys,
+      Integer limit,
+      Integer offset) {
     this.name = queryName;
     this.model = model;
     this.metricFilters = ImmutableList.copyOf(metricFilters);
     this.dimensions = ImmutableList.copyOf(dimensions);
     this.modelFilters = ImmutableList.copyOf(modelFilters);
     this.metrics = ImmutableList.copyOf(metrics);
+    this.orderBys = ImmutableList.copyOf(orderBys);
+    this.limit = limit;
+    this.offset = offset;
   }
 
   @Override

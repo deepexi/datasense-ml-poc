@@ -6,6 +6,7 @@ import com.deepexi.ds.ast.Column;
 import com.deepexi.ds.ast.Join;
 import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
+import com.deepexi.ds.ast.OrderBy;
 import com.deepexi.ds.ast.Relation;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
@@ -77,6 +78,11 @@ public class ScopeCollector implements AstNodeVisitor<Void, ScopeCollectorContex
     // 处理完毕收集
     context.getRegistry().putAll(subContext.getRegistry());
     return null;
+  }
+
+  @Override
+  public Void visitOrderBy(OrderBy node, ScopeCollectorContext context) {
+    throw new UnsupportedException("this node should not be visit");
   }
 
   @Override

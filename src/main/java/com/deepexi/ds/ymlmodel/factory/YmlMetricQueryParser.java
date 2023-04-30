@@ -4,7 +4,9 @@ import static java.util.Collections.EMPTY_LIST;
 
 import com.deepexi.ds.ComponentType;
 import com.deepexi.ds.ymlmodel.YmlMetricQuery;
+import com.deepexi.ds.ymlmodel.YmlMetricQuery.YmlOrderBy;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -58,6 +60,32 @@ public class YmlMetricQueryParser {
     if (metricFilter == null) {
       metricFilter = EMPTY_LIST;
     }
-    return new YmlMetricQuery(name, metricNames, dim, modelFilter, metricFilter);
+
+    // orderBy
+    List<YmlOrderBy> orderBys = new ArrayList<>();
+    List<Map<String, String>> orderBysObj = (List<Map<String, String>>) map.get("order_bys");
+    if (orderBysObj != null) {
+      orderBysObj.forEach(ele -> {
+        String name1 = ele.get("name");
+        String direction = ele.get("direction");
+        orderBys.add(new YmlOrderBy(name1, direction));
+      });
+    }
+
+    // limit
+    Integer limit = (Integer) map.get("limit");
+
+    // offset
+    Integer offset = (Integer) map.get("offset");
+
+    return new YmlMetricQuery(
+        name,
+        metricNames,
+        dim,
+        modelFilter,
+        metricFilter,
+        orderBys,
+        limit,
+        offset);
   }
 }

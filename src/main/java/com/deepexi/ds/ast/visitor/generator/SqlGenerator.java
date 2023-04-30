@@ -10,12 +10,13 @@ import com.deepexi.ds.ast.Column;
 import com.deepexi.ds.ast.Join;
 import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
+import com.deepexi.ds.ast.OrderBy;
+import com.deepexi.ds.ast.expression.CompareExpression;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.IdentifierPolicy;
 import com.deepexi.ds.ast.expression.IntegerLiteral;
 import com.deepexi.ds.ast.expression.StringLiteral;
-import com.deepexi.ds.ast.expression.CompareExpression;
 import com.deepexi.ds.ast.source.ModelSource;
 import com.deepexi.ds.ast.source.Source;
 import com.deepexi.ds.ast.source.TableSource;
@@ -55,7 +56,7 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
     StringBuilder groupByBuilder = new StringBuilder();
     for (int i = 0; i < node.getDimensions().size(); i++) {
       Column ele = node.getDimensions().get(i);
-      String expr = process(ele.getExpr(),context); // TODO 仅有表达式
+      String expr = process(ele.getExpr(), context); // TODO 仅有表达式
       if (i > 0) {
         groupByBuilder.append(", ");
       }
@@ -95,6 +96,25 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
       }
       havingSql = havingBuilder.toString();
     }
+
+    // order by
+    String orderBySql = "";
+    if (node.getOrderBys().size() > 0) {
+      StringBuilder orderByBuilder = new StringBuilder();
+      orderByBuilder.append("order by ");
+      for (int i = 0; i < node.getOrderBys().size(); i++) {
+        if (i > 0) {
+          orderByBuilder.append(", ");
+        }
+        String str = process(node.getOrderBys().get(i), context);
+        orderByBuilder.append(str);
+      }
+      orderBySql = orderByBuilder.toString();
+    }
+
+    // limit offset
+    String limitSql = node.getLimit() == null ? "" : "limit " + node.getLimit();
+    String offsetSql = node.getOffset() == null ? "" : "offset " + node.getOffset();
     // 组装模板
     final String sqlTemplate = ResUtils.getSqlTemplate(metric_bind_query_001,
         context.getSqlDialect());
@@ -105,9 +125,20 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
     valuesMap.put("whereSql", whereSql);
     valuesMap.put("groupBySql", groupBySql);
     valuesMap.put("havingSql", havingSql);
+    valuesMap.put("orderBySql", orderBySql);
+    valuesMap.put("limitSql", limitSql);
+    valuesMap.put("offsetSql", offsetSql);
 
     StringSubstitutor sub = new StringSubstitutor(valuesMap);
-    return sub.replace(sqlTemplate);
+    return sub.replace(sqlTemplate).trim();
+  }
+
+  @Override
+  public String visitOrderBy(OrderBy node, SqlGeneratorContext context) {
+    String tblName = node.getName().getPrefix();
+    String colName = node.getName().getValue();
+    String direction = node.getDirection().name;
+    return String.format("%s.%s %s", tblName, colName, direction);
   }
 
   @Override

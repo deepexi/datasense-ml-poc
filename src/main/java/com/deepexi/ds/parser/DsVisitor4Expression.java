@@ -8,11 +8,17 @@ import com.deepexi.ds.ast.expression.ArithmeticExpression;
 import com.deepexi.ds.ast.expression.ArithmeticExpression.ArithmeticOperator;
 import com.deepexi.ds.ast.expression.CompareOperator;
 import com.deepexi.ds.ast.expression.Expression;
+import com.deepexi.ds.ast.expression.FunctionExpression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.IntegerLiteral;
+import com.deepexi.ds.ast.expression.StringLiteral;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 /**
  * 访问节点, 并返回一个 Expression
@@ -20,12 +26,14 @@ import org.antlr.v4.runtime.ParserRuleContext;
 public class DsVisitor4Expression extends DsBaseVisitor<Expression> {
 
   private void debug(ParserRuleContext ctx) {
-    int childCount = ctx.getChildCount();
-    for (int i = 0; i < childCount; i++) {
-      System.out.printf("visit %s, child[%s] = %s%n", ctx.getClass().getCanonicalName(), i,
-          ctx.getChild(i).getText());
-    }
-    System.out.println("====================");
+//    int childCount = ctx.getChildCount();
+//    for (int i = 0; i < childCount; i++) {
+//      System.out.printf("visit %s, child[%s] = %s%n",
+//          ctx.getClass().getCanonicalName(),
+//          i,
+//          ctx.getChild(i).getText());
+//    }
+//    System.out.println("====================");
   }
 
   @Override
@@ -184,7 +192,22 @@ public class DsVisitor4Expression extends DsBaseVisitor<Expression> {
   @Override
   public Expression visitFunctionCall(DsParser.FunctionCallContext ctx) {
     debug(ctx);
-    return visitChildren(ctx);
+    // funName  (       arg1        ,         ..., argN          )
+    // child0  child1   child2     child3                    child_last
+    // 这里 括号, 逗号, 都是 child
+    int childCount = ctx.getChildCount();
+    String funName = ctx.getChild(0).getText();
+    List<Expression> args = new ArrayList<>();
+    int firstArgIndex = 2;
+    int lastArgIndex = childCount - 2;
+    for (int i = firstArgIndex; i <= lastArgIndex; i = i + 2) {
+      System.out.println(ctx.getChild(i).getText());
+      ParseTree child = ctx.getChild(i);
+      boolean isAsterisk = child instanceof TerminalNode && "*".equals(child.getText());
+      Expression arg = isAsterisk ? StringLiteral.of("*") : visit(ctx.getChild(i));
+      args.add(arg);
+    }
+    return new FunctionExpression(funName, args);
   }
 
   @Override
@@ -208,7 +231,10 @@ public class DsVisitor4Expression extends DsBaseVisitor<Expression> {
   @Override
   public Expression visitBasicStringLiteral(DsParser.BasicStringLiteralContext ctx) {
     debug(ctx);
-    return visitChildren(ctx);
+    if (ctx.getChildCount() == 1) {
+      return Identifier.of(ctx.getChild(0).getText());
+    }
+    throw new RuntimeException("TODO");
   }
 
   @Override
@@ -269,7 +295,10 @@ public class DsVisitor4Expression extends DsBaseVisitor<Expression> {
   @Override
   public Expression visitUnquotedIdentifier(DsParser.UnquotedIdentifierContext ctx) {
     debug(ctx);
-    return visitChildren(ctx);
+    if (ctx.getChildCount() == 1) {
+      return Identifier.of(ctx.getChild(0).getText());
+    }
+    throw new RuntimeException("TODO");
   }
 
   @Override
@@ -326,6 +355,4 @@ public class DsVisitor4Expression extends DsBaseVisitor<Expression> {
     debug(ctx);
     return visitChildren(ctx);
   }
-
-
 }

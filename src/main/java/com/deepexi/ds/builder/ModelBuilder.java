@@ -17,7 +17,7 @@ import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.source.ModelSource;
 import com.deepexi.ds.ast.source.Source;
 import com.deepexi.ds.ast.source.TableSource;
-import com.deepexi.ds.builder.express.JoinConditionExpressionParser;
+import com.deepexi.ds.builder.express.JoinConditionParser;
 import com.deepexi.ds.ymlmodel.YmlColumn;
 import com.deepexi.ds.ymlmodel.YmlDimension;
 import com.deepexi.ds.ymlmodel.YmlJoin;
@@ -149,8 +149,8 @@ public class ModelBuilder {
           // 目前 literal中是一个 原子条件
           // 多个条件之间是 Logic.AND 运算
           String literal = conditions.get(j);
-          Expression expr = new JoinConditionExpressionParser(literal, ctx.getScopes(), srcRel)
-              .parse();
+          Expression expr = new JoinConditionParser(literal, ctx.getScopes(), srcRel).parse();
+
           expressions.add(expr);
         }
       }
@@ -233,7 +233,7 @@ public class ModelBuilder {
       if (refCol == null) {
         throw new ModelException(String.format("dimension [%s] not exists in columns", name));
       }
-      Identifier refExpr = (Identifier)refCol.getExpr(); // TODO maybe 出问题
+      Identifier refExpr = (Identifier) refCol.getExpr(); // TODO maybe 出问题
       String refTable = refExpr.getPrefix();
       // 重新组装 dimension, 比如 原来引用 tableA.colA => {currentTable}.colA
       Identifier expr = new Identifier(ctx.getName().getValue(), refExpr.getValue());

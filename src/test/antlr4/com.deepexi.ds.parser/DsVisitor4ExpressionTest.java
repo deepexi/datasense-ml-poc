@@ -3,17 +3,12 @@ package com.deepexi.ds.parser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.deepexi.ds.antlr4.DsLexer;
-import com.deepexi.ds.antlr4.DsParser;
-import com.deepexi.ds.antlr4.DsParser.BooleanExpressionContext;
-import com.deepexi.ds.antlr4.DsParser.StandaloneExpressionContext;
 import com.deepexi.ds.ast.expression.ArithmeticExpression;
 import com.deepexi.ds.ast.expression.CompareExpression;
 import com.deepexi.ds.ast.expression.Expression;
+import com.deepexi.ds.ast.expression.FunctionExpression;
 import com.deepexi.ds.ast.expression.Identifier;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
+import com.deepexi.ds.ast.expression.IntegerLiteral;
 import org.junit.jupiter.api.Test;
 
 public class DsVisitor4ExpressionTest {
@@ -39,6 +34,8 @@ public class DsVisitor4ExpressionTest {
     assertEquals("-1*-9", testStandalone(" -1 * -9   ").toString());
     assertEquals("(-1*2)+(4/2)", testStandalone("-1 * 2 + 4 / 2 ").toString());
     assertEquals("(-1*(2+4))/2", testStandalone("-1 * (2 + 4) / 2 ").toString());
+    //    assertEquals(xxx, testBoolean(xxx).toString());
+    //    assertEquals(xxx, testBoolean(xxx).toString());
   }
 
 
@@ -58,30 +55,40 @@ public class DsVisitor4ExpressionTest {
     assertEquals("T1.C1<=1", testBoolean("T1.C1 <= 1").toString());
     assertEquals("T1.C1<>1", testBoolean("T1.C1 <> 1").toString());
     assertEquals("T1.C1=T2.C2", testBoolean("T1.C1 =T2.C2").toString());
-//    assertEquals(xxx, testBoolean(xxx).toString());
+    //    assertEquals(xxx, testBoolean(xxx).toString());
+    //    assertEquals(xxx, testBoolean(xxx).toString());
+  }
+
+
+  @Test
+  public void testParse_standalone_function() {
+    Expression expr = testStandalone("MAX(888,999)");
+    assertTrue(expr instanceof FunctionExpression);
+    assertEquals("MAX", ((FunctionExpression) expr).getName());
+    assertEquals(2, ((FunctionExpression) expr).getArgs().size());
+    assertTrue(((FunctionExpression) expr).getArgs().get(0) instanceof IntegerLiteral);
+    assertEquals(888, ((IntegerLiteral) ((FunctionExpression) expr).getArgs().get(0)).getValue());
+    assertEquals(999, ((IntegerLiteral) ((FunctionExpression) expr).getArgs().get(1)).getValue());
+
+    assertEquals("MAX(1,2)", testStandalone("MAX(1,   2)").toString());
+    assertEquals("FUN1(T1.C1,T2,C2)", testStandalone("FUN1(T1.C1, T2,C2)").toString());
+    assertEquals("FUN1(T1.C1,'T2'.C2)", testStandalone("FUN1(T1.C1, 'T2'.C2)").toString());
+    assertEquals("FUN1(T1.C1,'T2'.C2,'T3')",
+        testStandalone("FUN1(T1.C1, 'T2'.C2, 'T3')").toString());
+    assertEquals("COUNT(*)", testStandalone("COUNT(*)").toString());
+    assertEquals("MAX(1+2,T1.C1)", testStandalone("MAX(1+2, T1.C1)").toString());
+
+    assertEquals("MAX(COUNT(*),FUN2(C1,C2))",
+        testStandalone("MAX(COUNT(*), FUN2(C1,C2))").toString());
+    //    assertEquals(xxx, testStandalone(xxx).toString());
+    //    assertEquals(xxx, testStandalone(xxx).toString());
   }
 
   private static Expression testStandalone(String inExpr) {
-    String expr = inExpr.toUpperCase();
-    CharStream input = CharStreams.fromString(expr);
-    DsLexer lexer = new DsLexer(input);
-    CommonTokenStream tokens = new CommonTokenStream(lexer);
-    DsParser parser = new DsParser(tokens);
-
-    StandaloneExpressionContext tree = parser.standaloneExpression();
-    DsVisitor4Expression tv = new DsVisitor4Expression();
-    return tv.visit(tree);
+    return ParserUtils.parseStandaloneExpression(inExpr);
   }
 
   private static Expression testBoolean(String inExpr) {
-    String expr = inExpr.toUpperCase();
-    CharStream input = CharStreams.fromString(expr);
-    DsLexer lexer = new DsLexer(input);
-    CommonTokenStream tokens = new CommonTokenStream(lexer);
-    DsParser parser = new DsParser(tokens);
-
-    BooleanExpressionContext tree = parser.booleanExpression();
-    DsVisitor4Expression tv = new DsVisitor4Expression();
-    return tv.visit(tree);
+    return ParserUtils.parseBooleanExpression(inExpr);
   }
 }

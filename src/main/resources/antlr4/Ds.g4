@@ -241,7 +241,7 @@ fragment DIGIT
     ;
 
 fragment LETTER
-    : [A-Z]
+    : [a-zA-Z]
     ;
 
 WS

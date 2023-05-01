@@ -11,6 +11,7 @@ import com.deepexi.ds.ast.Join;
 import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.OrderBy;
+import com.deepexi.ds.ast.Relation;
 import com.deepexi.ds.ast.expression.CompareExpression;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
@@ -18,7 +19,6 @@ import com.deepexi.ds.ast.expression.IdentifierPolicy;
 import com.deepexi.ds.ast.expression.IntegerLiteral;
 import com.deepexi.ds.ast.expression.StringLiteral;
 import com.deepexi.ds.ast.source.ModelSource;
-import com.deepexi.ds.ast.source.Source;
 import com.deepexi.ds.ast.source.TableSource;
 import com.deepexi.ds.ast.utils.ResUtils;
 import com.google.common.collect.ImmutableList;
@@ -34,8 +34,10 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
 
   @Override
   public String visitMetricBindQuery(MetricBindQuery node, SqlGeneratorContext context) {
-    String modelSql = process(node.getModel(), context);
-    String aliasSql = process(node.getModel().getName(), context);
+//    String modelSql = process(node.getModel(), context);
+//    String aliasSql = process(node.getModel().getName(), context);
+    String modelSql = process(node.getRelation(), context);
+    String aliasSql = process(node.getRelation().getTableName(), context);
 
     String whereSql = ""; // where optional
     if (node.getModelFilters().size() > 0) {
@@ -146,8 +148,8 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
     final String ALL_COLUMN = "*";
 
     // sourceAlias
-    Source source = node.getSource();
-    Identifier alias = source.getAlias();
+    Relation source = node.getSource();
+    Identifier alias = source.getTableName();
     String aliasSql = process(alias, context);
 
     // sourceSql
@@ -231,11 +233,6 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
       builder.append(aCondition);
     }
     return builder.toString();
-  }
-
-  @Override
-  public String visitSource(Source node, SqlGeneratorContext context) {
-    throw new ModelException("TODO");
   }
 
   @Override

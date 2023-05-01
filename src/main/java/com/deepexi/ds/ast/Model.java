@@ -1,7 +1,6 @@
 package com.deepexi.ds.ast;
 
 import com.deepexi.ds.ast.expression.Identifier;
-import com.deepexi.ds.ast.source.Source;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import lombok.Getter;
@@ -10,12 +9,13 @@ import lombok.Getter;
 public class Model extends Relation {
 
   protected final Identifier name;
-  protected final Source source;
+  //  protected final Source source;
+  protected final Relation source;
   protected final ImmutableList<Join> joins;
   protected final ImmutableList<Column> columns;
   protected final ImmutableList<Column> dimensions;
 
-  public Model(Identifier name, Source source, List<Join> joins, List<Column> columns,
+  public Model(Identifier name, Relation source, List<Join> joins, List<Column> columns,
       List<Column> dimensions) {
     this.name = name;
     this.columns = ImmutableList.copyOf(columns);

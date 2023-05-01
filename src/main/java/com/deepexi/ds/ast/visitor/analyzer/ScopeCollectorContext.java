@@ -12,11 +12,12 @@ import lombok.Getter;
  */
 @Getter
 public class ScopeCollectorContext {
-  protected final Model root;
+  protected final Relation root;
+  // protected final Model root;
   private final Map<ModelNodeRef, Relation> registry = new HashMap<>();
   private Relation sourceRelation;
 
-  public ScopeCollectorContext(Model root) {
+  public ScopeCollectorContext(Relation root) {
     this.root = root;
   }
 

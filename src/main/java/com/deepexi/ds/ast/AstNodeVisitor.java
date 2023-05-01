@@ -7,7 +7,6 @@ import com.deepexi.ds.ast.expression.IntegerLiteral;
 import com.deepexi.ds.ast.expression.StringLiteral;
 import com.deepexi.ds.ast.expression.CompareExpression;
 import com.deepexi.ds.ast.source.ModelSource;
-import com.deepexi.ds.ast.source.Source;
 import com.deepexi.ds.ast.source.TableSource;
 
 /**
@@ -30,8 +29,6 @@ public interface AstNodeVisitor<R, C> {
   R visitJoin(Join node, C context);
 
   R visitExpression(Expression node, C context);
-
-  R visitSource(Source node, C context);
 
   R visitTableSource(TableSource node, C context);
 

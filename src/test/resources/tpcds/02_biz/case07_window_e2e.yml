@@ -102,6 +102,19 @@ order_bys:
   - name: d_moy
 limit: 100
 offset: 1
+# 该窗口表示: 从(最早一条, 到 current row]
+window:
+  window_type: sliding # sliding | tumbling, 目前仅支持 sliding
+  partitions: [ s_store_name, d_year ]
+  order_bys:
+    - name: d_moy
+  # 几个关键字 left_most, current_row
+  left:
+    base: left_most
+    offset: 0
+  right:
+    base: current_row
+    offset: 0
 
 ---
 version: v1

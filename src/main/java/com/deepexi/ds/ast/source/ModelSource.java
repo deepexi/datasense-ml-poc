@@ -1,9 +1,10 @@
 package com.deepexi.ds.ast.source;
 
 
+import com.deepexi.ds.ast.AstNodeVisitor;
 import com.deepexi.ds.ast.Column;
 import com.deepexi.ds.ast.Model;
-import com.deepexi.ds.ast.AstNodeVisitor;
+import com.deepexi.ds.ast.Relation;
 import com.deepexi.ds.ast.expression.Identifier;
 import java.util.List;
 import lombok.Getter;
@@ -12,7 +13,7 @@ import lombok.Getter;
  * this source from another Model
  */
 @Getter
-public class ModelSource extends Source {
+public class ModelSource extends Relation {
 
   private final Model model;
 
@@ -28,11 +29,6 @@ public class ModelSource extends Source {
   @Override
   public String toString() {
     return model.getName().getValue();
-  }
-
-  @Override
-  public Identifier getAlias() {
-    return model.getName();
   }
 
   @Override

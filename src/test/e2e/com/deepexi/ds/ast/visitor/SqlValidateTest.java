@@ -32,6 +32,12 @@ public class SqlValidateTest {
     assert_that_rows_must_be_equal("tpcds/02_biz/case05_e2e.yml");
   }
 
+  @Test
+  public void testVisitMetricBindQuery_case06() {
+    assert_that_rows_must_be_equal("tpcds/02_biz/case06_order_by_e2e.yml");
+  }
+
+
   private void assert_that_rows_must_be_equal(String resOfYml) {
     // parse yml
     YmlFullQuery ctx = YmlFullQueryParser.loadFromRes(resOfYml);

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import com.deepexi.ds.ymlmodel.YmlFullQuery;
 import com.deepexi.ds.ymlmodel.YmlMetric;
 import com.deepexi.ds.ymlmodel.YmlMetricQuery;
+import com.deepexi.ds.ymlmodel.YmlWindow;
 import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
 
@@ -42,9 +43,41 @@ public class YmlFullQueryParserTest {
     assertNotNull(ctx.getModels());
     assertEquals(5, ctx.getModels().size());
   }
+
   @Test
   void testParseMetricFromResFile_orderby() {
-    YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("debug/case06_order_by_e2e.yml");
+    YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("tpcds/02_biz/case06_order_by_e2e.yml");
     assertNotNull(ctx);
+    assertNotNull(ctx.getQuery().getOrderBys());
+    assertEquals(3, ctx.getQuery().getOrderBys().size());
+
+    assertNotNull(ctx.getQuery().getLimit());
+    assertEquals(100, ctx.getQuery().getLimit());
+
+    assertNotNull(ctx.getQuery().getOffset());
+    assertEquals(1, ctx.getQuery().getOffset());
+  }
+
+
+  @Test
+  void testParseMetricFromResFile_window() {
+    YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("tpcds/02_biz/case07_window_e2e.yml");
+    assertNotNull(ctx);
+    YmlWindow window = ctx.getQuery().getWindow();
+    assertNotNull(window);
+    assertEquals("sliding", window.getWindowType());
+    // getPartitions
+    assertEquals("s_store_name", window.getPartitions().get(0));
+    assertEquals("d_year", window.getPartitions().get(1));
+    // getOrderBys
+    assertEquals(1, window.getOrderBys().size());
+    assertEquals("d_moy", window.getOrderBys().get(0).getName());
+    assertEquals("asc", window.getOrderBys().get(0).getDirection());
+    // left
+    assertEquals("left_most", window.getLeft().getBase());
+    assertEquals(0, window.getLeft().getOffset());
+    // right
+    assertEquals("current_row", window.getRight().getBase());
+    assertEquals(0, window.getRight().getOffset());
   }
 }

@@ -10,7 +10,8 @@ import lombok.Getter;
 public class MetricBindQuery extends Relation {
 
   private final Identifier name;                  // 该 metric 名
-  private final Model model;                      // 目前可以是 Model 和 Metric
+  // private final Model model;                      // 目前可以是 Model 和 Metric
+  private final Relation relation;                      // 目前可以是 Model 和 Metric
   private final ImmutableList<Column> metrics;    // 每个指标的
   // 查询有关的条件
   private final ImmutableList<Expression> metricFilters;
@@ -24,7 +25,8 @@ public class MetricBindQuery extends Relation {
 
   public MetricBindQuery(
       Identifier queryName,
-      Model model,
+      // Model model,
+      Relation relation,
       List<Expression> metricFilters,
       List<Column> dimensions,
       List<Expression> modelFilters,
@@ -33,7 +35,8 @@ public class MetricBindQuery extends Relation {
       Integer limit,
       Integer offset) {
     this.name = queryName;
-    this.model = model;
+    // this.model = model;
+    this.relation = relation;
     this.metricFilters = ImmutableList.copyOf(metricFilters);
     this.dimensions = ImmutableList.copyOf(dimensions);
     this.modelFilters = ImmutableList.copyOf(modelFilters);

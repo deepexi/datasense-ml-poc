@@ -6,15 +6,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.deepexi.ds.ModelException;
-import com.deepexi.ds.ModelException.FieldMissException;
 import com.deepexi.ds.ModelException.ModelHasCycleException;
 import com.deepexi.ds.ModelException.ModelHasManyRootException;
 import com.deepexi.ds.ModelException.ModelNotFoundException;
 import com.deepexi.ds.ast.Column;
 import com.deepexi.ds.ast.ColumnDataType;
 import com.deepexi.ds.ast.Model;
+import com.deepexi.ds.ast.Relation;
 import com.deepexi.ds.ast.expression.Identifier;
-import com.deepexi.ds.ast.source.Source;
 import com.deepexi.ds.ast.source.TableSource;
 import com.deepexi.ds.ymlmodel.YmlModel;
 import com.deepexi.ds.ymlmodel.factory.YmlModelParser;
@@ -37,7 +36,7 @@ public class ModelBuilderTest {
     assertEquals("date_dim", rootModel.getName().getValue());
 
     // source
-    Source source = rootModel.getSource();
+    Relation source = rootModel.getSource();
     assertTrue(source instanceof TableSource);
     TableSource ts = (TableSource) source;
     assertEquals("date_dim", ts.getTableName().getValue());

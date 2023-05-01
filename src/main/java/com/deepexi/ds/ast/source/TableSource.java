@@ -1,7 +1,8 @@
 package com.deepexi.ds.ast.source;
 
-import com.deepexi.ds.ast.Column;
 import com.deepexi.ds.ast.AstNodeVisitor;
+import com.deepexi.ds.ast.Column;
+import com.deepexi.ds.ast.Relation;
 import com.deepexi.ds.ast.expression.Identifier;
 import java.util.List;
 import lombok.Getter;
@@ -10,7 +11,7 @@ import lombok.Getter;
  * this source is from an external table
  */
 @Getter
-public class TableSource extends Source {
+public class TableSource extends Relation {
 
   private final String dataSource;
   private final Identifier tableName;
@@ -28,11 +29,6 @@ public class TableSource extends Source {
   @Override
   public String toString() {
     return tableName + ", dataSource=" + dataSource;
-  }
-
-  @Override
-  public Identifier getAlias() {
-    return tableName;
   }
 
   @Override

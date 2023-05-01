@@ -8,7 +8,6 @@ import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.OrderBy;
 import com.deepexi.ds.ast.source.ModelSource;
-import com.deepexi.ds.ast.source.Source;
 import com.deepexi.ds.ast.source.TableSource;
 
 public class ExpressionRewriter implements AstNodeVisitor<Expression, Void> {
@@ -35,11 +34,6 @@ public class ExpressionRewriter implements AstNodeVisitor<Expression, Void> {
 
   @Override
   public Expression visitExpression(Expression node, Void context) {
-    return null;
-  }
-
-  @Override
-  public Expression visitSource(Source node, Void context) {
     return null;
   }
 

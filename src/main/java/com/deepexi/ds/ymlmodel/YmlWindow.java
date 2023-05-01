@@ -1,5 +1,6 @@
 package com.deepexi.ds.ymlmodel;
 
+import com.deepexi.ds.ymlmodel.YmlMetricQuery.YmlOrderBy;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import lombok.Getter;
@@ -8,21 +9,21 @@ import lombok.Getter;
 public class YmlWindow {
 
   private final String windowType;
-  private final int length;
-  private final String dimension;
   private final ImmutableList<String> partitions;
-  private final ImmutableList<String> orderBy;
+  private final ImmutableList<YmlOrderBy> orderBys;
+  private final YmlWindowBoundary left;
+  private final YmlWindowBoundary right;
 
   public YmlWindow(
       String windowType,
-      int length,
-      String dimension,
       List<String> partitions,
-      List<String> orderBy) {
+      List<YmlOrderBy> orderBys,
+      YmlWindowBoundary left,
+      YmlWindowBoundary right) {
     this.windowType = windowType;
-    this.length = length;
-    this.dimension = dimension;
     this.partitions = ImmutableList.copyOf(partitions);
-    this.orderBy = ImmutableList.copyOf(orderBy);
+    this.orderBys = ImmutableList.copyOf(orderBys);
+    this.left = left;
+    this.right = right;
   }
 }

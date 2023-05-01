@@ -33,6 +33,7 @@ public class YmlMetricQuery {
   private final ImmutableList<YmlOrderBy> orderBys;
   private final Integer limit;
   private final Integer offset;
+  private final YmlWindow window;
 
   public YmlMetricQuery(String name,
       List<String> metricNames,
@@ -41,7 +42,7 @@ public class YmlMetricQuery {
       List<String> metricFilters,
       List<YmlOrderBy> orderBys,
       Integer limit,
-      Integer offset) {
+      Integer offset, YmlWindow window) {
     this.name = name;
     this.metricNames = ImmutableList.copyOf(metricNames);
     this.dimensions = ImmutableList.copyOf(dimensions);
@@ -50,6 +51,7 @@ public class YmlMetricQuery {
     this.orderBys = ImmutableList.copyOf(orderBys);
     this.limit = limit;
     this.offset = offset;
+    this.window = window;
   }
 
   @Override

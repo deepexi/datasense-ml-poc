@@ -5,6 +5,8 @@ import static java.util.Collections.EMPTY_LIST;
 import com.deepexi.ds.ComponentType;
 import com.deepexi.ds.ymlmodel.YmlMetricQuery;
 import com.deepexi.ds.ymlmodel.YmlMetricQuery.YmlOrderBy;
+import com.deepexi.ds.ymlmodel.YmlWindow;
+import com.deepexi.ds.ymlmodel.YmlWindowBoundary;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,15 +64,7 @@ public class YmlMetricQueryParser {
     }
 
     // orderBy
-    List<YmlOrderBy> orderBys = new ArrayList<>();
-    List<Map<String, String>> orderBysObj = (List<Map<String, String>>) map.get("order_bys");
-    if (orderBysObj != null) {
-      orderBysObj.forEach(ele -> {
-        String name1 = ele.get("name");
-        String direction = ele.get("direction");
-        orderBys.add(new YmlOrderBy(name1, direction));
-      });
-    }
+    List<YmlOrderBy> orderBys = parseOrderBy(map);
 
     // limit
     Integer limit = (Integer) map.get("limit");
@@ -78,6 +72,8 @@ public class YmlMetricQueryParser {
     // offset
     Integer offset = (Integer) map.get("offset");
 
+    // window
+    YmlWindow window = parseWindow(map);
     return new YmlMetricQuery(
         name,
         metricNames,
@@ -86,6 +82,41 @@ public class YmlMetricQueryParser {
         metricFilter,
         orderBys,
         limit,
-        offset);
+        offset,
+        window);
+  }
+
+  private static List<YmlOrderBy> parseOrderBy(Map<String, Object> mapHasOrderBy) {
+    List<YmlOrderBy> orderBys = new ArrayList<>();
+    List<Map<String, String>> orderBysObj = (List<Map<String, String>>) mapHasOrderBy.get(
+        "order_bys");
+    if (orderBysObj != null) {
+      orderBysObj.forEach(ele -> {
+        String name1 = ele.get("name");
+        String direction = ele.get("direction");
+        orderBys.add(new YmlOrderBy(name1, direction));
+      });
+    }
+    return orderBys;
+  }
+
+  private static YmlWindow parseWindow(Map<String, Object> mapHasWindow) {
+    if(! mapHasWindow.containsKey("window")){
+      return null;
+    }
+    Map<String, Object> windowMap = (Map<String, Object>) mapHasWindow.get("window");
+    String windowType = (String) windowMap.get("window_type");
+    List<String> partitions = (List<String>) windowMap.get("partitions");
+    List<YmlOrderBy> orderBys = parseOrderBy(windowMap);
+    YmlWindowBoundary left = parseBoundary((Map<String, Object>) windowMap.get("left"));
+    YmlWindowBoundary right = parseBoundary((Map<String, Object>) windowMap.get("right"));
+    //
+    return new YmlWindow(windowType, partitions, orderBys, left, right);
+  }
+
+  private static YmlWindowBoundary parseBoundary(Map<String, Object> boundaryInfo) {
+    String base = (String) boundaryInfo.get("base");
+    int offset = (int) boundaryInfo.get("offset");
+    return new YmlWindowBoundary(base, offset);
   }
 }

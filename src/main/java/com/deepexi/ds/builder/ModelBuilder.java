@@ -12,10 +12,10 @@ import com.deepexi.ds.ast.ColumnDataType;
 import com.deepexi.ds.ast.Join;
 import com.deepexi.ds.ast.JoinType;
 import com.deepexi.ds.ast.Model;
+import com.deepexi.ds.ast.Relation;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.source.ModelSource;
-import com.deepexi.ds.ast.source.Source;
 import com.deepexi.ds.ast.source.TableSource;
 import com.deepexi.ds.builder.express.BoolConditionParser;
 import com.deepexi.ds.ymlmodel.YmlColumn;
@@ -43,7 +43,8 @@ public class ModelBuilder {
   private static class Container {
 
     private Identifier name;
-    private Source source;
+//    private Source source;
+    private Relation source;
     private List<Join> joins;
     private List<Column> columns;
     private List<Column> dimensions;

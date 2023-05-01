@@ -43,12 +43,11 @@ public class ModelBuilder {
   private static class Container {
 
     private Identifier name;
-//    private Source source;
     private Relation source;
     private List<Join> joins;
     private List<Column> columns;
     private List<Column> dimensions;
-    private List<RelationMock> scopes = new ArrayList<RelationMock>();
+    private List<RelationMock> scopes = new ArrayList<>();
     private RelationMock sourceRelation;
 
     Model build() {
@@ -127,8 +126,7 @@ public class ModelBuilder {
     }
 
     List<Join> joinList = new ArrayList<>(joins.size());
-    for (int i = 0; i < joins.size(); i++) {
-      YmlJoin join = joins.get(i);
+    for (YmlJoin join : joins) {
       String modelName = join.getModelName();
       YmlModel ymlModel = requireModel(modelName);
       Container subCtx = new Container();
@@ -146,12 +144,10 @@ public class ModelBuilder {
       List<String> conditions = join.getConditions();
       List<Expression> expressions = new ArrayList<>();
       if (conditions != null && conditions.size() > 0) {
-        for (int j = 0; j < conditions.size(); j++) {
+        for (String literal : conditions) {
           // 目前 literal中是一个 原子条件
           // 多个条件之间是 Logic.AND 运算
-          String literal = conditions.get(j);
           Expression expr = new BoolConditionParser(literal, ctx.getScopes(), srcRel).parse();
-
           expressions.add(expr);
         }
       }
@@ -191,8 +187,8 @@ public class ModelBuilder {
       expr = colName;
     }
     String[] fields = expr.split(RE_IDENTIFIER_SEPARATOR);
-    Identifier fromCol = null;
-    Column referColumn = null;
+    Identifier fromCol;
+    Column referColumn;
     if (fields.length == 1) {
       fromCol = new Identifier(srcTableName, fields[0].trim());
       referColumn = assertColumnExistsInRelation(fields[0].trim(), srcRel);
@@ -209,7 +205,7 @@ public class ModelBuilder {
     // type: 可以由上下文推到得到
     String type = col.getDataType();
     ColumnDataType type1 = ColumnDataType.fromName(type);
-    if (type1 == null && referColumn != null) {
+    if (type1 == null) {
       type1 = referColumn.getDataType();
     }
     if (type1 == null) {
@@ -235,12 +231,9 @@ public class ModelBuilder {
         throw new ModelException(String.format("dimension [%s] not exists in columns", name));
       }
       Identifier refExpr = (Identifier) refCol.getExpr(); // TODO maybe 出问题
-      String refTable = refExpr.getPrefix();
       // 重新组装 dimension, 比如 原来引用 tableA.colA => {currentTable}.colA
       Identifier expr = new Identifier(ctx.getName().getValue(), refExpr.getValue());
-
-      Column dim = new Column(refCol.getAlias(), expr, refCol.getDataType(),
-          refCol.getRawExpr());
+      Column dim = new Column(refCol.getAlias(), expr, refCol.getDataType(), refCol.getRawExpr());
       dims.add(dim);
     }
     ctx.setDimensions(dims);

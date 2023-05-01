@@ -1,7 +1,6 @@
 package com.deepexi.ds.ast.visitor.analyzer;
 
 import com.deepexi.ds.ast.AstNode;
-import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.Relation;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +12,6 @@ import lombok.Getter;
 @Getter
 public class ScopeCollectorContext {
   protected final Relation root;
-  // protected final Model root;
   private final Map<ModelNodeRef, Relation> registry = new HashMap<>();
   private Relation sourceRelation;
 

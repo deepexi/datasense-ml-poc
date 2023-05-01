@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("unchecked")
 public class MetricBindQueryBuilder {
 
   private YmlMetricQuery metricQuery;
@@ -39,7 +40,6 @@ public class MetricBindQueryBuilder {
 
   // 关联的 model, 如果一个孤立的model 不被引用, 将不会出现在此集合中
   private Model model4Metrics;
-  // private Set<Model> models;
 
   public MetricBindQueryBuilder(YmlFullQuery ymlFullQuery) {
     checkIntegrity(ymlFullQuery);

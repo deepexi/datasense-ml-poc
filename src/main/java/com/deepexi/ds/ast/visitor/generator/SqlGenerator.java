@@ -34,8 +34,6 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
 
   @Override
   public String visitMetricBindQuery(MetricBindQuery node, SqlGeneratorContext context) {
-//    String modelSql = process(node.getModel(), context);
-//    String aliasSql = process(node.getModel().getName(), context);
     String modelSql = process(node.getRelation(), context);
     String aliasSql = process(node.getRelation().getTableName(), context);
 
@@ -156,7 +154,7 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
     String sourceSql = process(source, context);
 
     // selectSql
-    String selectSql = null;
+    String selectSql;
     List<Column> columns = node.getColumns();
     if (columns == null || columns.size() == 0) {
       selectSql = ALL_COLUMN;
@@ -258,7 +256,7 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
 
   @Override
   public String visitIntegerLiteral(IntegerLiteral node, SqlGeneratorContext context) {
-    return node.getValue() + "";
+    return String.valueOf(node.getValue());
   }
 
   @Override

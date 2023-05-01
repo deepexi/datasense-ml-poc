@@ -19,12 +19,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@SuppressWarnings("UnstableApiUsage")
 public class ModelBuilderFactory {
 
   private final List<YmlModel> models;
   private final Map<String, YmlModel> lookup = new HashMap<>();
-  private final List<String> leafNode = new ArrayList<>();
-  private MutableGraph<String> graph = GraphBuilder.directed().build();
+  private final List<String> leafNode = new ArrayList<>(); // leafNode存放 外部 source
+  private final MutableGraph<String> graph = GraphBuilder.directed().build();
 
   public ModelBuilderFactory(List<YmlModel> models) {
     if (models == null || models.size() == 0) {

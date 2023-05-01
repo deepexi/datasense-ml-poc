@@ -22,7 +22,7 @@ public class ModelNodeRef {
    */
   @Override
   public boolean equals(Object o) {
-    if (o == null || !(o instanceof ModelNodeRef)) {
+    if (!(o instanceof ModelNodeRef)) {
       return false;
     }
     return this.node == ((ModelNodeRef) o).node; // direct same reference of object

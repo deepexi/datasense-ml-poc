@@ -29,6 +29,6 @@ public class DecimalLiteral extends Expression {
   }
 
   public String toString() {
-    return "" + value;
+    return String.valueOf(value);
   }
 }

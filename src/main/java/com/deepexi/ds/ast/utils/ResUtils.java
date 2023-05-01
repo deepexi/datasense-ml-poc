@@ -49,16 +49,15 @@ public class ResUtils {
       }
     } catch (Exception ex) {
       // not sql for this dialect
-      System.out.println(
-          String.format("should provide sql for dialect=[%s], sql_template=[%s]", dialect.name,
-              templateId.fileName));
+      System.out.printf("should provide sql for dialect=[%s], sql_template=[%s]%n", dialect.name,
+          templateId.fileName);
     }
     return getResourceFileAsString(path4Default);
   }
 
   // 检测sql中是否有占位符 ${.*?}
   public static boolean noPlaceHolder(String sql) {
-    return !(sql.matches("\\$\\{.*?\\}"));
+    return !(sql.matches("\\$\\{.*?}"));
   }
 
   public static String indent(String in) {

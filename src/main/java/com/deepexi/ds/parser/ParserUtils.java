@@ -11,9 +11,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 
 public class ParserUtils {
 
-  public static Expression parseStandaloneExpression(String inExpr) {
-    // String expr = inExpr.toUpperCase();
-    String expr = inExpr;
+  public static Expression parseStandaloneExpression(String expr) {
     CharStream input = CharStreams.fromString(expr);
     DsLexer lexer = new DsLexer(input);
     CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -24,9 +22,7 @@ public class ParserUtils {
     return visitor.visit(tree);
   }
 
-  public static Expression parseBooleanExpression(String inExpr) {
-    // String expr = inExpr.toUpperCase();
-    String expr = inExpr;
+  public static Expression parseBooleanExpression(String expr) {
     CharStream input = CharStreams.fromString(expr);
     DsLexer lexer = new DsLexer(input);
     CommonTokenStream tokens = new CommonTokenStream(lexer);

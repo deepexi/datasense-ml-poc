@@ -12,15 +12,14 @@ public class YmlFullQuery {
   private final ImmutableList<YmlModel> models;
   private YmlDebug ymlDebug;
 
-  public YmlFullQuery(YmlMetricQuery query, List<YmlMetric> metrics,
-      List<YmlModel> models) {
+  public YmlFullQuery(YmlMetricQuery query, List<YmlMetric> metrics, List<YmlModel> models) {
     this.query = query;
     this.metrics = ImmutableList.copyOf(metrics);
     this.models = ImmutableList.copyOf(models);
   }
 
-  public YmlFullQuery(YmlMetricQuery query, List<YmlMetric> metrics,
-      List<YmlModel> models, YmlDebug ymlDebug) {
+  public YmlFullQuery(YmlMetricQuery query, List<YmlMetric> metrics, List<YmlModel> models,
+      YmlDebug ymlDebug) {
     this.query = query;
     this.metrics = ImmutableList.copyOf(metrics);
     this.models = ImmutableList.copyOf(models);

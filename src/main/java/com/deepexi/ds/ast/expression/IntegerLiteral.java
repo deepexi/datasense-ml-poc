@@ -23,6 +23,6 @@ public class IntegerLiteral extends Expression {
   }
 
   public String toString() {
-    return "" + value;
+    return String.valueOf(value);
   }
 }

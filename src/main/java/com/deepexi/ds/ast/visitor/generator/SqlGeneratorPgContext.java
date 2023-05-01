@@ -2,7 +2,6 @@ package com.deepexi.ds.ast.visitor.generator;
 
 
 import com.deepexi.ds.ast.AstNode;
-import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.SqlDialect;
 import com.deepexi.ds.ast.expression.IdentifierPolicy;
 import lombok.Getter;

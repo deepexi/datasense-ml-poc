@@ -9,7 +9,6 @@ import lombok.Getter;
 public class Model extends Relation {
 
   protected final Identifier name;
-  //  protected final Source source;
   protected final Relation source;
   protected final ImmutableList<Join> joins;
   protected final ImmutableList<Column> columns;

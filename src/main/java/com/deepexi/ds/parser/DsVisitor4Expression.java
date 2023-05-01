@@ -12,7 +12,6 @@ import com.deepexi.ds.ast.expression.FunctionExpression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.IntegerLiteral;
 import com.deepexi.ds.ast.expression.StringLiteral;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -74,14 +73,6 @@ public class DsVisitor4Expression extends DsBaseVisitor<Expression> {
       CompareExpressionBuilder builder = (CompareExpressionBuilder) visit(ctx.getChild(1));
       return builder.left(left).build();
     }
-
-//    if (childCount == 3) {
-//      // like foo=bar
-//      Identifier left = (Identifier) visit(ctx.getChild(0));
-//      CompareExpressionBuilder builderHasOp = (CompareExpressionBuilder) visit(ctx.getChild(1));
-//      builderHasOp.left(left);
-//      return builderHasOp.build();
-//    }
     throw new TODOException("TODO: can't parse ctx");
   }
 
@@ -272,23 +263,6 @@ public class DsVisitor4Expression extends DsBaseVisitor<Expression> {
   @Override
   public Expression visitQualifiedName(DsParser.QualifiedNameContext ctx) {
     debug(ctx);
-//    int childCount = ctx.getChildCount();
-//
-//    // case colX
-//    if (childCount == 1) {
-//      return visitChildren(ctx);
-//    }
-//
-//    // case tableA.colX
-//    if (childCount == 3) {
-//      String v1 = ctx.getChild(0).getText();
-//      String v2 = ctx.getChild(1).getText();
-//      String v3 = ctx.getChild(2).getText();
-//      if (Objects.equals(v2, ".")) {
-//        return new Identifier(v1, v3);
-//      }
-//    }
-//    throw new ModelException("can't parse expression");
     return visitChildren(ctx);
   }
 
@@ -322,8 +296,6 @@ public class DsVisitor4Expression extends DsBaseVisitor<Expression> {
   @Override
   public Expression visitDecimalLiteral(DsParser.DecimalLiteralContext ctx) {
     debug(ctx);
-    String text = ctx.getChild(0).getText();
-    BigDecimal bigDecimal = new BigDecimal(text);
     return visitChildren(ctx);
   }
 

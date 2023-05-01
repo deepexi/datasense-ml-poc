@@ -49,16 +49,13 @@ public class ScopeCollector implements AstNodeVisitor<Void, ScopeCollectorContex
 
   @Override
   public Void visitTableSource(TableSource node, ScopeCollectorContext context) {
-    Relation relation = node;
-    context.registerRelation(node, relation);
-    context.registerSourceRelation(relation);
+    context.registerRelation(node, node);
+    context.registerSourceRelation(node);
     return null;
   }
 
   @Override
   public Void visitJoin(Join node, ScopeCollectorContext context) {
-    // Model joinModel = node.getModel();
-    // context.registerRelation(node, new RelationFromModel(joinModel, context));
     context.registerRelation(node, node.getModel());
 
     // 递归处理

@@ -25,8 +25,7 @@ import java.util.List;
 import lombok.Getter;
 
 /**
- * col加上 表名
- * colA => tableX.colA
+ * col加上 表名 colA => tableX.colA
  */
 public class AddTableNameToColumnRewriter implements AstNodeVisitor<AstNode, AvailTableContext> {
 
@@ -42,6 +41,9 @@ public class AddTableNameToColumnRewriter implements AstNodeVisitor<AstNode, Ava
     }
   }
 
+  /**
+   * 正常的程序入口
+   */
   @Override
   public AstNode visitColumn(Column node, AvailTableContext context) {
     Expression newExpr = (Expression) process(node.getExpr(), context);
@@ -78,6 +80,29 @@ public class AddTableNameToColumnRewriter implements AstNodeVisitor<AstNode, Ava
   }
 
   @Override
+  public AstNode visitStringLiteral(StringLiteral node, AvailTableContext context) {
+    return node;
+  }
+
+
+  @Override
+  public AstNode visitIntegerLiteral(IntegerLiteral node, AvailTableContext context) {
+    return node;
+  }
+
+  @Override
+  public AstNode visitCompareExpression(CompareExpression node, AvailTableContext context) {
+    Expression left = (Expression) process(node.getLeft(), context);
+    Expression right = (Expression) process(node.getRight(), context);
+    return node.replaceLeftRight(left, right);
+  }
+
+  @Override
+  public AstNode visitBooleanLiteral(BooleanLiteral node, AvailTableContext context) {
+    return node;
+  }
+
+  @Override
   public AstNode visitNode(AstNode node, AvailTableContext context) {
     throw new RuntimeException("should not be visit");
   }
@@ -108,24 +133,6 @@ public class AddTableNameToColumnRewriter implements AstNodeVisitor<AstNode, Ava
   }
 
   @Override
-  public AstNode visitStringLiteral(StringLiteral node, AvailTableContext context) {
-    return node;
-  }
-
-
-  @Override
-  public AstNode visitIntegerLiteral(IntegerLiteral node, AvailTableContext context) {
-    return node;
-  }
-
-  @Override
-  public AstNode visitCompareExpression(CompareExpression node, AvailTableContext context) {
-    Expression left = (Expression) process(node.getLeft(), context);
-    Expression right = (Expression) process(node.getRight(), context);
-    return node.replaceLeftRight(left, right);
-  }
-
-  @Override
   public AstNode visitMetricBindQuery(MetricBindQuery node, AvailTableContext context) {
     throw new RuntimeException("should not be visit");
   }
@@ -135,8 +142,4 @@ public class AddTableNameToColumnRewriter implements AstNodeVisitor<AstNode, Ava
     throw new RuntimeException("should not be visit");
   }
 
-  @Override
-  public AstNode visitBooleanLiteral(BooleanLiteral node, AvailTableContext context) {
-    return node;
-  }
 }

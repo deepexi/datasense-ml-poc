@@ -7,17 +7,15 @@ import lombok.Getter;
 @Getter
 public class Column extends AstNode {
 
-  public static final Column ALL_COLUMN = new Column("*", Identifier.of("*"), null, "*");
+  public static final Column ALL_COLUMN = new Column("*", Identifier.of("*"), null);
   private final Expression expr;
   private final String alias;
   private final ColumnDataType dataType;
-  private final String rawExpr; // 这个字段最终要去掉的
 
-  public Column(String alias, Expression expr, ColumnDataType dataType, String rawExpr) {
+  public Column(String alias, Expression expr, ColumnDataType dataType) {
     this.alias = alias;
     this.expr = expr;
     this.dataType = dataType;
-    this.rawExpr = rawExpr;
   }
 
   @Override
@@ -27,5 +25,9 @@ public class Column extends AstNode {
 
   public String toString() {
     return String.format("%s  =>  %s [%s ]", expr, alias, dataType);
+  }
+
+  public Column replaceExpr(Expression newExpr) {
+    return new Column(alias, newExpr, dataType);
   }
 }

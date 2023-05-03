@@ -128,24 +128,28 @@ nonReserved
     | YEAR
     ;
 
+CASE: 'CASE' | 'case';
+WHEN: 'WHEN' | 'when';
+THEN: 'THEN' | 'then';
+ELSE: 'ELSE' | 'else';
+END: 'END' | 'end';
+TRUE: 'TRUE' | 'true';
+FALSE: 'FALSE' | 'false';
+
 ALL: 'ALL';
 AND: 'AND';
 ANY: 'ANY';
 AS: 'AS';
 ASC: 'ASC';
 BY: 'BY';
-CASE: 'CASE' | 'case';
 CAST: 'CAST';
 COUNT: 'COUNT';
 DATE: 'DATE';
 DAY: 'DAY';
 DESC: 'DESC';
 DISTINCT: 'DISTINCT';
-ELSE: 'ELSE' | 'else';
-END: 'END' | 'end';
 EXCEPT: 'EXCEPT';
 EXCLUDING: 'EXCLUDING';
-FALSE: 'FALSE';
 FIRST: 'FIRST';
 FOLLOWING: 'FOLLOWING';
 HOUR: 'HOUR';
@@ -173,14 +177,11 @@ SECOND: 'SECOND';
 SET: 'SET';
 SUBSTRING: 'SUBSTRING';
 TEXT: 'TEXT';
-THEN: 'THEN' | 'then';
 TIME: 'TIME';
 TIMESTAMP: 'TIMESTAMP';
 TO: 'TO';
 TRIM: 'TRIM';
-TRUE: 'TRUE';
 UNIQUE: 'UNIQUE';
-WHEN: 'WHEN' | 'when';
 WINDOW: 'WINDOW';
 YEAR: 'YEAR';
 

@@ -23,7 +23,7 @@ public class RelationMock {
   public RelationMock(String tableName, List<String> colNames) {
     this.tableName = Identifier.of(tableName);
     this.columns = colNames.stream()
-        .map(name -> new Column(name, null, null, null))
+        .map(name -> new Column(name, null, null))
         .collect(Collectors.toList());
     this.allColumn = false;
   }

@@ -17,7 +17,10 @@ import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.source.ModelSource;
 import com.deepexi.ds.ast.source.TableSource;
+import com.deepexi.ds.builder.express.AddTableNameToColumnRewriter;
+import com.deepexi.ds.builder.express.AddTableNameToColumnRewriter.AvailTableContext;
 import com.deepexi.ds.builder.express.BoolConditionParser;
+import com.deepexi.ds.parser.ParserUtils;
 import com.deepexi.ds.ymlmodel.YmlColumn;
 import com.deepexi.ds.ymlmodel.YmlDimension;
 import com.deepexi.ds.ymlmodel.YmlJoin;
@@ -169,9 +172,7 @@ public class ModelBuilder {
         Column column = parseBasicColumn(col, srcRel, ctx);
         columns.add(column);
       } else {
-        // not parse
-        ColumnDataType type1 = ColumnDataType.fromName(col.getDataType());
-        Column column = new Column(col.getName(), null, type1, col.getExpr());
+        Column column = parseDerivedColumn(col, srcRel, ctx);
         columns.add(column);
       }
     }
@@ -212,7 +213,20 @@ public class ModelBuilder {
       throw new FieldMissException("data_type of " + colName);
     }
     // done
-    return new Column(colName, fromCol, type1, col.getExpr());
+    return new Column(colName, fromCol, type1/*, col.getExpr()*/);
+  }
+
+  private Column parseDerivedColumn(YmlColumn col, RelationMock srcRel, Container ctx) {
+    String colName = col.getName();
+    String type = col.getDataType();
+    ColumnDataType type1 = ColumnDataType.fromName(type); // dataType必须有
+    if (type1 == null) {
+      throw new FieldMissException("data_type of " + colName);
+    }
+    Expression expression = ParserUtils.parseStandaloneExpression(col.getExpr());
+    Column colRaw = new Column(colName, expression, type1);
+    AvailTableContext context = new AvailTableContext(ctx.scopes, srcRel);
+    return (Column) new AddTableNameToColumnRewriter().process(colRaw, context);
   }
 
   private void parseDimension(RelationMock srcRel, List<YmlDimension> list, Container ctx) {
@@ -233,7 +247,8 @@ public class ModelBuilder {
       Identifier refExpr = (Identifier) refCol.getExpr(); // TODO maybe 出问题
       // 重新组装 dimension, 比如 原来引用 tableA.colA => {currentTable}.colA
       Identifier expr = new Identifier(ctx.getName().getValue(), refExpr.getValue());
-      Column dim = new Column(refCol.getAlias(), expr, refCol.getDataType(), refCol.getRawExpr());
+      Column dim = new Column(refCol.getAlias(), expr,
+          refCol.getDataType()/*, refCol.getRawExpr()*/);
       dims.add(dim);
     }
     ctx.setDimensions(dims);

@@ -1,6 +1,9 @@
 package com.deepexi.ds.ast;
 
 import com.deepexi.ds.ModelException.UnsupportedException;
+import com.deepexi.ds.ast.expression.BooleanLiteral;
+import com.deepexi.ds.ast.expression.CaseWhenExpression;
+import com.deepexi.ds.ast.expression.CaseWhenExpression.WhenThen;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.IntegerLiteral;
@@ -45,4 +48,10 @@ public interface AstNodeVisitor<R, C> {
   R visitMetricBindQuery(MetricBindQuery node, C context);
 
   R visitOrderBy(OrderBy node, C context);
+
+  R visitCaseWhen(CaseWhenExpression node, C context);
+
+  R visitWhenThen(WhenThen node, C context);
+
+  R visitBooleanLiteral(BooleanLiteral node, C context);
 }

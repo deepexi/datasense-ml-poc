@@ -1,5 +1,6 @@
 package com.deepexi.ds.ast.visitor.generator;
 
+import static com.deepexi.ds.ast.utils.SqlTemplateId.case_when_001;
 import static com.deepexi.ds.ast.utils.SqlTemplateId.metric_bind_query_001;
 import static com.deepexi.ds.ast.utils.SqlTemplateId.model_001;
 
@@ -12,6 +13,9 @@ import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.OrderBy;
 import com.deepexi.ds.ast.Relation;
+import com.deepexi.ds.ast.expression.BooleanLiteral;
+import com.deepexi.ds.ast.expression.CaseWhenExpression;
+import com.deepexi.ds.ast.expression.CaseWhenExpression.WhenThen;
 import com.deepexi.ds.ast.expression.CompareExpression;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
@@ -142,6 +146,47 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
   }
 
   @Override
+  public String visitCaseWhen(CaseWhenExpression node, SqlGeneratorContext context) {
+    ImmutableList<WhenThen> whenThenList = node.getWhenThenList();
+    StringBuilder whenThenBuilder = new StringBuilder();
+    whenThenList.forEach(whenThen -> {
+      String whenThenSql = process(whenThen, context);
+      whenThenBuilder.append(whenThenSql);
+    });
+    String whenThenSql = whenThenBuilder.toString();
+
+    String elseSql = "";
+    if (node.getElseExpression() != null) {
+      elseSql = "else " + process(node.getElseExpression(), context);
+    }
+
+    // 组装模板
+    final String sqlTemplate = ResUtils.getSqlTemplate(case_when_001, context.getSqlDialect());
+    Map<String, String> valuesMap = new HashMap<>();
+    valuesMap.put("whenThenSql", whenThenSql);
+    valuesMap.put("elseSql", elseSql);
+
+    StringSubstitutor sub = new StringSubstitutor(valuesMap);
+    return sub.replace(sqlTemplate).trim();
+  }
+
+  @Override
+  public String visitWhenThen(WhenThen node, SqlGeneratorContext context) {
+    String whenSql = process(node.getWhen(), context);
+    String thenSql = process(node.getThen(), context);
+    return String.format("when %s then %s ", whenSql, thenSql);
+  }
+
+  @Override
+  public String visitBooleanLiteral(BooleanLiteral node, SqlGeneratorContext context) {
+    if (node == BooleanLiteral.TRUE) {
+      return "true";
+    } else {
+      return "false";
+    }
+  }
+
+  @Override
   public String visitModel(Model node, SqlGeneratorContext context) {
     final String ALL_COLUMN = "*";
 
@@ -205,7 +250,8 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
     final String pattern = "%s as %s";
     String alias = node.getAlias();
     if (node.getExpr() == null) {
-      return node.getRawExpr(); // use rawExpr
+      throw new ModelException("column expression should not be null");
+      // return node.getRawExpr(); // use rawExpr
     }
     String expr = process(node.getExpr(), context);
     return String.format(pattern, expr, alias);

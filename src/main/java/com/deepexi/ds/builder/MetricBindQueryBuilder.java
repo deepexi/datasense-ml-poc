@@ -125,7 +125,7 @@ public class MetricBindQueryBuilder {
       ColumnDataType dataType = ColumnDataType.fromName(m.getDataType());
       // TODO: 解析聚合函数
       StringLiteral expr = StringLiteral.of(rawExpr);
-      Column column = new Column(alias, expr, dataType, rawExpr);
+      Column column = new Column(alias, expr, dataType);
       columns.add(column);
     }
     // name

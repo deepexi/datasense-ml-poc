@@ -8,6 +8,9 @@ import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.OrderBy;
 import com.deepexi.ds.ast.Relation;
+import com.deepexi.ds.ast.expression.BooleanLiteral;
+import com.deepexi.ds.ast.expression.CaseWhenExpression;
+import com.deepexi.ds.ast.expression.CaseWhenExpression.WhenThen;
 import com.deepexi.ds.ast.expression.CompareExpression;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
@@ -79,6 +82,21 @@ public class ScopeCollector implements AstNodeVisitor<Void, ScopeCollectorContex
 
   @Override
   public Void visitOrderBy(OrderBy node, ScopeCollectorContext context) {
+    throw new UnsupportedException("this node should not be visit");
+  }
+
+  @Override
+  public Void visitCaseWhen(CaseWhenExpression node, ScopeCollectorContext context) {
+    throw new UnsupportedException("this node should not be visit");
+  }
+
+  @Override
+  public Void visitWhenThen(WhenThen node, ScopeCollectorContext context) {
+    throw new UnsupportedException("this node should not be visit");
+  }
+
+  @Override
+  public Void visitBooleanLiteral(BooleanLiteral node, ScopeCollectorContext context) {
     throw new UnsupportedException("this node should not be visit");
   }
 

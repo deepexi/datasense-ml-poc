@@ -7,6 +7,7 @@ import com.deepexi.ds.antlr4.DsParser;
 import com.deepexi.ds.antlr4.DsParser.ExpressionContext;
 import com.deepexi.ds.ast.expression.ArithmeticExpression;
 import com.deepexi.ds.ast.expression.ArithmeticExpression.ArithmeticOperator;
+import com.deepexi.ds.ast.expression.BooleanLiteral;
 import com.deepexi.ds.ast.expression.CaseWhenExpression;
 import com.deepexi.ds.ast.expression.CaseWhenExpression.WhenThen;
 import com.deepexi.ds.ast.expression.CompareOperator;
@@ -246,7 +247,12 @@ public class DsVisitor4Expression extends DsBaseVisitor<Expression> {
   @Override
   public Expression visitBooleanLiteral(DsParser.BooleanLiteralContext ctx) {
     debug(ctx);
-    return visitChildren(ctx);
+    // 这里并不打算创建 BooleanLiteral, 而是直接使用
+    if ("true".equalsIgnoreCase(ctx.getChild(0).getText())) {
+      return BooleanLiteral.TRUE;
+    } else {
+      return BooleanLiteral.FALSE;
+    }
   }
 
   @Override

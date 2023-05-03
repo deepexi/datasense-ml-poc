@@ -53,4 +53,8 @@ public class Identifier extends Expression {
   public int hashCode() {
     return Objects.hashCode(prefix, value);
   }
+
+  public Expression replacePrefix(String prefix) {
+    return new Identifier(prefix, value);
+  }
 }

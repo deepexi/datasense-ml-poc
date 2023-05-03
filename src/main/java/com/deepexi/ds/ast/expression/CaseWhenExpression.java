@@ -1,6 +1,5 @@
 package com.deepexi.ds.ast.expression;
 
-import com.deepexi.ds.ModelException.TODOException;
 import com.deepexi.ds.ast.AstNodeVisitor;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
@@ -27,17 +26,15 @@ public class CaseWhenExpression extends Expression {
 
   @Override
   public <R, C> R accept(AstNodeVisitor<R, C> visitor, C context) {
-    throw new TODOException("TODO");
+    return visitor.visitCaseWhen(this, context);
   }
 
   @Override
   public String toString() {
-    String elseStr = elseExpression == null ? "" : "else " + elseExpression.toString();
+    String elseStr = elseExpression == null ? "" : "else " + elseExpression;
     StringBuilder whenThenBuilder = new StringBuilder();
-    whenThenList.forEach(whenThen -> {
-      whenThenBuilder.append(whenThen.toString());
-    });
-    return String.format("case %s %s end", whenThenBuilder.toString(), elseStr);
+    whenThenList.forEach(whenThen -> whenThenBuilder.append(whenThen.toString()));
+    return String.format("case %s %s end", whenThenBuilder, elseStr);
   }
 
   @Getter
@@ -53,7 +50,7 @@ public class CaseWhenExpression extends Expression {
 
     @Override
     public <R, C> R accept(AstNodeVisitor<R, C> visitor, C context) {
-      throw new TODOException("TODO");
+      return visitor.visitWhenThen(this, context);
     }
 
     @Override

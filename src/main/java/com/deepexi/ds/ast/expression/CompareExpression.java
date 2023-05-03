@@ -20,4 +20,8 @@ public class CompareExpression extends BinaryExpression {
   public <R, C> R accept(AstNodeVisitor<R, C> visitor, C context) {
     return visitor.visitCompareExpression(this, context);
   }
+
+  public CompareExpression replaceLeftRight(Expression left, Expression right) {
+    return new CompareExpression(left, right, op);
+  }
 }

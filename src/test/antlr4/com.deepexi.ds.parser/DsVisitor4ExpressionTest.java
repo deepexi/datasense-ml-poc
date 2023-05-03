@@ -1,9 +1,13 @@
 package com.deepexi.ds.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.deepexi.ds.ast.expression.ArithmeticExpression;
+import com.deepexi.ds.ast.expression.CaseWhenExpression;
+import com.deepexi.ds.ast.expression.CaseWhenExpression.WhenThen;
 import com.deepexi.ds.ast.expression.CompareExpression;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.FunctionExpression;
@@ -82,6 +86,43 @@ public class DsVisitor4ExpressionTest {
         testStandalone("MAX(COUNT(*), FUN2(C1,C2))").toString());
     //    assertEquals(xxx, testStandalone(xxx).toString());
     //    assertEquals(xxx, testStandalone(xxx).toString());
+  }
+
+  @Test
+  public void testParse_case_when_1() {
+    String s = "case when d_dom <= 3 then xxx when d_dom <=4 then yyy else zzz end";
+    Expression expr = testStandalone(s);
+    assertTrue(expr instanceof CaseWhenExpression);
+    CaseWhenExpression caseWhen = (CaseWhenExpression) expr;
+
+    assertEquals(2, caseWhen.getWhenThenList().size());
+    WhenThen whenThen0 = caseWhen.getWhenThenList().get(0);
+    assertTrue(whenThen0.getWhen() instanceof CompareExpression);
+    assertEquals("d_dom", ((CompareExpression) whenThen0.getWhen()).getLeft().toString());
+    assertEquals("<=", ((CompareExpression) whenThen0.getWhen()).getOp().getName());
+    assertEquals("3", ((CompareExpression) whenThen0.getWhen()).getRight().toString());
+    assertEquals("xxx", whenThen0.getThen().toString());
+
+
+    WhenThen whenThen1 = caseWhen.getWhenThenList().get(1);
+    assertTrue(whenThen1.getWhen() instanceof CompareExpression);
+    assertEquals("d_dom", ((CompareExpression) whenThen1.getWhen()).getLeft().toString());
+    assertEquals("<=", ((CompareExpression) whenThen1.getWhen()).getOp().getName());
+    assertEquals("4", ((CompareExpression) whenThen1.getWhen()).getRight().toString());
+    assertEquals("yyy", whenThen1.getThen().toString());
+
+    assertNotNull(caseWhen.getElseExpression());
+    assertEquals("zzz", caseWhen.getElseExpression().toString());
+  }
+
+  @Test
+  public void testParse_case_when_no_else() {
+    String s = "case when d_dom <= 3 then xxx when d_dom <=4 then yyy end";
+    Expression expr = testStandalone(s);
+    assertTrue(expr instanceof CaseWhenExpression);
+    CaseWhenExpression caseWhen = (CaseWhenExpression) expr;
+
+    assertNull(caseWhen.getElseExpression());
   }
 
   private static Expression testStandalone(String inExpr) {

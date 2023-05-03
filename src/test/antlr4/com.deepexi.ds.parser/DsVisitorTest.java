@@ -24,7 +24,10 @@ public class DsVisitorTest {
       "COUNT(*)",
       //
       "MAX(1+2, T1.C1)",
-      "MAX(COUNT(*), FUN2(C1,C2))"
+      "MAX(COUNT(*), FUN2(C1,C2))",
+      //
+      "case when d_dom <= 3 then 3 when d_dom <=4 then 4 else 9 end",
+      "case when d_dom <= 3 then xxx when d_dom <=4 then yyy end"
   );
 
   public static List<String> case_boolean = Arrays.asList(

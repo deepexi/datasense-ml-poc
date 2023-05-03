@@ -4,8 +4,11 @@ import com.deepexi.ds.ModelException;
 import com.deepexi.ds.ModelException.TODOException;
 import com.deepexi.ds.antlr4.DsBaseVisitor;
 import com.deepexi.ds.antlr4.DsParser;
+import com.deepexi.ds.antlr4.DsParser.ExpressionContext;
 import com.deepexi.ds.ast.expression.ArithmeticExpression;
 import com.deepexi.ds.ast.expression.ArithmeticExpression.ArithmeticOperator;
+import com.deepexi.ds.ast.expression.CaseWhenExpression;
+import com.deepexi.ds.ast.expression.CaseWhenExpression.WhenThen;
 import com.deepexi.ds.ast.expression.CompareOperator;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.FunctionExpression;
@@ -24,15 +27,20 @@ import org.antlr.v4.runtime.tree.TerminalNode;
  */
 public class DsVisitor4Expression extends DsBaseVisitor<Expression> {
 
+  private static final boolean DEBUG = false;
+
   private void debug(ParserRuleContext ctx) {
-//    int childCount = ctx.getChildCount();
-//    for (int i = 0; i < childCount; i++) {
-//      System.out.printf("visit %s, child[%s] = %s%n",
-//          ctx.getClass().getCanonicalName(),
-//          i,
-//          ctx.getChild(i).getText());
-//    }
-//    System.out.println("====================");
+    if (!DEBUG) {
+      return;
+    }
+    int childCount = ctx.getChildCount();
+    for (int i = 0; i < childCount; i++) {
+      System.out.printf("visit %s, child[%s] = %s%n",
+          ctx.getClass().getCanonicalName(),
+          i,
+          ctx.getChild(i).getText());
+    }
+    System.out.println("====================");
   }
 
   @Override
@@ -148,7 +156,29 @@ public class DsVisitor4Expression extends DsBaseVisitor<Expression> {
   @Override
   public Expression visitSimpleCase(DsParser.SimpleCaseContext ctx) {
     debug(ctx);
-    return visitChildren(ctx);
+    // case when then (else)? end
+    // child[0] = case
+    // child[1] = when...then.. WhenClauseContext
+    // child[2] = when...then.. WhenClauseContext
+    // child[3] = else               当有else时
+    // child[4] = else 中的表达式      当有else时
+    // child[last] = end
+    int count = ctx.getChildCount();
+    ExpressionContext elseExpression = ctx.elseExpression;
+
+    int firstWhenThen = 1;
+    int lastWhenThen = count - 2; // no "else"
+    Expression elseExpr = null;
+    if (elseExpression != null) {
+      lastWhenThen = count - 4; // has "else"
+      elseExpr = visit(ctx.elseExpression);
+    }
+    List<WhenThen> whenThenList = new ArrayList<>();
+    for (int i = firstWhenThen; i <= lastWhenThen; i++) {
+      WhenThen whenThenExpr = (WhenThen) visit(ctx.getChild(i));
+      whenThenList.add(whenThenExpr);
+    }
+    return new CaseWhenExpression(whenThenList, elseExpr);
   }
 
   @Override
@@ -257,7 +287,14 @@ public class DsVisitor4Expression extends DsBaseVisitor<Expression> {
   @Override
   public Expression visitWhenClause(DsParser.WhenClauseContext ctx) {
     debug(ctx);
-    return visitChildren(ctx);
+    int childCount = ctx.getChildCount();
+    if (childCount != 4) {
+      throw new ModelException("when then should have 4 child");
+    }
+    // when expr then expr
+    Expression when = visit(ctx.getChild(1));
+    Expression then = visit(ctx.getChild(3));
+    return new WhenThen(when, then);
   }
 
   @Override

@@ -58,6 +58,7 @@ primaryExpression
     | qualifiedName '(' (label=identifier '.')? ASTERISK ')'                              #functionCall
     | qualifiedName '(' (expression (',' expression)*)? ')'                               #functionCall
     | CASE operand=expression whenClause+ (ELSE elseExpression=expression)? END           #simpleCase
+    | CASE whenClause+ (ELSE elseExpression=expression)? END                              #simpleCase
     | identifier                                                                          #columnReference
     | base=primaryExpression '.' fieldName=identifier                                     #dereference
     | '(' expression ')'                                                                  #parenthesizedExpression
@@ -133,15 +134,15 @@ ANY: 'ANY';
 AS: 'AS';
 ASC: 'ASC';
 BY: 'BY';
-CASE: 'CASE';
+CASE: 'CASE' | 'case';
 CAST: 'CAST';
 COUNT: 'COUNT';
 DATE: 'DATE';
 DAY: 'DAY';
 DESC: 'DESC';
 DISTINCT: 'DISTINCT';
-ELSE: 'ELSE';
-END: 'END';
+ELSE: 'ELSE' | 'else';
+END: 'END' | 'end';
 EXCEPT: 'EXCEPT';
 EXCLUDING: 'EXCLUDING';
 FALSE: 'FALSE';
@@ -172,14 +173,14 @@ SECOND: 'SECOND';
 SET: 'SET';
 SUBSTRING: 'SUBSTRING';
 TEXT: 'TEXT';
-THEN: 'THEN';
+THEN: 'THEN' | 'then';
 TIME: 'TIME';
 TIMESTAMP: 'TIMESTAMP';
 TO: 'TO';
 TRIM: 'TRIM';
 TRUE: 'TRUE';
 UNIQUE: 'UNIQUE';
-WHEN: 'WHEN';
+WHEN: 'WHEN' | 'when';
 WINDOW: 'WINDOW';
 YEAR: 'YEAR';
 

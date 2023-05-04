@@ -13,6 +13,7 @@ import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.OrderBy;
 import com.deepexi.ds.ast.Relation;
+import com.deepexi.ds.ast.Window;
 import com.deepexi.ds.ast.expression.BooleanLiteral;
 import com.deepexi.ds.ast.expression.CaseWhenExpression;
 import com.deepexi.ds.ast.expression.CaseWhenExpression.WhenThen;
@@ -204,6 +205,11 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
       args = builder.toString();
     }
     return s1.replace("_args_", args);
+  }
+
+  @Override
+  public String visitWindow(Window node, SqlGeneratorContext context) {
+    throw new RuntimeException("TODO");
   }
 
   @Override

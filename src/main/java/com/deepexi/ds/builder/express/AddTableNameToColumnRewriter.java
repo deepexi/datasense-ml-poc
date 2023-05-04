@@ -7,6 +7,7 @@ import com.deepexi.ds.ast.Join;
 import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.OrderBy;
+import com.deepexi.ds.ast.Window;
 import com.deepexi.ds.ast.expression.BooleanLiteral;
 import com.deepexi.ds.ast.expression.CaseWhenExpression;
 import com.deepexi.ds.ast.expression.CaseWhenExpression.WhenThen;
@@ -19,8 +20,10 @@ import com.deepexi.ds.ast.expression.StringLiteral;
 import com.deepexi.ds.ast.source.ModelSource;
 import com.deepexi.ds.ast.source.TableSource;
 import com.deepexi.ds.builder.express.AddTableNameToColumnRewriter.AvailTableContext;
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.Getter;
 
 /**
@@ -43,8 +46,41 @@ public class AddTableNameToColumnRewriter implements AstNodeVisitor<AstNode, Ava
    */
   @Override
   public AstNode visitColumn(Column node, AvailTableContext context) {
+    Window window = node.getWindow();
+    Window newWindow = window;
+    if (window != null) {
+      newWindow = (Window) process(window, context);
+    }
     Expression newExpr = (Expression) process(node.getExpr(), context);
-    return node.replaceExpr(newExpr);
+    return new Column(node.getAlias(), newExpr, node.getDataType(), newWindow);
+  }
+
+
+  @Override
+  public AstNode visitWindow(Window node, AvailTableContext context) {
+    ImmutableList<Column> partitions = node.getPartitions();
+    List<Column> newPartitions = partitions;
+    if (partitions.size() > 0) {
+      newPartitions = partitions.stream()
+          .map(column -> (Column) process(column, context))
+          .collect(Collectors.toList());
+    }
+    ImmutableList<OrderBy> orderBys = node.getOrderBys();
+    List<OrderBy> newOrderBys = orderBys;
+    if (orderBys.size() > 0) {
+      newOrderBys = orderBys.stream()
+          .map(orderBy -> (OrderBy) process(orderBy, context))
+          .collect(Collectors.toList());
+    }
+
+    return new Window(node.getWindowType(), newPartitions, newOrderBys, node.getLeft(),
+        node.getRight());
+  }
+
+  @Override
+  public AstNode visitOrderBy(OrderBy node, AvailTableContext context) {
+    Identifier identifier = (Identifier) process(node, context);
+    return new OrderBy(identifier, node.getDirection());
   }
 
   @Override
@@ -52,7 +88,8 @@ public class AddTableNameToColumnRewriter implements AstNodeVisitor<AstNode, Ava
     if (node.getPrefix() != null) {
       return node;
     }
-    return node.replacePrefix(context.sourceRelationIdentifier.getValue());
+    String prefix = context.sourceRelationIdentifier.getValue();
+    return new Identifier(prefix, node.getValue());
   }
 
   @Override
@@ -144,11 +181,6 @@ public class AddTableNameToColumnRewriter implements AstNodeVisitor<AstNode, Ava
 
   @Override
   public AstNode visitMetricBindQuery(MetricBindQuery node, AvailTableContext context) {
-    throw new RuntimeException("should not be visit");
-  }
-
-  @Override
-  public AstNode visitOrderBy(OrderBy node, AvailTableContext context) {
     throw new RuntimeException("should not be visit");
   }
 

@@ -11,11 +11,20 @@ public class Column extends AstNode {
   private final Expression expr;
   private final String alias;
   private final ColumnDataType dataType;
+  private final Window window;
 
   public Column(String alias, Expression expr, ColumnDataType dataType) {
     this.alias = alias;
     this.expr = expr;
     this.dataType = dataType;
+    this.window = null;
+  }
+
+  public Column(String alias, Expression expr, ColumnDataType dataType, Window window) {
+    this.alias = alias;
+    this.expr = expr;
+    this.dataType = dataType;
+    this.window = window;
   }
 
   @Override
@@ -27,7 +36,4 @@ public class Column extends AstNode {
     return String.format("%s  =>  %s [%s ]", expr, alias, dataType);
   }
 
-  public Column replaceExpr(Expression newExpr) {
-    return new Column(alias, newExpr, dataType);
-  }
 }

@@ -29,7 +29,7 @@ public class Window extends AstNode {
 
   @Override
   public <R, C> R accept(AstNodeVisitor<R, C> visitor, C context) {
-    throw new RuntimeException("TODO");
+    return visitor.visitWindow(this, context);
   }
 
   @Getter

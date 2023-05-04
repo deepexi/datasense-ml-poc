@@ -57,4 +57,6 @@ public interface AstNodeVisitor<R, C> {
   R visitBooleanLiteral(BooleanLiteral node, C context);
 
   R visitFunction(FunctionExpression node, C context);
+
+  R visitWindow(Window node, C context);
 }

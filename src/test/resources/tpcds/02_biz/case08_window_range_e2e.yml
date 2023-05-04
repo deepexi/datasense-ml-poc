@@ -1,8 +1,7 @@
-# 业务: 按照 [year,month,门店] 统计 sales_order 按月累计 销售额, 净利润,
-# 年在 [2000, 2001], 销售额 > 1,000,000
-# 多个指标(销售额, 净利润)在同一个查询中
-# order by limit offset
-# 窗口: 按月累计
+# 统计:
+# 门店=able, 在 2000年, 每天的销售额, 以及该天之前三天的累计销售额, 按日期排序
+# 输出格式 = able | year | month | day_of_month | 当前销售额 | 前三天销售额
+# 注意: 并不是每天都有销售额, 所以日期排序有空缺, 日期并不连续
 
 ---
 version: v1
@@ -37,6 +36,8 @@ columns:
     data_type: int
   - name: d_moy
     data_type: int
+  - name: d_dom
+    data_type: int
 
 ---
 version: v1
@@ -63,32 +64,27 @@ columns:
     expr: date_dim.d_moy
   - name: s_store_name
     expr: store.s_store_name
+  - name: d_dom
+    expr: date_dim.d_dom
 
 ---
 version: v1
 resource: metric_def
 name: metric_sum_ss_net_paid__store_sales # 命名规范 metric_[聚合描述]__[model]
 model_name: store_sales
-dimensions: [ d_year, d_moy, s_store_name ]
+dimensions: [ d_year, d_moy, d_dom, s_store_name ]
 agg: sum(ss_net_paid)
 
----
-version: v1
-resource: metric_def
-name: metric_sum_ss_net_profit__store_sales # 命名规范 metric_[聚合描述]__[model]
-model_name: store_sales
-dimensions: [ d_year, d_moy, s_store_name ]
-agg: sum(ss_net_profit)
 
 ---
 version: v1
 resource: metrics_query
 # 命名规范 query_[query描述]__[metric_name]
 name: query_by_month__metric_sum_ss_net_paid__store_sales
-metric_names: [ metric_sum_ss_net_paid__store_sales, metric_sum_ss_net_profit__store_sales ]
-dimensions: [ d_year, d_moy, s_store_name ]
+metric_names: [ metric_sum_ss_net_paid__store_sales ]
+dimensions: [ d_year, d_moy, d_dom, s_store_name ]
 # model_filters 填写维度名
-model_filters: [ d_year>=2000, d_year<=2001 ]
+model_filters: [ d_year=2000, s_store_name='able' ]
 # metric_filters 填写指标名称
 metric_filters: [ metric_sum_ss_net_paid__store_sales > 0 ]
 # 该窗口表示: 从(最早一条, 到 current row]
@@ -105,58 +101,48 @@ window:
   end:
     base: current_row
     offset: 0
-#order_by: [s_store_name, d_year, d_moy ]
-order_bys:
-  - name: s_store_name
-    direction: asc
-  - name: d_year
-  - name: d_moy
-limit: 100
-offset: 1
 
 ---
 version: v1
 resource: model_debug
 sql: >-
-  with store_sales_detail as (
+  with t1 as (
+    with store_sales as (
+      with store_sales as ( select * from store_sales )
+      select
+        store_sales.ss_net_paid as ss_net_paid,
+        store_sales.ss_net_profit as ss_net_profit,
+        date_dim.d_year as d_year,
+        date_dim.d_moy as d_moy,
+        date_dim.d_dom as d_dom,
+        store.s_store_name as s_store_name
+      from store_sales
+      inner join date_dim on store_sales.ss_sold_date_sk=date_dim.d_date_sk
+      inner join store on store_sales.ss_store_sk=store.s_store_sk
+    )
     select
-      ss_net_paid,
-      ss_net_profit,
-      date_dim.d_year,
-      date_dim.d_moy,
-      store.s_store_name
-    from store_sales 
-      inner join date_dim on ss_sold_date_sk=date_dim.d_date_sk
-      inner join store on ss_store_sk=store.s_store_sk
-  ),
-  store_sales_group_by_mon as (
-   select 
-     d_year,
-     d_moy,
-     s_store_name,
-     sum(ss_net_paid) as month_paid,
-     sum(ss_net_profit) as month_profit
-   from store_sales_detail
-   where d_year>=2000 and d_year<=2001
-   group by d_year, d_moy, s_store_name
-   having sum(ss_net_paid) > 0
+      make_date(d_year, d_moy, d_dom) as _the_date, -- 这里因为需要按天累计, 创建了日期列
+      store_sales.s_store_name as s_store_name,
+      store_sales.d_year as d_year,
+      store_sales.d_moy as d_moy,
+      store_sales.d_dom as d_dom,
+      sum(ss_net_paid) as day_sum_ss_net_paid
+    from store_sales
+    where
+      store_sales.d_year=2000
+      and s_store_name='able'
+      group by s_store_name, d_year, d_moy, d_dom
   )
-  select 
-  	s_store_name,
-  	d_year,
-  	d_moy,
-  	month_paid,
-  	sum(month_paid) over (
-      partition by s_store_name, d_year 
-      order by d_moy 
-      rows between unbounded preceding and current row
-    ) acc_mon_paid,
-  	month_profit,
-    sum(month_profit) over (
-      partition by s_store_name, d_year 
-      order by d_moy 
-      rows between unbounded preceding and current row
-    ) acc_mon_paid
-  from store_sales_group_by_mon
-  order by s_store_name, d_year, d_moy
-  limit 100 offset 1
+  select
+    _the_date,
+    s_store_name,
+    d_year,
+    d_moy,
+    d_dom,
+    day_sum_ss_net_paid,
+    sum(day_sum_ss_net_paid) over (
+      partition by 		s_store_name
+      order by _the_date
+      range between INTERVAL '3 days' PRECEDING and INTERVAL '1 day' PRECEDING
+    )
+  from t1

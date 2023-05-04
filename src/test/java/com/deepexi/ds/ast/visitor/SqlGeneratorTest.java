@@ -10,8 +10,9 @@ import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.Relation;
 import com.deepexi.ds.ast.SqlDialect;
-import com.deepexi.ds.ast.expression.IdentifierPolicy.IdentifierPolicyBackTick;
-import com.deepexi.ds.ast.expression.IdentifierPolicy.IdentifierPolicyNoQuote;
+import com.deepexi.ds.ast.visitor.generator.IdentifierQuotePolicy.IdentifierPolicyBackTick;
+import com.deepexi.ds.ast.visitor.generator.IdentifierQuotePolicy.IdentifierPolicyNoQuote;
+import com.deepexi.ds.ast.visitor.generator.IdentifierShowPolicy;
 import com.deepexi.ds.ast.visitor.generator.SqlGenerator;
 import com.deepexi.ds.ast.visitor.generator.SqlGeneratorContext;
 import com.deepexi.ds.ast.visitor.generator.SqlGeneratorPgContext;
@@ -33,8 +34,11 @@ public class SqlGeneratorTest {
     Model rootModel = ModelBuilder.singleTreeModel(ymlModels);
     // 准备 visit
     SqlGenerator generator = new SqlGenerator();
-    SqlGeneratorContext context = new SqlGeneratorContext(rootModel, SqlDialect.POSTGRES,
-        IdentifierPolicyNoQuote.NO_QUOTE);
+    SqlGeneratorContext context = new SqlGeneratorContext(
+        rootModel,
+        SqlDialect.POSTGRES,
+        IdentifierPolicyNoQuote.NO_QUOTE,
+        IdentifierShowPolicy.SHOW_TABLE_NAME);
     String sql = generator.process(context.getRoot(), context);
     assertNotNull(sql);
 
@@ -50,8 +54,11 @@ public class SqlGeneratorTest {
 
     // 准备 visit
     SqlGenerator generator = new SqlGenerator();
-    SqlGeneratorContext context = new SqlGeneratorContext(rootModel, SqlDialect.POSTGRES,
-        IdentifierPolicyBackTick.BACK_TICK);
+    SqlGeneratorContext context = new SqlGeneratorContext(
+        rootModel,
+        SqlDialect.POSTGRES,
+        IdentifierPolicyBackTick.BACK_TICK,
+        IdentifierShowPolicy.SHOW_TABLE_NAME);
     String sql = generator.process(context.getRoot(), context);
     System.out.println(sql);
     assertTrue(noPlaceHolder(sql)); // 所有占位符都已被替换

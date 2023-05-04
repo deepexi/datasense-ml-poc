@@ -21,7 +21,6 @@ import com.deepexi.ds.ast.expression.CompareExpression;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.FunctionExpression;
 import com.deepexi.ds.ast.expression.Identifier;
-import com.deepexi.ds.ast.expression.IdentifierPolicy;
 import com.deepexi.ds.ast.expression.IntegerLiteral;
 import com.deepexi.ds.ast.expression.StringLiteral;
 import com.deepexi.ds.ast.source.ModelSource;
@@ -156,10 +155,11 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
 
   @Override
   public String visitOrderBy(OrderBy node, SqlGeneratorContext context) {
-    String tblName = node.getName().getPrefix();
-    String colName = node.getName().getValue();
+    String field = process(node.getName(), context);
     String direction = node.getDirection().name;
-    return String.format("%s.%s %s", tblName, colName, direction);
+    // like: tableA.colX desc
+    return "_field_ _direction_".replace("_field_", field)
+        .replace("_direction_", direction);
   }
 
   @Override
@@ -359,19 +359,19 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
     }
 
     String alias = node.getAlias();
-    String exprStr = process(node.getExpr(), context);
-    String windowStr = "";
-
-    if (node.getWindow() != null) {
-      windowStr = "\n" + process(node.getWindow(), context);
+    String colExpr = process(node.getExpr(), context);
+    if (node.getWindow() == null) {
+      return "colExpr as alias"
+          .replace("colExpr", colExpr)
+          .replace("alias", alias);
     }
 
-    final String pattern = "_expr_ _window_ as _alias_";
-    return
-        pattern
-            .replace("_expr_", exprStr)
-            .replace("_window_", windowStr)
-            .replace("_alias_", alias);
+    // has window
+    String windowStr = "\n" + process(node.getWindow(), context);
+    return "colExpr window as alias"
+        .replace("colExpr", colExpr)
+        .replace("window", windowStr)
+        .replace("alias", alias);
   }
 
   @Override
@@ -431,27 +431,33 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
 
   @Override
   public String visitIdentifier(Identifier node, SqlGeneratorContext context) {
-    IdentifierPolicy policy = context.getIdentifierPolicy();
+    IdentifierQuotePolicy quotePolicy = context.getQuotePolicy();
+    IdentifierShowPolicy showPolicy = context.getShowPolicy();
 
-    String prefix = node.getPrefix();
-    String value = node.getValue();
-    if (prefix == null) {
-      if (policy.hasQuote()) {
-        return String.format("%s%s%s",
-            policy.quoteString(), value, policy.quoteString());
+    String tableName = node.getPrefix();
+    String fieldName = node.getValue();
+
+    // no_show_table && no_quote
+    // no_show_table && quote
+    // show_table && no_quote
+    // show_table && quote
+
+    if (showPolicy.showTableName() && tableName != null) {
+      if (!quotePolicy.hasQuote()) {
+        return tableName + "." + fieldName;
       } else {
-        return String.format("%s", node.getValue());
+        return quotePolicy.quote() + tableName + quotePolicy.quote()
+            + "." +
+            quotePolicy.quote() + fieldName + quotePolicy.quote();
       }
     }
 
-    if (policy.hasQuote()) {
-      return String.format("%s%s%s.%s%s%s",
-          policy.quoteString(), prefix, policy.quoteString(),
-          policy.quoteString(), value, policy.quoteString());
+    // table_name=null | policy=NO_TABLE_NAME
+    if (!quotePolicy.hasQuote()) {
+      return fieldName;
     } else {
-      return String.format("%s.%s", prefix, node.getValue());
+      return quotePolicy.quote() + fieldName + quotePolicy.quote();
     }
-
   }
 
   @Override

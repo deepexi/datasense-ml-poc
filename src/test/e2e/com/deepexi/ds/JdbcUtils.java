@@ -1,12 +1,16 @@
 package com.deepexi.ds;
 
-import com.deepexi.ds.ModelException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+/**
+ * 使用jdbc连接 对端数据库, 执行sql.
+ * 仅用于测试, 且目前仅比对 row count
+ * 目前连接 pg, 如果连接其他, 需要在 mvn中配置 jdbc驱动
+ */
 public class JdbcUtils {
 
   static String JDBC_DRIVER = "org.postgresql.Driver";
@@ -57,7 +61,7 @@ public class JdbcUtils {
   }
 
   public static void main(String[] args) {
-    String sql = "select from z01_fact_01";
+    String sql = "select * from call_center cc";
     System.out.println(queryCount(sql));
   }
 }

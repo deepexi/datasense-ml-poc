@@ -1,20 +1,20 @@
-package com.deepexi.ds.ast.expression;
+package com.deepexi.ds.ast.visitor.generator;
 
 import com.deepexi.ds.ModelException.UnsupportedException;
 
 /**
  * 是否用 `` '' 来将字段包裹起来
  */
-public interface IdentifierPolicy {
+public interface IdentifierQuotePolicy {
 
   boolean hasQuote();
 
-  String quoteString();
+  String quote();
 
-  IdentifierPolicy NO_QUOTE = new IdentifierPolicyNoQuote();
-  IdentifierPolicy BACK_TICK = new IdentifierPolicyBackTick();
+  IdentifierQuotePolicy NO_QUOTE = new IdentifierPolicyNoQuote();
+  IdentifierQuotePolicy BACK_TICK = new IdentifierPolicyBackTick();
 
-  final class IdentifierPolicyNoQuote implements IdentifierPolicy {
+  final class IdentifierPolicyNoQuote implements IdentifierQuotePolicy {
 
     @Override
     public boolean hasQuote() {
@@ -22,12 +22,12 @@ public interface IdentifierPolicy {
     }
 
     @Override
-    public String quoteString() {
+    public String quote() {
       throw new UnsupportedException("this method should NOT be called, since hasQuote is false");
     }
   }
 
-  final class IdentifierPolicyBackTick implements IdentifierPolicy {
+  final class IdentifierPolicyBackTick implements IdentifierQuotePolicy {
 
     @Override
     public boolean hasQuote() {
@@ -35,7 +35,7 @@ public interface IdentifierPolicy {
     }
 
     @Override
-    public String quoteString() {
+    public String quote() {
       return "`";
     }
   }

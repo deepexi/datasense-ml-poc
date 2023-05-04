@@ -14,7 +14,7 @@ public class Window extends AstNode {
   private final WindowType windowType;                  // 似乎不需要的
   private final ImmutableList<Identifier> partitions;   // optional
   private final ImmutableList<OrderBy> orderBys;        // optional
-  private final FrameType frameType;                    // 计算列
+  private final FrameType frameType;                    // rows | range | groups
   private final FrameBoundary frameStart;               // optional
   private final FrameBoundary frameEnd;                 // 与 start 一致
 
@@ -30,10 +30,6 @@ public class Window extends AstNode {
     this.frameType = frameType;
     this.frameStart = frameStart;
     this.frameEnd = frameEnd;
-
-    // 计算 frameType
-    // 如果 start end 是
-
   }
 
   @Override

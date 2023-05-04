@@ -16,7 +16,7 @@
 -- dialect: postgres, model_001.sql --
 with ${aliasSql} as (
     ${sourceSql}
-    )
+)
 select
     ${selectSql}
 from ${aliasSql} ${joinSql}

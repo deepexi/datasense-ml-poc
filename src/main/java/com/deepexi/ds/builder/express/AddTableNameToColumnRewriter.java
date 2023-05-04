@@ -12,14 +12,13 @@ import com.deepexi.ds.ast.expression.CaseWhenExpression;
 import com.deepexi.ds.ast.expression.CaseWhenExpression.WhenThen;
 import com.deepexi.ds.ast.expression.CompareExpression;
 import com.deepexi.ds.ast.expression.Expression;
+import com.deepexi.ds.ast.expression.FunctionExpression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.IntegerLiteral;
 import com.deepexi.ds.ast.expression.StringLiteral;
 import com.deepexi.ds.ast.source.ModelSource;
 import com.deepexi.ds.ast.source.TableSource;
-import com.deepexi.ds.builder.RelationMock;
 import com.deepexi.ds.builder.express.AddTableNameToColumnRewriter.AvailTableContext;
-import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -32,12 +31,10 @@ public class AddTableNameToColumnRewriter implements AstNodeVisitor<AstNode, Ava
   @Getter
   public static class AvailTableContext {
 
-    private final ImmutableList<RelationMock> scopes;
-    private final RelationMock sourceRelation;
+    private final Identifier sourceRelationIdentifier;
 
-    public AvailTableContext(List<RelationMock> scopes, RelationMock sourceRelation) {
-      this.scopes = ImmutableList.copyOf(scopes);
-      this.sourceRelation = sourceRelation;
+    public AvailTableContext(Identifier identifier) {
+      this.sourceRelationIdentifier = identifier;
     }
   }
 
@@ -55,7 +52,7 @@ public class AddTableNameToColumnRewriter implements AstNodeVisitor<AstNode, Ava
     if (node.getPrefix() != null) {
       return node;
     }
-    return node.replacePrefix(context.sourceRelation.getTableName().getValue());
+    return node.replacePrefix(context.sourceRelationIdentifier.getValue());
   }
 
   @Override
@@ -100,6 +97,19 @@ public class AddTableNameToColumnRewriter implements AstNodeVisitor<AstNode, Ava
   @Override
   public AstNode visitBooleanLiteral(BooleanLiteral node, AvailTableContext context) {
     return node;
+  }
+
+  @Override
+  public AstNode visitFunction(FunctionExpression node, AvailTableContext context) {
+    if (node.getArgs().size() == 0) {
+      return node;
+    }
+    List<Expression> newArgs = new ArrayList<>();
+    for (Expression expression : node.getArgs()) {
+      Expression newArg = (Expression) process(expression, context);
+      newArgs.add(newArg);
+    }
+    return node.replaceArgs(newArgs);
   }
 
   @Override

@@ -9,13 +9,13 @@ import lombok.Getter;
 @Getter
 public class MetricBindQuery extends Relation {
 
-  private final Identifier name;                  // 该 metric 名
-  private final Relation relation;                // 该查询所依赖的 "表"
-  private final ImmutableList<Column> metrics;    // 每个指标的
+  private final Identifier name;                          // 该 metric 名
+  private final Relation relation;                        // 该查询所依赖的 "表", from 子句
+  private final ImmutableList<Column> metrics;            // 每个指标的, select中的聚合函数
   // 查询有关的条件
-  private final ImmutableList<Expression> metricFilters;
-  private final ImmutableList<Column> dimensions;
-  private final ImmutableList<Expression> modelFilters;
+  private final ImmutableList<Expression> metricFilters;  // having 子句中的过滤条件
+  private final ImmutableList<Column> dimensions;         // group by 子句中的列, 也会在 select中
+  private final ImmutableList<Expression> modelFilters;   // where clause中的列
 
   // orderBy / limit /offset
   private final ImmutableList<OrderBy> orderBys;
@@ -24,7 +24,6 @@ public class MetricBindQuery extends Relation {
 
   public MetricBindQuery(
       Identifier queryName,
-      // Model model,
       Relation relation,
       List<Expression> metricFilters,
       List<Column> dimensions,

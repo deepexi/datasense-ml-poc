@@ -5,6 +5,7 @@ import com.deepexi.ds.ast.expression.BooleanLiteral;
 import com.deepexi.ds.ast.expression.CaseWhenExpression;
 import com.deepexi.ds.ast.expression.CaseWhenExpression.WhenThen;
 import com.deepexi.ds.ast.expression.Expression;
+import com.deepexi.ds.ast.expression.FunctionExpression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.IntegerLiteral;
 import com.deepexi.ds.ast.expression.StringLiteral;
@@ -54,4 +55,6 @@ public interface AstNodeVisitor<R, C> {
   R visitWhenThen(WhenThen node, C context);
 
   R visitBooleanLiteral(BooleanLiteral node, C context);
+
+  R visitFunction(FunctionExpression node, C context);
 }

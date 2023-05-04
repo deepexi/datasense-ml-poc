@@ -213,7 +213,7 @@ public class SqlGeneratorTest {
   @Test
   public void testVisitMetricBindQuery_case05() {
     YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("tpcds/02_biz/case05_e2e.yml");
-    MetricBindQuery node = new MetricBindQueryBuilder(ctx).build();
+    MetricBindQuery node = (MetricBindQuery) new MetricBindQueryBuilder(ctx).build();
     assertEquals(2, node.getMetrics().size());
 
     // generate sql
@@ -229,7 +229,7 @@ public class SqlGeneratorTest {
   @Test
   public void testVisitMetricBindQuery_case06() {
     YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("tpcds/02_biz/case06_order_by_e2e.yml");
-    MetricBindQuery node = new MetricBindQueryBuilder(ctx).build();
+    MetricBindQuery node = (MetricBindQuery) new MetricBindQueryBuilder(ctx).build();
     assertEquals(2, node.getMetrics().size());
 
     // generate sql

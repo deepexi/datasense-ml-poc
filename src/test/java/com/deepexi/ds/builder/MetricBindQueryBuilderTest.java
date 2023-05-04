@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.deepexi.ds.ModelException;
 import com.deepexi.ds.ast.MetricBindQuery;
+import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ymlmodel.YmlFullQuery;
 import com.deepexi.ds.ymlmodel.factory.YmlFullQueryParser;
 import org.junit.jupiter.api.Test;
@@ -14,7 +15,7 @@ public class MetricBindQueryBuilderTest {
   @Test
   public void testBuild() {
     YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("debug/10_full.yml");
-    MetricBindQuery fullAst = new MetricBindQueryBuilder(ctx).build();
+    MetricBindQuery fullAst = (MetricBindQuery) new MetricBindQueryBuilder(ctx).build();
     assertNotNull(fullAst);
   }
 
@@ -22,5 +23,12 @@ public class MetricBindQueryBuilderTest {
   public void testBuild_illegal_1_dim() {
     YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("debug/11_full_illegal_1.yml");
     assertThrows(ModelException.class, () -> new MetricBindQueryBuilder(ctx).build());
+  }
+
+  @Test
+  public void testBuild_window() {
+    YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("tpcds/02_biz/case07_window_e2e.yml");
+    Model fullAst = (Model) new MetricBindQueryBuilder(ctx).build();
+    assertNotNull(fullAst);
   }
 }

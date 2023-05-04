@@ -1,7 +1,8 @@
-# 业务: 按照 [year,month,门店] 统计 sales_order 销售额, 净利润,
+# 业务: 按照 [year,month,门店] 统计 sales_order 按月累计 销售额, 净利润,
 # 年在 [2000, 2001], 销售额 > 1,000,000
 # 多个指标(销售额, 净利润)在同一个查询中
 # order by limit offset
+# 窗口: 按月累计
 
 ---
 version: v1
@@ -47,10 +48,8 @@ source:
   datasource: ds_id_ck01
 joins:
   - model_name: date_dim
-    # join_type: inner # default join=inner
     conditions: [ ss_sold_date_sk=date_dim.d_date_sk ]
   - model_name: store
-    # join_type: inner # default join=inner
     conditions: [ ss_store_sk=store.s_store_sk ]
 dimensions: [ d_year, d_moy, s_store_name ]
 columns:
@@ -73,7 +72,6 @@ model_name: store_sales
 dimensions: [ d_year, d_moy, s_store_name ]
 agg: sum(ss_net_paid)
 
-
 ---
 version: v1
 resource: metric_def
@@ -81,7 +79,6 @@ name: metric_sum_ss_net_profit__store_sales # 命名规范 metric_[聚合描述]
 model_name: store_sales
 dimensions: [ d_year, d_moy, s_store_name ]
 agg: sum(ss_net_profit)
-
 
 ---
 version: v1
@@ -93,15 +90,7 @@ dimensions: [ d_year, d_moy, s_store_name ]
 # model_filters 填写维度名
 model_filters: [ d_year>=200, d_year<=2001 ]
 # metric_filters 填写指标名称
-metric_filters: [ metric_sum_ss_net_paid__store_sales > 1100000 ]
-#order_by: [s_store_name, d_year, d_moy ]
-order_bys:
-  - name: s_store_name
-    direction: asc
-  - name: d_year
-  - name: d_moy
-limit: 100
-offset: 1
+metric_filters: [ metric_sum_ss_net_paid__store_sales > 0 ]
 # 该窗口表示: 从(最早一条, 到 current row]
 window:
   window_type: sliding # sliding | tumbling, 目前仅支持 sliding
@@ -115,12 +104,20 @@ window:
   right:
     base: current_row
     offset: 0
+#order_by: [s_store_name, d_year, d_moy ]
+order_bys:
+  - name: s_store_name
+    direction: asc
+  - name: d_year
+  - name: d_moy
+limit: 100
+offset: 1
 
 ---
 version: v1
 resource: model_debug
 sql: >-
-  with cte as (
+  with store_sales_detail as (
     select
       ss_net_paid,
       ss_net_profit,
@@ -130,16 +127,27 @@ sql: >-
     from store_sales 
       inner join date_dim on ss_sold_date_sk=date_dim.d_date_sk
       inner join store on ss_store_sk=store.s_store_sk
+  ),
+  store_sales_group_by_mon as (
+   select 
+     d_year,
+     d_moy,
+     s_store_name,
+     sum(ss_net_paid) as month_paid,
+     sum(ss_net_profit) as month_profit
+   from store_sales_detail
+   where d_year>=200 and d_year<=2001
+   group by d_year, d_moy, s_store_name
+   having sum(ss_net_paid) > 0
   )
   select 
-    d_year,
-    d_moy,
-    s_store_name,
-    sum(ss_net_paid) as metric_sum_ss_net_paid__store_sales,
-    sum(ss_net_profit) as metric_sum_ss_net_profit__store_sales
-  from cte
-  where d_year>=200 and d_year<=2001
-  group by d_year, d_moy, s_store_name
-  having sum(ss_net_paid) > 1100000
+  	s_store_name,
+  	d_year,
+  	d_moy,
+  	month_paid,
+  	sum(month_paid) over (partition by s_store_name, d_year order by d_moy rows between unbounded preceding and current row) acc_mon_paid,
+  	month_profit,
+    sum(month_profit) over (partition by s_store_name, d_year order by d_moy rows between unbounded preceding and current row) acc_mon_paid
+  from store_sales_group_by_mon
   order by s_store_name, d_year, d_moy
-  limit 100 offset 1
+  limit 100 offset 0

@@ -223,7 +223,6 @@ public class DsVisitor4Expression extends DsBaseVisitor<Expression> {
     int firstArgIndex = 2;
     int lastArgIndex = childCount - 2;
     for (int i = firstArgIndex; i <= lastArgIndex; i = i + 2) {
-      System.out.println(ctx.getChild(i).getText());
       ParseTree child = ctx.getChild(i);
       boolean isAsterisk = child instanceof TerminalNode && "*".equals(child.getText());
       Expression arg = isAsterisk ? StringLiteral.of("*") : visit(ctx.getChild(i));

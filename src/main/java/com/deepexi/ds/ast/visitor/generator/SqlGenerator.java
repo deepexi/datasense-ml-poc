@@ -18,6 +18,7 @@ import com.deepexi.ds.ast.expression.CaseWhenExpression;
 import com.deepexi.ds.ast.expression.CaseWhenExpression.WhenThen;
 import com.deepexi.ds.ast.expression.CompareExpression;
 import com.deepexi.ds.ast.expression.Expression;
+import com.deepexi.ds.ast.expression.FunctionExpression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.IdentifierPolicy;
 import com.deepexi.ds.ast.expression.IntegerLiteral;
@@ -184,6 +185,25 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
     } else {
       return "false";
     }
+  }
+
+  @Override
+  public String visitFunction(FunctionExpression node, SqlGeneratorContext context) {
+    String pattern = "_fun_(_args_)";
+    String s1 = pattern.replace("_fun_", node.getName());
+    String args = "";
+    if (node.getArgs().size() > 0) {
+      StringBuilder builder = new StringBuilder();
+      for (int i = 0; i < node.getArgs().size(); i++) {
+        if (i > 0) {
+          builder.append(", ");
+        }
+        Expression arg = node.getArgs().get(i);
+        builder.append(process(arg, context));
+      }
+      args = builder.toString();
+    }
+    return s1.replace("_args_", args);
   }
 
   @Override

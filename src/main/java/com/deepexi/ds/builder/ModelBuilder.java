@@ -225,7 +225,7 @@ public class ModelBuilder {
     }
     Expression expression = ParserUtils.parseStandaloneExpression(col.getExpr());
     Column colRaw = new Column(colName, expression, type1);
-    AvailTableContext context = new AvailTableContext(ctx.scopes, srcRel);
+    AvailTableContext context = new AvailTableContext(srcRel.getTableName());
     return (Column) new AddTableNameToColumnRewriter().process(colRaw, context);
   }
 
@@ -247,8 +247,7 @@ public class ModelBuilder {
       Identifier refExpr = (Identifier) refCol.getExpr(); // TODO maybe 出问题
       // 重新组装 dimension, 比如 原来引用 tableA.colA => {currentTable}.colA
       Identifier expr = new Identifier(ctx.getName().getValue(), refExpr.getValue());
-      Column dim = new Column(refCol.getAlias(), expr,
-          refCol.getDataType()/*, refCol.getRawExpr()*/);
+      Column dim = new Column(refCol.getAlias(), expr, refCol.getDataType());
       dims.add(dim);
     }
     ctx.setDimensions(dims);

@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.deepexi.ds.ast.AstNode;
 import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
+import com.deepexi.ds.ast.Relation;
 import com.deepexi.ds.ast.SqlDialect;
 import com.deepexi.ds.ast.expression.IdentifierPolicy.IdentifierPolicyBackTick;
 import com.deepexi.ds.ast.expression.IdentifierPolicy.IdentifierPolicyNoQuote;
@@ -231,6 +232,21 @@ public class SqlGeneratorTest {
     YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("tpcds/02_biz/case06_order_by_e2e.yml");
     MetricBindQuery node = (MetricBindQuery) new MetricBindQueryBuilder(ctx).build();
     assertEquals(2, node.getMetrics().size());
+
+    // generate sql
+    SqlGenerator generator = new SqlGenerator();
+    SqlGeneratorContext context = new SqlGeneratorPgContext(node);
+    String sql = generator.process(context.getRoot(), context);
+    assertNotNull(sql);
+    assertTrue(noPlaceHolder(sql)); // 所有占位符都已被替换
+    System.out.println(sql);
+    assertNotNull(sql);
+  }
+
+  @Test
+  public void testVisitMetricBindQuery_case07() {
+    YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("tpcds/02_biz/case07_window_e2e.yml");
+    Relation node = (Relation) new MetricBindQueryBuilder(ctx).build();
 
     // generate sql
     SqlGenerator generator = new SqlGenerator();

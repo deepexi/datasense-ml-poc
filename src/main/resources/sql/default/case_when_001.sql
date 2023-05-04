@@ -8,7 +8,7 @@
 --! sql变量:
 --!     whenThenSql
 --!     elseSql
--- dialect: default, case_when_001.sql [保留, 用于检测是否命中了正确的dialect]
+-- dialect: default, case_when_001.sql
 case
     ${whenThenSql}
     ${elseSql}

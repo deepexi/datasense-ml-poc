@@ -4,14 +4,16 @@ import com.deepexi.ds.ModelException.UnsupportedException;
 import com.deepexi.ds.ast.expression.BooleanLiteral;
 import com.deepexi.ds.ast.expression.CaseWhenExpression;
 import com.deepexi.ds.ast.expression.CaseWhenExpression.WhenThen;
+import com.deepexi.ds.ast.expression.CompareExpression;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.FunctionExpression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.IntegerLiteral;
 import com.deepexi.ds.ast.expression.StringLiteral;
-import com.deepexi.ds.ast.expression.CompareExpression;
 import com.deepexi.ds.ast.source.ModelSource;
 import com.deepexi.ds.ast.source.TableSource;
+import com.deepexi.ds.ast.window.FrameBoundary;
+import com.deepexi.ds.ast.window.Window;
 
 /**
  * R = Result, C = Context
@@ -20,6 +22,10 @@ public interface AstNodeVisitor<R, C> {
 
   default R process(AstNode node, C context) {
     return node.accept(this, context);
+  }
+
+  default R process(AstNode node) {
+    return node.accept(this, null);
   }
 
   default R visitNode(AstNode node, C context) {
@@ -59,4 +65,6 @@ public interface AstNodeVisitor<R, C> {
   R visitFunction(FunctionExpression node, C context);
 
   R visitWindow(Window node, C context);
+
+  R visitFrameBoundary(FrameBoundary node, C context);
 }

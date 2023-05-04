@@ -11,19 +11,25 @@ import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.OrderBy;
 import com.deepexi.ds.ast.OrderBy.OrderByDirection;
-import com.deepexi.ds.ast.Window;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
-import com.deepexi.ds.builder.express.AddTableNameToColumnRewriter;
-import com.deepexi.ds.builder.express.AddTableNameToColumnRewriter.AvailTableContext;
+import com.deepexi.ds.ast.window.FrameBoundary;
+import com.deepexi.ds.ast.window.FrameType;
+import com.deepexi.ds.ast.window.Window;
+import com.deepexi.ds.ast.window.FrameBoundaryBase;
+import com.deepexi.ds.ast.window.WindowType;
 import com.deepexi.ds.builder.express.BoolConditionParser;
+import com.deepexi.ds.builder.express.ColumnNameRewriter;
+import com.deepexi.ds.builder.express.ColumnTableNameRewriter;
 import com.deepexi.ds.builder.express.MetricExpressionParser;
 import com.deepexi.ds.parser.ParserUtils;
+import com.deepexi.ds.ymlmodel.YmlFrameBoundary;
 import com.deepexi.ds.ymlmodel.YmlFullQuery;
 import com.deepexi.ds.ymlmodel.YmlMetric;
 import com.deepexi.ds.ymlmodel.YmlMetricQuery;
 import com.deepexi.ds.ymlmodel.YmlMetricQuery.YmlOrderBy;
 import com.deepexi.ds.ymlmodel.YmlModel;
+import com.deepexi.ds.ymlmodel.YmlWindow;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -122,13 +128,14 @@ public class MetricBindQueryBuilder {
 
     // collect all metrics
     List<Column> columns = new ArrayList<>();
+    ColumnTableNameRewriter tableNameRewriter = new ColumnTableNameRewriter(
+        model4Metrics.getName());
     for (YmlMetric m : this.metrics) {
       String alias = m.getName();
       Expression expression = ParserUtils.parseStandaloneExpression(m.getAggregate());
       ColumnDataType dataType = ColumnDataType.fromName(m.getDataType());
       Column rawCol = new Column(alias, expression, dataType);
-      AvailTableContext context = new AvailTableContext(model4Metrics.getName());
-      Column column = (Column) new AddTableNameToColumnRewriter().process(rawCol, context);
+      Column column = (Column) tableNameRewriter.process(rawCol);
       columns.add(column);
     }
     // name
@@ -170,8 +177,7 @@ public class MetricBindQueryBuilder {
     metricQuery.getOrderBys().forEach((YmlOrderBy ymlOrderBy) -> {
       String colName = ymlOrderBy.getName();
       Identifier name1 = new Identifier(model4Metrics.getName().getValue(), colName);
-      String direction = ymlOrderBy.getDirection();
-      OrderByDirection direction1 = OrderByDirection.fromName(direction);
+      OrderByDirection direction1 = OrderByDirection.fromName(ymlOrderBy.getDirection());
       orderBys.add(new OrderBy(name1, direction1));
     });
 
@@ -188,34 +194,153 @@ public class MetricBindQueryBuilder {
           metricQuery.getOffset());
     }
 
-    if (true) {
-      throw new RuntimeException("in progress");
-    }
     // 包含 window, 需要创建一个额外的 MetricBindQuery, 记做 midMetric
     // 在 midMetric完成 group by
-    // 之上还有一层 MetricBindQuery, 完成窗口运算
-    String midMetricName = metricQuery.getName() + "__mid";
-    MetricBindQuery midMetric = new MetricBindQuery(Identifier.of(midMetricName),
-        model4Metrics, metricFilters, dimensions,
-        modelFilters, columns, EMPTY_LIST, null, null);
+    // 之上还有一层 MetricBindQuery, 完成窗口运算, 记做 upper
 
-    // window
-    Window window = buildWindow();
-
-    return new Model(
-        metricQueryName,
-        midMetric,
-        EMPTY_LIST,
+    // ======== 处理 midMetric
+    String midMetricName = "_mid_";
+    // String midMetricName = "_mid_" + metricQuery.getName() ;
+    Identifier midMetricId = Identifier.of(midMetricName);
+    MetricBindQuery midMetric = new MetricBindQuery(
+        midMetricId,
+        model4Metrics,
+        metricFilters,
+        dimensions,
+        modelFilters,
         columns,
         EMPTY_LIST,
-        orderBys,
-        metricQuery.getLimit(),
-        metricQuery.getOffset()
+        null,
+        null);
+
+    // window
+    Window window = buildWindow(midMetricId);
+
+    // orderBys 处理
+    ColumnTableNameRewriter tableNameReplacer = new ColumnTableNameRewriter(
+        midMetric.getName(),
+        midMetric.getRelation().getTableName(),
+        midMetric.getName()
+    );
+
+    List<OrderBy> orderByUpper = new ArrayList<>(orderBys.size());
+    orderBys.forEach(orderBy -> {
+      Identifier identifier = (Identifier) tableNameReplacer.process(orderBy.getName());
+      orderByUpper.add(new OrderBy(identifier, orderBy.getDirection()));
+    });
+
+    // column 处理
+    List<Column> upperColumns = buildColumnForUpperModel(midMetric, window);
+
+    // 最终返回一个 Model
+    return new Model(
+        metricQueryName,        // model id
+        midMetric,              // from what relation
+        EMPTY_LIST,             // join
+        upperColumns,           // exposure columns
+        EMPTY_LIST,             // dimensions
+        orderByUpper,           // order by
+        metricQuery.getLimit(), // limit
+        metricQuery.getOffset() // offset
     );
   }
 
-  private Window buildWindow() {
-    return null;
+  private List<Column> buildColumnForUpperModel(MetricBindQuery midMetric, Window window) {
+    ColumnTableNameRewriter tableNameReplacer = new ColumnTableNameRewriter(
+        midMetric.getName(),
+        midMetric.getRelation().getTableName(),
+        midMetric.getName()
+    );
+
+    // 指标维度列, 改写 tableName即可
+    List<Column> upperColumns = new ArrayList<>();
+    for (int i = 0; i < midMetric.getDimensions().size(); i++) {
+      Column dimInMid = midMetric.getDimensions().get(i);
+      Column column = (Column) tableNameReplacer.process(dimInMid);
+      upperColumns.add(column);
+    }
+
+    // 指标列, 改tableName, 该字段名,  加window
+    for (int i = 0; i < midMetric.getMetrics().size(); i++) {
+      // 改 tableName
+      Column metricInMid = midMetric.getMetrics().get(i);
+      Column columnInToTable = (Column) tableNameReplacer.process(metricInMid);
+
+      // 改 fieldName
+      String toName = metricInMid.getAlias();
+      ColumnNameRewriter columnNameRewriter = new ColumnNameRewriter(midMetric.getName(), toName);
+      Column noWindow = (Column) columnNameRewriter.process(columnInToTable);
+
+      // 添加 window 到该 column
+      Column hasWindow = new Column(
+          noWindow.getAlias(),
+          noWindow.getExpr(),
+          noWindow.getDataType(),
+          window
+      );
+      upperColumns.add(hasWindow);
+    }
+
+    return upperColumns;
+  }
+
+  /**
+   * 构建 window, 返回的window已经处理过, 基于 fromRelation
+   */
+  private Window buildWindow(Identifier fromRelation) {
+    YmlWindow ymlWindow = this.metricQuery.getWindow();
+
+    // windowType
+    WindowType windowType = WindowType.fromName(ymlWindow.getWindowType());
+    if (windowType == null) {
+      throw new ModelException("window type not support " + ymlWindow.getWindowType());
+    }
+
+    ColumnTableNameRewriter rewriter = new ColumnTableNameRewriter(fromRelation);
+    // partitions
+    List<Identifier> partitions = EMPTY_LIST;
+    if (ymlWindow.getPartitions().size() > 0) {
+      ImmutableList<String> ymlPartition = ymlWindow.getPartitions();
+      partitions = new ArrayList<>(ymlPartition.size());
+      for (int i = 0; i < ymlPartition.size(); i++) {
+        String partitionCol = ymlPartition.get(i);
+        Identifier col0 = (Identifier) ParserUtils.parseStandaloneExpression(partitionCol);
+        Identifier col1 = (Identifier) rewriter.process(col0);
+        partitions.add(col1);
+      }
+    }
+
+    // orderBys
+    List<OrderBy> orderBys = EMPTY_LIST;
+    if (ymlWindow.getOrderBys().size() > 0) {
+      ImmutableList<YmlOrderBy> ymlOrderBys = ymlWindow.getOrderBys();
+      orderBys = new ArrayList<>(ymlOrderBys.size());
+      for (int i = 0; i < ymlOrderBys.size(); i++) {
+        YmlOrderBy ymlOrderBy = ymlOrderBys.get(i);
+        Identifier col0 = (Identifier) ParserUtils.parseStandaloneExpression(ymlOrderBy.getName());
+        Identifier col1 = (Identifier) rewriter.process(col0);
+        OrderByDirection direction1 = OrderByDirection.fromName(ymlOrderBy.getDirection());
+        orderBys.add(new OrderBy(col1, direction1));
+      }
+    }
+
+    FrameType frameType = FrameType.fromName(ymlWindow.getFrameType());
+    FrameBoundary start = parseFromYml(ymlWindow.getStart());
+    FrameBoundary end = parseFromYml(ymlWindow.getEnd());
+
+    return new Window(windowType, partitions, orderBys, frameType, start, end);
+  }
+
+  private FrameBoundary parseFromYml(YmlFrameBoundary boundary) {
+    if (boundary == null) {
+      throw new ModelException("window must have two boundary");
+    }
+    String ymlLeftBase = boundary.getBase();
+    FrameBoundaryBase leftBase = FrameBoundaryBase.fromName(ymlLeftBase);
+    if (leftBase == null) {
+      throw new ModelException("window base not support " + ymlLeftBase);
+    }
+    return new FrameBoundary(leftBase, boundary.getOffset());
   }
 
 }

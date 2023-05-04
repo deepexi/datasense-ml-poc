@@ -97,11 +97,12 @@ window:
   partitions: [ s_store_name, d_year ]
   order_bys:
     - name: d_moy
-  # 几个关键字 left_most, current_row
-  left:
-    base: left_most
+  # unbounded_preceding 对应累计求和
+  frame_type: rows
+  start:
+    base: unbounded_preceding
     offset: 0
-  right:
+  end:
     base: current_row
     offset: 0
 #order_by: [s_store_name, d_year, d_moy ]
@@ -150,4 +151,4 @@ sql: >-
     sum(month_profit) over (partition by s_store_name, d_year order by d_moy rows between unbounded preceding and current row) acc_mon_paid
   from store_sales_group_by_mon
   order by s_store_name, d_year, d_moy
-  limit 100 offset 0
+  limit 100 offset 1

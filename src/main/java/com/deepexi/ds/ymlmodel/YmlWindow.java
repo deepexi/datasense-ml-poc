@@ -11,19 +11,22 @@ public class YmlWindow {
   private final String windowType;
   private final ImmutableList<String> partitions;
   private final ImmutableList<YmlOrderBy> orderBys;
-  private final YmlWindowBoundary left;
-  private final YmlWindowBoundary right;
+  private final String frameType;
+  private final YmlFrameBoundary start;
+  private final YmlFrameBoundary end;
 
   public YmlWindow(
       String windowType,
       List<String> partitions,
       List<YmlOrderBy> orderBys,
-      YmlWindowBoundary left,
-      YmlWindowBoundary right) {
+      String frameType,
+      YmlFrameBoundary start,
+      YmlFrameBoundary end) {
     this.windowType = windowType;
     this.partitions = ImmutableList.copyOf(partitions);
     this.orderBys = ImmutableList.copyOf(orderBys);
-    this.left = left;
-    this.right = right;
+    this.frameType = frameType;
+    this.start = start;
+    this.end = end;
   }
 }

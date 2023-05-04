@@ -17,9 +17,8 @@ import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.source.ModelSource;
 import com.deepexi.ds.ast.source.TableSource;
-import com.deepexi.ds.builder.express.AddTableNameToColumnRewriter;
-import com.deepexi.ds.builder.express.AddTableNameToColumnRewriter.AvailTableContext;
 import com.deepexi.ds.builder.express.BoolConditionParser;
+import com.deepexi.ds.builder.express.ColumnTableNameRewriter;
 import com.deepexi.ds.parser.ParserUtils;
 import com.deepexi.ds.ymlmodel.YmlColumn;
 import com.deepexi.ds.ymlmodel.YmlDimension;
@@ -225,8 +224,7 @@ public class ModelBuilder {
     }
     Expression expression = ParserUtils.parseStandaloneExpression(col.getExpr());
     Column colRaw = new Column(colName, expression, type1);
-    AvailTableContext context = new AvailTableContext(srcRel.getTableName());
-    return (Column) new AddTableNameToColumnRewriter().process(colRaw, context);
+    return (Column) new ColumnTableNameRewriter(srcRel.getTableName()).process(colRaw);
   }
 
   private void parseDimension(RelationMock srcRel, List<YmlDimension> list, Container ctx) {

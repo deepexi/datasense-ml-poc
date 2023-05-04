@@ -2,18 +2,20 @@ package com.deepexi.ds.ast;
 
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
+import com.deepexi.ds.ast.window.Window;
 import lombok.Getter;
+import lombok.NonNull;
 
 @Getter
 public class Column extends AstNode {
 
   public static final Column ALL_COLUMN = new Column("*", Identifier.of("*"), null);
-  private final Expression expr;
   private final String alias;
-  private final ColumnDataType dataType;
-  private final Window window;
+  private final Expression expr;          // maybe null
+  private final ColumnDataType dataType;  // maybe null
+  private final Window window;            // maybe null
 
-  public Column(String alias, Expression expr, ColumnDataType dataType) {
+  public Column(@NonNull String alias, @NonNull Expression expr, ColumnDataType dataType) {
     this.alias = alias;
     this.expr = expr;
     this.dataType = dataType;
@@ -33,7 +35,7 @@ public class Column extends AstNode {
   }
 
   public String toString() {
-    return String.format("%s  =>  %s [%s ]", expr, alias, dataType);
+    return String.format("%s  AS  %s", expr, alias);
   }
 
 }

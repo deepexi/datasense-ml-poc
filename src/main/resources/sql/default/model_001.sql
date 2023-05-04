@@ -10,6 +10,9 @@
 --!     sourceSql
 --!     columnSql
 --!     joinSql
+--!     orderBySql
+--!     limitSql
+--!     offsetSql
 -- dialect: default, model_001.sql --
 with ${aliasSql} as (
     ${sourceSql}
@@ -17,3 +20,5 @@ with ${aliasSql} as (
 select
     ${selectSql}
 from ${aliasSql} ${joinSql}
+${orderBySql}
+${limitSql} ${offsetSql}

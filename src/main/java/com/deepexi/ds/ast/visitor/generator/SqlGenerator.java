@@ -3,6 +3,7 @@ package com.deepexi.ds.ast.visitor.generator;
 import static com.deepexi.ds.ast.utils.SqlTemplateId.case_when_001;
 import static com.deepexi.ds.ast.utils.SqlTemplateId.metric_bind_query_001;
 import static com.deepexi.ds.ast.utils.SqlTemplateId.model_001;
+import static com.deepexi.ds.ast.utils.SqlTemplateId.window_row_frame_001;
 
 import com.deepexi.ds.ModelException;
 import com.deepexi.ds.ast.AstNode;
@@ -13,7 +14,6 @@ import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.OrderBy;
 import com.deepexi.ds.ast.Relation;
-import com.deepexi.ds.ast.Window;
 import com.deepexi.ds.ast.expression.BooleanLiteral;
 import com.deepexi.ds.ast.expression.CaseWhenExpression;
 import com.deepexi.ds.ast.expression.CaseWhenExpression.WhenThen;
@@ -27,6 +27,12 @@ import com.deepexi.ds.ast.expression.StringLiteral;
 import com.deepexi.ds.ast.source.ModelSource;
 import com.deepexi.ds.ast.source.TableSource;
 import com.deepexi.ds.ast.utils.ResUtils;
+import com.deepexi.ds.ast.utils.SqlTemplateId;
+import com.deepexi.ds.ast.window.FrameBoundary;
+import com.deepexi.ds.ast.window.FrameBoundaryBase;
+import com.deepexi.ds.ast.window.FrameType;
+import com.deepexi.ds.ast.window.Window;
+import com.deepexi.ds.ast.window.WindowType;
 import com.google.common.collect.ImmutableList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +43,31 @@ import org.apache.commons.text.StringSubstitutor;
  * this visit traverse the whole ModelML, then generate full sql
  */
 public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext> {
+
+  private String genOrderBySql(List<OrderBy> orderBys, SqlGeneratorContext context) {
+    String orderBySql = "";
+    if (orderBys != null && orderBys.size() > 0) {
+      StringBuilder orderByBuilder = new StringBuilder();
+      orderByBuilder.append("order by ");
+      for (int i = 0; i < orderBys.size(); i++) {
+        if (i > 0) {
+          orderByBuilder.append(", ");
+        }
+        String str = process(orderBys.get(i), context);
+        orderByBuilder.append(str);
+      }
+      orderBySql = orderByBuilder.toString();
+    }
+    return orderBySql;
+  }
+
+  private String templateFilling(SqlTemplateId templateId, Map<String, String> valuesMap,
+      SqlGeneratorContext context) {
+    final String sqlTemplate = ResUtils.getSqlTemplate(templateId,
+        context.getSqlDialect());
+    StringSubstitutor sub = new StringSubstitutor(valuesMap);
+    return sub.replace(sqlTemplate).trim();
+  }
 
   @Override
   public String visitMetricBindQuery(MetricBindQuery node, SqlGeneratorContext context) {
@@ -104,26 +135,12 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
     }
 
     // order by
-    String orderBySql = "";
-    if (node.getOrderBys().size() > 0) {
-      StringBuilder orderByBuilder = new StringBuilder();
-      orderByBuilder.append("order by ");
-      for (int i = 0; i < node.getOrderBys().size(); i++) {
-        if (i > 0) {
-          orderByBuilder.append(", ");
-        }
-        String str = process(node.getOrderBys().get(i), context);
-        orderByBuilder.append(str);
-      }
-      orderBySql = orderByBuilder.toString();
-    }
-
+    String orderBySql = genOrderBySql(node.getOrderBys(), context);
     // limit offset
     String limitSql = node.getLimit() == null ? "" : "limit " + node.getLimit();
     String offsetSql = node.getOffset() == null ? "" : "offset " + node.getOffset();
+
     // 组装模板
-    final String sqlTemplate = ResUtils.getSqlTemplate(metric_bind_query_001,
-        context.getSqlDialect());
     Map<String, String> valuesMap = new HashMap<>();
     valuesMap.put("aliasSql", aliasSql);
     valuesMap.put("modelSql", ResUtils.indent(modelSql));
@@ -134,9 +151,7 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
     valuesMap.put("orderBySql", orderBySql);
     valuesMap.put("limitSql", limitSql);
     valuesMap.put("offsetSql", offsetSql);
-
-    StringSubstitutor sub = new StringSubstitutor(valuesMap);
-    return sub.replace(sqlTemplate).trim();
+    return templateFilling(metric_bind_query_001, valuesMap, context);
   }
 
   @Override
@@ -163,13 +178,10 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
     }
 
     // 组装模板
-    final String sqlTemplate = ResUtils.getSqlTemplate(case_when_001, context.getSqlDialect());
     Map<String, String> valuesMap = new HashMap<>();
     valuesMap.put("whenThenSql", whenThenSql);
     valuesMap.put("elseSql", elseSql);
-
-    StringSubstitutor sub = new StringSubstitutor(valuesMap);
-    return sub.replace(sqlTemplate).trim();
+    return templateFilling(case_when_001, valuesMap, context);
   }
 
   @Override
@@ -209,7 +221,71 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
 
   @Override
   public String visitWindow(Window node, SqlGeneratorContext context) {
-    throw new RuntimeException("TODO");
+    if (node.getWindowType() != WindowType.SLIDING) {
+      throw new ModelException("only support sliding window");
+    }
+    if (node.getFrameType() != FrameType.ROWS) {
+      throw new ModelException("TODO, current only support rows");
+    }
+
+    // partitionSql
+    String partitionSql = "";
+    if (node.getPartitions() != null && node.getPartitions().size() > 0) {
+      ImmutableList<Identifier> partitions = node.getPartitions();
+      StringBuilder builder = new StringBuilder();
+      builder.append("partition by ");
+      for (int i = 0; i < partitions.size(); i++) {
+        if (i > 0) {
+          builder.append(", ");
+        }
+        Identifier identifier = partitions.get(i);
+        builder.append(process(identifier, context));    // 用 prefix.value
+      }
+      partitionSql = builder.toString();
+    }
+
+    String orderBySql = genOrderBySql(node.getOrderBys(), context);
+    String frameStart = "";
+    if (node.getFrameStart() != null) {
+      frameStart = process(node.getFrameStart(), context);
+    }
+
+    String frameEnd = "";
+    if (node.getFrameEnd() != null) {
+      frameEnd = process(node.getFrameEnd(), context);
+    }
+    String frameType = node.getFrameType().name;
+
+    Map<String, String> valuesMap = new HashMap<>();
+    valuesMap.put("partitionSql", partitionSql);
+    valuesMap.put("orderBySql", orderBySql);
+    valuesMap.put("frameType", frameType);
+    valuesMap.put("frameStart", frameStart);
+    valuesMap.put("frameEnd", frameEnd);
+    return templateFilling(window_row_frame_001, valuesMap, context);
+  }
+
+  @Override
+  public String visitFrameBoundary(FrameBoundary node, SqlGeneratorContext context) {
+    FrameBoundaryBase base = node.getBase();
+    if (base == FrameBoundaryBase.CURRENT_ROW) {
+      return "current row";
+    }
+    if (base == FrameBoundaryBase.UNBOUNDED_FOLLOWING) {
+      return "unbounded following";
+    }
+    if (base == FrameBoundaryBase.UNBOUNDED_PRECEDING) {
+      return "unbounded preceding";
+    }
+    if (base == FrameBoundaryBase.N_FOLLOWING) {
+      // offset > 0
+      return node.getOffset() + " " + "following";
+    }
+    if (base == FrameBoundaryBase.N_PRECEDING) {
+      return node.getOffset() + " " + "preceding";
+    }
+
+    throw new ModelException("if you add new FrameBoundaryBase, you should parse it here");
   }
 
   @Override
@@ -225,11 +301,9 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
     String sourceSql = process(source, context);
 
     // selectSql
-    String selectSql;
+    String selectSql = ALL_COLUMN;
     List<Column> columns = node.getColumns();
-    if (columns == null || columns.size() == 0) {
-      selectSql = ALL_COLUMN;
-    } else {
+    if (columns != null && columns.size() > 0) {
       // get = "colA, colB, colC"
       StringBuilder builder = new StringBuilder();
       for (int i = 0; i < columns.size(); i++) {
@@ -255,15 +329,22 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
       joinSql = builder.toString();
     }
 
+    // order by
+    String orderBySql = genOrderBySql(node.getOrderBys(), context);
+    // limit offset
+    String limitSql = node.getLimit() == null ? "" : "limit " + node.getLimit();
+    String offsetSql = node.getOffset() == null ? "" : "offset " + node.getOffset();
+
     // 组装模板
-    final String sqlTemplate = ResUtils.getSqlTemplate(model_001, context.getSqlDialect());
     Map<String, String> valuesMap = new HashMap<>();
     valuesMap.put("aliasSql", aliasSql);
     valuesMap.put("sourceSql", ResUtils.indent(sourceSql));
     valuesMap.put("selectSql", ResUtils.indent(selectSql));
     valuesMap.put("joinSql", joinSql);
-    StringSubstitutor sub = new StringSubstitutor(valuesMap);
-    return sub.replace(sqlTemplate);
+    valuesMap.put("orderBySql", orderBySql);
+    valuesMap.put("limitSql", limitSql);
+    valuesMap.put("offsetSql", offsetSql);
+    return templateFilling(model_001, valuesMap, context);
   }
 
   @Override
@@ -273,14 +354,24 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
 
   @Override
   public String visitColumn(Column node, SqlGeneratorContext context) {
-    final String pattern = "%s as %s";
-    String alias = node.getAlias();
     if (node.getExpr() == null) {
       throw new ModelException("column expression should not be null");
-      // return node.getRawExpr(); // use rawExpr
     }
-    String expr = process(node.getExpr(), context);
-    return String.format(pattern, expr, alias);
+
+    String alias = node.getAlias();
+    String exprStr = process(node.getExpr(), context);
+    String windowStr = "";
+
+    if (node.getWindow() != null) {
+      windowStr = "\n" + process(node.getWindow(), context);
+    }
+
+    final String pattern = "_expr_ _window_ as _alias_";
+    return
+        pattern
+            .replace("_expr_", exprStr)
+            .replace("_window_", windowStr)
+            .replace("_alias_", alias);
   }
 
   @Override

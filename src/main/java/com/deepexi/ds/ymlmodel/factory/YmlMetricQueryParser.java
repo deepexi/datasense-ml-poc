@@ -3,10 +3,10 @@ package com.deepexi.ds.ymlmodel.factory;
 import static java.util.Collections.EMPTY_LIST;
 
 import com.deepexi.ds.ComponentType;
+import com.deepexi.ds.ymlmodel.YmlFrameBoundary;
 import com.deepexi.ds.ymlmodel.YmlMetricQuery;
 import com.deepexi.ds.ymlmodel.YmlMetricQuery.YmlOrderBy;
 import com.deepexi.ds.ymlmodel.YmlWindow;
-import com.deepexi.ds.ymlmodel.YmlWindowBoundary;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -101,22 +101,23 @@ public class YmlMetricQueryParser {
   }
 
   private static YmlWindow parseWindow(Map<String, Object> mapHasWindow) {
-    if(! mapHasWindow.containsKey("window")){
+    if (!mapHasWindow.containsKey("window")) {
       return null;
     }
     Map<String, Object> windowMap = (Map<String, Object>) mapHasWindow.get("window");
     String windowType = (String) windowMap.get("window_type");
     List<String> partitions = (List<String>) windowMap.get("partitions");
     List<YmlOrderBy> orderBys = parseOrderBy(windowMap);
-    YmlWindowBoundary left = parseBoundary((Map<String, Object>) windowMap.get("left"));
-    YmlWindowBoundary right = parseBoundary((Map<String, Object>) windowMap.get("right"));
+    String frameType = (String) windowMap.get("frame_type");
+    YmlFrameBoundary start = parseBoundary((Map<String, Object>) windowMap.get("start"));
+    YmlFrameBoundary end = parseBoundary((Map<String, Object>) windowMap.get("end"));
     //
-    return new YmlWindow(windowType, partitions, orderBys, left, right);
+    return new YmlWindow(windowType, partitions, orderBys, frameType, start, end);
   }
 
-  private static YmlWindowBoundary parseBoundary(Map<String, Object> boundaryInfo) {
+  private static YmlFrameBoundary parseBoundary(Map<String, Object> boundaryInfo) {
     String base = (String) boundaryInfo.get("base");
     int offset = (int) boundaryInfo.get("offset");
-    return new YmlWindowBoundary(base, offset);
+    return new YmlFrameBoundary(base, offset);
   }
 }

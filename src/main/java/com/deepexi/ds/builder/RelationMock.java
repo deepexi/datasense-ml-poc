@@ -3,6 +3,7 @@ package com.deepexi.ds.builder;
 import com.deepexi.ds.ast.Column;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.expression.Identifier;
+import com.deepexi.ds.ast.expression.StringLiteral;
 import com.deepexi.ds.ast.source.TableSource;
 import com.deepexi.ds.ymlmodel.YmlColumn;
 import com.deepexi.ds.ymlmodel.YmlModel;
@@ -23,7 +24,7 @@ public class RelationMock {
   public RelationMock(String tableName, List<String> colNames) {
     this.tableName = Identifier.of(tableName);
     this.columns = colNames.stream()
-        .map(name -> new Column(name, null, null))
+        .map(name -> new Column(name, StringLiteral.of("*"), null))
         .collect(Collectors.toList());
     this.allColumn = false;
   }

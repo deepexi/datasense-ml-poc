@@ -4,17 +4,16 @@
 --! sql文件命名规范: {该sql所处node名}_{数字编号}.sql, 如 metric_bind_query_001.sql表示 MetricBindQuery中使用该文件
 --! 占位符方式: ${变量名}, 如 ${aliasSql}
 --! ============= 以下用于描述 sql模板 ======
---! sql用途: 解析Model节点时 生成整体sql
+--! sql用途: 解析 window
 --! sql变量:
---!     aliasSql
---!     sourceSql
---!     columnSql
---!     joinSql
--- dialect: default, template.sql [保留, 用于检测是否命中了正确的dialect]
-with ${aliasSql} as (
-    ${sourceSql}
-    )
-select
-    ${selectSql}
-from ${aliasSql} ${joinSql}
--- dialect: default, template.sql [保留, 用于检测是否命中了正确的dialect]
+--!     partitionSql
+--!     orderBySql
+--!     frameType
+--!     frameStart
+--!     frameEnd
+-- dialect: postgres, window_row_frame_001.sql --
+over (
+    ${partitionSql}
+    ${orderBySql}
+    ${frameType} between ${frameStart} and ${frameEnd}
+)

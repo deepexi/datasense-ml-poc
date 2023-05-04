@@ -3,6 +3,7 @@ package com.deepexi.ds.ast;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.google.common.collect.ImmutableList;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 
@@ -21,6 +22,9 @@ public class MetricBindQuery extends Relation {
   private final ImmutableList<OrderBy> orderBys;
   private final Integer limit;
   private final Integer offset;
+
+  // 计算列
+  private final ImmutableList<Column> columns;
 
   public MetricBindQuery(
       Identifier queryName,
@@ -41,6 +45,12 @@ public class MetricBindQuery extends Relation {
     this.orderBys = ImmutableList.copyOf(orderBys);
     this.limit = limit;
     this.offset = offset;
+
+    // columns = dimension + metrics
+    List<Column> columnsOfThisRelation = new ArrayList<>();
+    columnsOfThisRelation.addAll(dimensions);
+    columnsOfThisRelation.addAll(metrics);
+    this.columns = ImmutableList.copyOf(columnsOfThisRelation);
   }
 
   @Override
@@ -53,8 +63,4 @@ public class MetricBindQuery extends Relation {
     return getName();
   }
 
-  @Override
-  public List<Column> getColumns() {
-    return null;
-  }
 }

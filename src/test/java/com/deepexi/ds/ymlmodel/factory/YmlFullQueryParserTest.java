@@ -74,10 +74,10 @@ public class YmlFullQueryParserTest {
     assertEquals("d_moy", window.getOrderBys().get(0).getName());
     assertEquals("asc", window.getOrderBys().get(0).getDirection());
     // left
-    assertEquals("left_most", window.getLeft().getBase());
-    assertEquals(0, window.getLeft().getOffset());
+    assertEquals("unbounded_preceding", window.getStart().getBase());
+    assertEquals(0, window.getStart().getOffset());
     // right
-    assertEquals("current_row", window.getRight().getBase());
-    assertEquals(0, window.getRight().getOffset());
+    assertEquals("current_row", window.getEnd().getBase());
+    assertEquals(0, window.getEnd().getOffset());
   }
 }

@@ -233,9 +233,8 @@ public class ModelBuilder {
       if (refCol == null) {
         throw new ModelException(String.format("dimension [%s] not exists in columns", name));
       }
-      Identifier refExpr = (Identifier) refCol.getExpr(); // TODO maybe 出问题
       // 重新组装 dimension, 比如 原来引用 tableA.colA => {currentTable}.colA
-      Identifier expr = new Identifier(ctx.getName().getValue(), refExpr.getValue());
+      Identifier expr = new Identifier(ctx.getName().getValue(), refCol.getAlias());
       Column dim = new Column(refCol.getAlias(), expr, refCol.getDataType());
       dims.add(dim);
     }

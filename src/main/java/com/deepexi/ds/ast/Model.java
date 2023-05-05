@@ -60,11 +60,16 @@ public class Model extends Relation {
 
   @Override
   public String toString() {
-    return name.toString();
+    return "model: " + name.toString();
   }
 
   @Override
   public Identifier getTableName() {
     return name;
+  }
+
+  @Override
+  public boolean hasAnyColumn() {
+    return false;
   }
 }

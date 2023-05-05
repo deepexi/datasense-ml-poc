@@ -28,11 +28,16 @@ public class TableSource extends Relation {
 
   @Override
   public String toString() {
-    return tableName + ", dataSource=" + dataSource;
+    return "table: " + tableName + ", dataSource=" + dataSource;
   }
 
   @Override
   public List<Column> getColumns() {
     return null;
+  }
+
+  @Override
+  public boolean hasAnyColumn() {
+    return true;
   }
 }

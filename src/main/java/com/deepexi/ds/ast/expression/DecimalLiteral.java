@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import lombok.Getter;
 
 @Getter
-public class DecimalLiteral extends Expression {
+public class DecimalLiteral extends Literal {
 
   private final BigDecimal value;
 

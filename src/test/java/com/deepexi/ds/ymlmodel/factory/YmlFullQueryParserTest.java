@@ -65,7 +65,6 @@ public class YmlFullQueryParserTest {
     assertNotNull(ctx);
     YmlWindow window = ctx.getQuery().getWindow();
     assertNotNull(window);
-    assertEquals("sliding", window.getWindowType());
     // getPartitions
     assertEquals("s_store_name", window.getPartitions().get(0));
     assertEquals("d_year", window.getPartitions().get(1));

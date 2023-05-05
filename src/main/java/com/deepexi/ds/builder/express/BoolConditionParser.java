@@ -1,11 +1,11 @@
 package com.deepexi.ds.builder.express;
 
 import com.deepexi.ds.ModelException.TODOException;
+import com.deepexi.ds.ast.Relation;
 import com.deepexi.ds.ast.expression.CompareExpression;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.builder.ModelBuilder;
-import com.deepexi.ds.builder.RelationMock;
 import com.deepexi.ds.parser.ParserUtils;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
@@ -18,10 +18,10 @@ import java.util.List;
 public class BoolConditionParser {
 
   private final String literal;
-  private final ImmutableList<RelationMock> scope;
-  private final RelationMock srcRel;
+  private final ImmutableList<Relation> scope;
+  private final Relation srcRel;
 
-  public BoolConditionParser(String literal, List<RelationMock> scope, RelationMock srcRel) {
+  public BoolConditionParser(String literal, List<Relation> scope, Relation srcRel) {
     this.literal = literal.trim();
     this.scope = ImmutableList.copyOf(scope);
     this.srcRel = srcRel;
@@ -57,7 +57,7 @@ public class BoolConditionParser {
     String tableName = tableCol.getPrefix();
     String colName = tableCol.getValue();
     if (tableName != null) {
-      RelationMock rel = ModelBuilder.assertTableInScope(tableName, scope);
+      Relation rel = ModelBuilder.assertTableInScope(tableName, scope);
       ModelBuilder.assertColumnExistsInRelation(colName, rel);
       return tableCol;
     } else {

@@ -4,7 +4,7 @@ import com.deepexi.ds.ast.AstNodeVisitor;
 import lombok.Getter;
 
 @Getter
-public class IntegerLiteral extends Expression {
+public class IntegerLiteral extends Literal {
 
   private final Integer value;
 

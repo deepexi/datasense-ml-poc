@@ -8,8 +8,6 @@ import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.OrderBy;
 import com.deepexi.ds.ast.Relation;
-import com.deepexi.ds.ast.window.FrameBoundary;
-import com.deepexi.ds.ast.window.Window;
 import com.deepexi.ds.ast.expression.BooleanLiteral;
 import com.deepexi.ds.ast.expression.CaseWhenExpression;
 import com.deepexi.ds.ast.expression.CaseWhenExpression.WhenThen;
@@ -21,6 +19,8 @@ import com.deepexi.ds.ast.expression.IntegerLiteral;
 import com.deepexi.ds.ast.expression.StringLiteral;
 import com.deepexi.ds.ast.source.ModelSource;
 import com.deepexi.ds.ast.source.TableSource;
+import com.deepexi.ds.ast.window.FrameBoundary;
+import com.deepexi.ds.ast.window.Window;
 
 /**
  * visit node=[source, join], get all available scope
@@ -30,6 +30,7 @@ public class ScopeCollector implements AstNodeVisitor<Void, ScopeCollectorContex
   @Override
   public Void visitModel(Model node, ScopeCollectorContext context) {
     // visit source and joins
+    context.registerRelation(node, node);
     process(node.getSource(), context);
 
     if (node.getJoins() != null && node.getJoins().size() > 0) {

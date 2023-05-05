@@ -31,7 +31,6 @@ import com.deepexi.ds.ast.window.FrameBoundary;
 import com.deepexi.ds.ast.window.FrameBoundaryBase;
 import com.deepexi.ds.ast.window.FrameType;
 import com.deepexi.ds.ast.window.Window;
-import com.deepexi.ds.ast.window.WindowType;
 import com.google.common.collect.ImmutableList;
 import java.util.HashMap;
 import java.util.List;
@@ -221,9 +220,6 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
 
   @Override
   public String visitWindow(Window node, SqlGeneratorContext context) {
-    if (node.getWindowType() != WindowType.SLIDING) {
-      throw new ModelException("only support sliding window");
-    }
     if (node.getFrameType() != FrameType.ROWS) {
       throw new ModelException("TODO, current only support rows");
     }

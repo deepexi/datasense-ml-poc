@@ -1,4 +1,9 @@
 # store_sales join store
+# join1                             [model_def]
+# |__source: store_sales            [model_def]
+#            |__source: store_sales [table]
+# |__join: store                    [model_def]
+#            |__source: store       [table]
 version: v1
 resource: model_def
 name: join1

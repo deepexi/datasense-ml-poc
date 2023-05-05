@@ -28,7 +28,7 @@ public class ModelSource extends Relation {
 
   @Override
   public String toString() {
-    return model.getName().getValue();
+    return "Model:" + model.getName().getValue();
   }
 
   @Override
@@ -39,5 +39,10 @@ public class ModelSource extends Relation {
   @Override
   public List<Column> getColumns() {
     return model.getColumns();
+  }
+
+  @Override
+  public boolean hasAnyColumn() {
+    return false;
   }
 }

@@ -105,14 +105,13 @@ public class YmlMetricQueryParser {
       return null;
     }
     Map<String, Object> windowMap = (Map<String, Object>) mapHasWindow.get("window");
-    String windowType = (String) windowMap.get("window_type");
     List<String> partitions = (List<String>) windowMap.get("partitions");
     List<YmlOrderBy> orderBys = parseOrderBy(windowMap);
     String frameType = (String) windowMap.get("frame_type");
     YmlFrameBoundary start = parseBoundary((Map<String, Object>) windowMap.get("start"));
     YmlFrameBoundary end = parseBoundary((Map<String, Object>) windowMap.get("end"));
     //
-    return new YmlWindow(windowType, partitions, orderBys, frameType, start, end);
+    return new YmlWindow(partitions, orderBys, frameType, start, end);
   }
 
   private static YmlFrameBoundary parseBoundary(Map<String, Object> boundaryInfo) {

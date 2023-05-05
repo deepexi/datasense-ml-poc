@@ -63,7 +63,6 @@ public abstract class BaseColumnIdentifierRewriter implements AstNodeVisitor<Ast
     }
 
     return new Window(
-        node.getWindowType(),
         newPartitions,
         newOrderBys,
         node.getFrameType(),

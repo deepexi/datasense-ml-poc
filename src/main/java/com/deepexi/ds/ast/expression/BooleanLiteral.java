@@ -4,7 +4,7 @@ import com.deepexi.ds.ast.AstNodeVisitor;
 import lombok.Getter;
 
 @Getter
-public class BooleanLiteral extends Expression {
+public class BooleanLiteral extends Literal {
 
   private final boolean value;
 

@@ -253,7 +253,22 @@ public class SqlGeneratorTest {
   @Test
   public void testVisitMetricBindQuery_case07() {
     YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("tpcds/02_biz/case07_window_e2e.yml");
-    Relation node = (Relation) new MetricBindQueryBuilder(ctx).build();
+    Relation node = new MetricBindQueryBuilder(ctx).build();
+
+    // generate sql
+    SqlGenerator generator = new SqlGenerator();
+    SqlGeneratorContext context = new SqlGeneratorPgContext(node);
+    String sql = generator.process(context.getRoot(), context);
+    assertNotNull(sql);
+    assertTrue(noPlaceHolder(sql)); // 所有占位符都已被替换
+    System.out.println(sql);
+    assertNotNull(sql);
+  }
+
+  @Test
+  public void testVisitMetricBindQuery_case08() {
+    YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("tpcds/02_biz/case08_window_range_e2e.yml");
+    Relation node = new MetricBindQueryBuilder(ctx).build();
 
     // generate sql
     SqlGenerator generator = new SqlGenerator();

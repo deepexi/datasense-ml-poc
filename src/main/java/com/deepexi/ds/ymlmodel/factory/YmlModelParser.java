@@ -131,8 +131,7 @@ public class YmlModelParser {
     return joins;
   }
 
-  private static final List<String> COLUMN_KEYS_SET = Arrays.asList("name", "expr", "hint",
-      "data_type");
+  private static final List<String> COLUMN_KEYS_SET = Arrays.asList("name", "expr", "data_type");
 
   private static List<YmlColumn> parseColumn(List<Map<String, Object>> list) {
     if (list == null || list.isEmpty()) {
@@ -148,8 +147,7 @@ public class YmlModelParser {
       String name = ParserUtils.getStringElseThrow(col, "name");
       String expr = ParserUtils.getStringElse(col, "expr", name);
       String type = ParserUtils.getStringElse(col, "data_type", null);
-      String hint = ParserUtils.getStringElse(col, "hint", YmlColumn.HINT_BASIC);
-      columns.add(new YmlColumn(name, expr, type, hint));
+      columns.add(new YmlColumn(name, expr, type));
     }
     return columns;
   }

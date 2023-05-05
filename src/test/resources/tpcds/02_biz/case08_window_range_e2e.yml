@@ -52,7 +52,7 @@ joins:
     conditions: [ ss_sold_date_sk=date_dim.d_date_sk ]
   - model_name: store
     conditions: [ ss_store_sk=store.s_store_sk ]
-dimensions: [ d_year, d_moy, s_store_name ]
+dimensions: [ s_store_name, d_year, d_moy, d_date ]
 columns:
   - name: ss_net_paid
     data_type: decimal
@@ -66,41 +66,42 @@ columns:
     expr: store.s_store_name
   - name: d_dom
     expr: date_dim.d_dom
+  - name: d_date
+    expr: udf_create_date_by_ymd(d_year, d_moy, d_dom)   # 自定义函数
+    data_type: date
 
 ---
 version: v1
 resource: metric_def
-name: metric_sum_ss_net_paid__store_sales # 命名规范 metric_[聚合描述]__[model]
+name: sum_ss_net_paid__store_sales
 model_name: store_sales
-dimensions: [ d_year, d_moy, d_dom, s_store_name ]
+dimensions: [ s_store_name, d_year, d_moy, d_dom, d_date ]
 agg: sum(ss_net_paid)
-
 
 ---
 version: v1
 resource: metrics_query
-# 命名规范 query_[query描述]__[metric_name]
-name: query_by_month__metric_sum_ss_net_paid__store_sales
-metric_names: [ metric_sum_ss_net_paid__store_sales ]
-dimensions: [ d_year, d_moy, d_dom, s_store_name ]
-# model_filters 填写维度名
+name: by_day__sum_ss_net_paid__store_sales
+metric_names: [ sum_ss_net_paid__store_sales ]
+dimensions: [ s_store_name, d_date ]
 model_filters: [ d_year=2000, s_store_name='able' ]
-# metric_filters 填写指标名称
-metric_filters: [ metric_sum_ss_net_paid__store_sales > 0 ]
-# 该窗口表示: 从(最早一条, 到 current row]
-window:
-  window_type: sliding # sliding | tumbling, 目前仅支持 sliding
-  partitions: [ s_store_name, d_year ]
-  order_bys:
-    - name: d_moy
-  # unbounded_preceding 对应累计求和
-  frame_type: rows
-  start:
-    base: unbounded_preceding
-    offset: 0
-  end:
-    base: current_row
-    offset: 0
+metric_filters: [ sum_ss_net_paid__store_sales > 0 ]
+# 该窗口表示, 按照日期(天), 累计3天, 从3天前开始, 到1天前结束
+# 年内按天 => order by: d_date ====> 推导 partition = dimensions - d_date
+# 3天前, 1天前, 推导出 frame_type, start, end
+#window:
+#  partitions: [ s_store_name, d_year ]
+#  # 保留时间无关 s_store_name
+#  # 按照 day_of_year进行统计, 保留 year, 一年内连续三天(day_of_year) 并非 月内连续三天
+#  order_bys:
+#    - name: d_date                      # 连续 "N天"
+#  frame_type: range                     # "连续" 三天
+#  start:
+#    base: n_preceding                   # 3天前开始 包含
+#    offset: 3
+#  end:
+#    base: n_preceding                   # 1天前结束 包含
+#    offset: 1
 
 ---
 version: v1
@@ -121,7 +122,6 @@ sql: >-
       inner join store on store_sales.ss_store_sk=store.s_store_sk
     )
     select
-      make_date(d_year, d_moy, d_dom) as _the_date, -- 这里因为需要按天累计, 创建了日期列
       store_sales.s_store_name as s_store_name,
       store_sales.d_year as d_year,
       store_sales.d_moy as d_moy,
@@ -134,15 +134,16 @@ sql: >-
       group by s_store_name, d_year, d_moy, d_dom
   )
   select
-    _the_date,
     s_store_name,
     d_year,
     d_moy,
     d_dom,
     day_sum_ss_net_paid,
     sum(day_sum_ss_net_paid) over (
-      partition by 		s_store_name
-      order by _the_date
-      range between INTERVAL '3 days' PRECEDING and INTERVAL '1 day' PRECEDING
+      partition by s_store_name
+          -- 注意这里创建了虚拟日期
+      order by make_date(d_year, d_moy, d_dom) 
+          -- 这里用了 interval + 日期, 这是 pg的用法
+      range between INTERVAL '3 days' PRECEDING and INTERVAL '1 day' PRECEDING 
     )
   from t1

@@ -67,43 +67,40 @@ columns:
 ---
 version: v1
 resource: metric_def
-name: metric_sum_ss_net_paid__store_sales # 命名规范 metric_[聚合描述]__[model]
+name: metric_sum_ss_net_paid__store_sales
 model_name: store_sales
-dimensions: [ d_year, d_moy, s_store_name ]
+dimensions: [ s_store_name, d_year, d_moy ]
 agg: sum(ss_net_paid)
 
 ---
 version: v1
 resource: metric_def
-name: metric_sum_ss_net_profit__store_sales # 命名规范 metric_[聚合描述]__[model]
+name: metric_sum_ss_net_profit__store_sales
 model_name: store_sales
-dimensions: [ d_year, d_moy, s_store_name ]
+dimensions: [ s_store_name, d_year, d_moy ]
 agg: sum(ss_net_profit)
 
 ---
 version: v1
 resource: metrics_query
-# 命名规范 query_[query描述]__[metric_name]
 name: query_by_month__metric_sum_ss_net_paid__store_sales
 metric_names: [ metric_sum_ss_net_paid__store_sales, metric_sum_ss_net_profit__store_sales ]
-dimensions: [ d_year, d_moy, s_store_name ]
+dimensions: [ s_store_name, d_year, d_moy ]
 # model_filters 填写维度名
 model_filters: [ d_year>=2000, d_year<=2001 ]
 # metric_filters 填写指标名称
 metric_filters: [ metric_sum_ss_net_paid__store_sales > 0 ]
-# 该窗口表示: 从(最早一条, 到 current row]
+# 该窗口表示, 年内, 按(月份) (累计) 从开始(月份), 到 当前(月份)
 window:
-  window_type: sliding # sliding | tumbling, 目前仅支持 sliding
-  partitions: [ s_store_name, d_year ]
+  partitions: [ s_store_name, d_year ]  # year 维度保留, 时间无关的维度保留
   order_bys:
-    - name: d_moy
-  # unbounded_preceding 对应累计求和
-  frame_type: rows
+    - name: d_moy                       # 月 - 维度
+  frame_type: rows                      # 月初至今/年初至今/...
   start:
-    base: unbounded_preceding
+    base: unbounded_preceding           # unbounded_preceding 对应累计求和
     offset: 0
   end:
-    base: current_row
+    base: current_row                   # 至今
     offset: 0
 #order_by: [s_store_name, d_year, d_moy ]
 order_bys:
@@ -145,13 +142,13 @@ sql: >-
   	s_store_name,
   	d_year,
   	d_moy,
-  	month_paid,
+  	-- month_paid,
   	sum(month_paid) over (
       partition by s_store_name, d_year 
       order by d_moy 
       rows between unbounded preceding and current row
     ) acc_mon_paid,
-  	month_profit,
+  	-- month_profit,
     sum(month_profit) over (
       partition by s_store_name, d_year 
       order by d_moy 

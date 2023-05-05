@@ -63,4 +63,9 @@ public class MetricBindQuery extends Relation {
     return getName();
   }
 
+  @Override
+  public boolean hasAnyColumn() {
+    return false;
+  }
+
 }

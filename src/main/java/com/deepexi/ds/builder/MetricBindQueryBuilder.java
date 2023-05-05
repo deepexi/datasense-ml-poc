@@ -4,20 +4,19 @@ import static java.util.Collections.EMPTY_LIST;
 
 import com.deepexi.ds.ModelException;
 import com.deepexi.ds.ModelException.TODOException;
-import com.deepexi.ds.ast.AstNode;
 import com.deepexi.ds.ast.Column;
 import com.deepexi.ds.ast.ColumnDataType;
 import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.OrderBy;
 import com.deepexi.ds.ast.OrderBy.OrderByDirection;
+import com.deepexi.ds.ast.Relation;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.window.FrameBoundary;
+import com.deepexi.ds.ast.window.FrameBoundaryBase;
 import com.deepexi.ds.ast.window.FrameType;
 import com.deepexi.ds.ast.window.Window;
-import com.deepexi.ds.ast.window.FrameBoundaryBase;
-import com.deepexi.ds.ast.window.WindowType;
 import com.deepexi.ds.builder.express.BoolConditionParser;
 import com.deepexi.ds.builder.express.ColumnNameRewriter;
 import com.deepexi.ds.builder.express.ColumnTableNameRewriter;
@@ -55,8 +54,8 @@ public class MetricBindQueryBuilder {
     parseAndCheckIntegrity(ymlFullQuery);
   }
 
-  public AstNode build() {
-    AstNode query = metricsOnSameModel();
+  public Relation build() {
+    Relation query = metricsOnSameModel();
     if (query == null) {
       throw new TODOException("目前仅支持针对同一个model的多指标查询");
     }
@@ -114,7 +113,7 @@ public class MetricBindQueryBuilder {
   /**
    * 针对一个 model 的多指标查询
    */
-  private AstNode metricsOnSameModel() {
+  private Relation metricsOnSameModel() {
     if (model4Metrics == null) {
       return null;
     }
@@ -143,16 +142,21 @@ public class MetricBindQueryBuilder {
 
     // dimension的处理策略: 取 YmlMetricQuery.query对象中的 dimension
     final List<Column> dimensions = new ArrayList<>();
-    metricQuery.getDimensions().forEach(d -> {
-      // 解析维度, 该维度在 metric对应的 model上
-      Column dim = model4Metrics.getDimensions().stream()
-          .filter(c -> c.getAlias().equals(d))
+    metricQuery.getDimensions().forEach((String dimName) -> {
+      // 该维度在 metric对应的 model上
+      Column dimOfModel = model4Metrics.getDimensions().stream()
+          .filter(c -> c.getAlias().equals(dimName))
           .findAny()
           .orElse(null);
-      if (dim == null) {
-        throw new ModelException(String.format("dim [%s] not found in columns of model[%s]", d,
-            model4Metrics.getName().getValue()));
+      if (dimOfModel == null) {
+        throw new ModelException(
+            String.format("dim [%s] not found in columns of model[%s]", dimName,
+                model4Metrics.getName().getValue()));
       }
+      Column dim = new Column(dimOfModel.getAlias(),
+          new Identifier(model4Metrics.getName().getValue(), dimOfModel.getAlias()),
+          dimOfModel.getDataType()
+      );
       dimensions.add(dim);
     });
 
@@ -166,9 +170,8 @@ public class MetricBindQueryBuilder {
 
     // modelFilters
     final List<Expression> modelFilters = new ArrayList<>();
-    RelationMock srcRelation = RelationMock.fromMode(model4Metrics);
     metricQuery.getModelFilters().forEach((String filterStr) -> {
-      Expression expr3 = new BoolConditionParser(filterStr, EMPTY_LIST, srcRelation).parse();
+      Expression expr3 = new BoolConditionParser(filterStr, EMPTY_LIST, model4Metrics).parse();
       modelFilters.add(expr3);
     });
 
@@ -290,12 +293,6 @@ public class MetricBindQueryBuilder {
   private Window buildWindow(Identifier fromRelation) {
     YmlWindow ymlWindow = this.metricQuery.getWindow();
 
-    // windowType
-    WindowType windowType = WindowType.fromName(ymlWindow.getWindowType());
-    if (windowType == null) {
-      throw new ModelException("window type not support " + ymlWindow.getWindowType());
-    }
-
     ColumnTableNameRewriter rewriter = new ColumnTableNameRewriter(fromRelation);
     // partitions
     List<Identifier> partitions = EMPTY_LIST;
@@ -328,7 +325,7 @@ public class MetricBindQueryBuilder {
     FrameBoundary start = parseFromYml(ymlWindow.getStart());
     FrameBoundary end = parseFromYml(ymlWindow.getEnd());
 
-    return new Window(windowType, partitions, orderBys, frameType, start, end);
+    return new Window(partitions, orderBys, frameType, start, end);
   }
 
   private FrameBoundary parseFromYml(YmlFrameBoundary boundary) {

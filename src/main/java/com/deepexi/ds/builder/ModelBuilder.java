@@ -1,11 +1,9 @@
 package com.deepexi.ds.builder;
 
-import static com.deepexi.ds.ast.expression.Identifier.RE_IDENTIFIER_SEPARATOR;
 import static java.util.Collections.EMPTY_LIST;
 
 import com.deepexi.ds.ModelException;
 import com.deepexi.ds.ModelException.ColumnNotExistException;
-import com.deepexi.ds.ModelException.FieldMissException;
 import com.deepexi.ds.ModelException.ModelNotFoundException;
 import com.deepexi.ds.ast.Column;
 import com.deepexi.ds.ast.ColumnDataType;
@@ -15,6 +13,7 @@ import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.Relation;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
+import com.deepexi.ds.ast.expression.Literal;
 import com.deepexi.ds.ast.source.ModelSource;
 import com.deepexi.ds.ast.source.TableSource;
 import com.deepexi.ds.builder.express.BoolConditionParser;
@@ -49,17 +48,16 @@ public class ModelBuilder {
     private List<Join> joins;
     private List<Column> columns;
     private List<Column> dimensions;
-    private List<RelationMock> scopes = new ArrayList<>();
-    private RelationMock sourceRelation;
+    private List<Relation> scopes = new ArrayList<>();
 
     Model build() {
       return new Model(name, source, joins, columns, dimensions);
     }
 
-    void addRelationMock(RelationMock r, boolean isSource) {
+    void addRelation(Relation r, boolean isSource) {
       scopes.add(r);
       if (isSource) {
-        sourceRelation = r;
+        source = r;
       }
     }
   }
@@ -90,7 +88,7 @@ public class ModelBuilder {
     ctx.setName(Identifier.of(root.getName()));
     // source
     parseSource(root.getSource(), ctx);
-    RelationMock srcRel = ctx.getSourceRelation();
+    Relation srcRel = ctx.getSource();
     // joins
     parseJoins(srcRel, root.getJoins(), ctx);
     // columns
@@ -106,8 +104,8 @@ public class ModelBuilder {
       // this source is external
       YmlSourceTable src = (YmlSourceTable) source;
       TableSource t = new TableSource(src.getDataSource(), Identifier.of(src.getTableName()));
-      ctx.setSource(t);
-      ctx.addRelationMock(RelationMock.fromTableSource(t), true);
+      // ctx.setSource(t);
+      ctx.addRelation(t, true);
     } else if (source instanceof YmlSourceModel) {
       YmlSourceModel src = (YmlSourceModel) source;
       String modelName = src.getModelName();
@@ -116,12 +114,12 @@ public class ModelBuilder {
       buildRoot(ymlModel, subCtx);
       Model subModel = subCtx.build();
       ModelSource modelSource = new ModelSource(subModel);
-      ctx.setSource(modelSource);
-      ctx.addRelationMock(RelationMock.fromMode(subModel), true);
+      // ctx.setSource(modelSource);
+      ctx.addRelation(subModel, true);
     }
   }
 
-  private void parseJoins(RelationMock srcRel, List<YmlJoin> joins, Container ctx) {
+  private void parseJoins(Relation srcRel, List<YmlJoin> joins, Container ctx) {
     if (joins == null || joins.isEmpty()) {
       ctx.setJoins(EMPTY_LIST);
       return;
@@ -134,8 +132,7 @@ public class ModelBuilder {
       Container subCtx = new Container();
       buildRoot(ymlModel, subCtx);
       Model subModel = subCtx.build();
-      RelationMock relationMock = RelationMock.fromMode(subModel);
-      ctx.addRelationMock(relationMock, false);
+      ctx.addRelation(subModel, false);
 
       // join type
       JoinType joinType = JoinType.fromName(join.getJoinType());
@@ -159,7 +156,7 @@ public class ModelBuilder {
     ctx.setJoins(joinList);
   }
 
-  private void parseColumn(RelationMock srcRel, List<YmlColumn> list, Container ctx) {
+  private void parseColumn(Relation srcRel, List<YmlColumn> list, Container ctx) {
     if (list == null || list.isEmpty()) {
       ctx.setColumns(EMPTY_LIST);
       return;
@@ -167,67 +164,61 @@ public class ModelBuilder {
 
     List<Column> columns = new ArrayList<>(list.size());
     for (YmlColumn col : list) {
-      if (col.isBasic()) {
-        Column column = parseBasicColumn(col, srcRel, ctx);
-        columns.add(column);
-      } else {
-        Column column = parseDerivedColumn(col, srcRel, ctx);
-        columns.add(column);
-      }
+      Column column = parseColumn(col, srcRel, ctx);
+      columns.add(column);
     }
     ctx.setColumns(columns);
   }
 
-  private Column parseBasicColumn(YmlColumn col, RelationMock srcRel, Container ctx) {
-    String colName = col.getName();
-    String srcTableName = srcRel.getTableName().getValue();
-    // case: colName or table.colName
-    String expr = col.getExpr();
-    if (expr == null) {
-      expr = colName;
-    }
-    String[] fields = expr.split(RE_IDENTIFIER_SEPARATOR);
-    Identifier fromCol;
-    Column referColumn;
-    if (fields.length == 1) {
-      fromCol = new Identifier(srcTableName, fields[0].trim());
-      referColumn = assertColumnExistsInRelation(fields[0].trim(), srcRel);
-    } else if (fields.length == 2) {
-      String targetTable = fields[0].trim();
-      // targetTable should exists, column should in targetTable table
-      RelationMock relation = assertTableInScope(targetTable, ctx.getScopes());
-      referColumn = assertColumnExistsInRelation(fields[1].trim(), relation);
-      fromCol = new Identifier(fields[0].trim(), fields[1].trim());
-    } else {
-      throw new ModelException("expr not support too many dot");
-    }
-
-    // type: 可以由上下文推到得到
-    String type = col.getDataType();
-    ColumnDataType type1 = ColumnDataType.fromName(type);
-    if (type1 == null) {
-      type1 = referColumn.getDataType();
-    }
-    if (type1 == null) {
-      throw new FieldMissException("data_type of " + colName);
-    }
-    // done
-    return new Column(colName, fromCol, type1/*, col.getExpr()*/);
-  }
-
-  private Column parseDerivedColumn(YmlColumn col, RelationMock srcRel, Container ctx) {
-    String colName = col.getName();
-    String type = col.getDataType();
-    ColumnDataType type1 = ColumnDataType.fromName(type); // dataType必须有
-    if (type1 == null) {
-      throw new FieldMissException("data_type of " + colName);
-    }
+  private Column parseColumn(YmlColumn col, Relation srcRel, Container ctx) {
     Expression expression = ParserUtils.parseStandaloneExpression(col.getExpr());
+
+    String colName = col.getName();                                     // 该列别名
+    ColumnDataType type1 = ColumnDataType.fromName(col.getDataType()); // col.getDataType()
+
+    if (expression instanceof Identifier) {
+      Identifier colId = (Identifier) expression;
+      // 这个 column 由其他列 直接得来. eg
+      // tableA.colX as alias
+      // 该字段类型, 该字段所引用的列 的类型
+      // 如果有一个, 则使用
+      // 如果不同, 则需要 类型转换
+      Relation fromTable = srcRel;
+      if (colId.getPrefix() != null) {
+        fromTable = assertTableInScope(colId.getPrefix(), ctx.getScopes());
+      } else {
+        colId = new Identifier(srcRel.getTableName().getValue(), colId.getValue());
+      }
+
+      Column referColumn = assertColumnExistsInRelation(colId.getValue(), fromTable);
+      ColumnDataType referColDataType = null;
+      if (referColumn != null) {
+        referColDataType = referColumn.getDataType();
+      }
+
+      if (type1 != null && referColDataType != null && type1 != referColDataType) {
+        throw new ModelException("TODO, 类型转换需要添加");
+      }
+
+      if (type1 == null) {
+        type1 = referColDataType;
+      }
+      return new Column(colName, colId, type1);
+    }
+
+    if (expression instanceof Literal) {
+      // 这个列是个固定值. eg
+      // 100 as alias
+      // TODO 根据 Literal子类型 推到 data_type
+      throw new ModelException("目前暂不支持 固定值 列");
+    }
+
+    // 其他情况, 这个列是派生计算而来
     Column colRaw = new Column(colName, expression, type1);
     return (Column) new ColumnTableNameRewriter(srcRel.getTableName()).process(colRaw);
   }
 
-  private void parseDimension(RelationMock srcRel, List<YmlDimension> list, Container ctx) {
+  private void parseDimension(Relation srcRel, List<YmlDimension> list, Container ctx) {
     if (list == null || list.isEmpty()) {
       ctx.setDimensions(EMPTY_LIST);
       return;
@@ -259,8 +250,8 @@ public class ModelBuilder {
     return ymlModel;
   }
 
-  public static RelationMock assertTableInScope(String tableName, List<RelationMock> scope) {
-    Optional<RelationMock> anyRelation = scope.stream()
+  public static Relation assertTableInScope(String tableName, List<Relation> scope) {
+    Optional<Relation> anyRelation = scope.stream()
         .filter(t -> Objects.equals(t.getTableName().getValue(), tableName))
         .findAny();
     if (!anyRelation.isPresent()) {
@@ -270,7 +261,10 @@ public class ModelBuilder {
     return anyRelation.get();
   }
 
-  public static Column assertColumnExistsInRelation(String colName, RelationMock rel) {
+  public static Column assertColumnExistsInRelation(String colName, Relation rel) {
+    if (rel == null) {
+      return null;
+    }
     Column column = rel.getColumn(colName);
     if (column == null) {
       throw new ColumnNotExistException(rel.getTableName().getValue(), colName);

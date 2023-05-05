@@ -23,7 +23,7 @@ public class ScopeCollectorContext {
     registry.put(new ModelNodeRef(node), relation);
   }
 
-  void registerSourceRelation(Relation tableLike) {
-    this.sourceRelation = tableLike;
+  void registerSourceRelation(Relation relation) {
+    this.sourceRelation = relation;
   }
 }

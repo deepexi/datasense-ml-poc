@@ -28,7 +28,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
  */
 public class DsVisitor4Expression extends DsBaseVisitor<Expression> {
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   private void debug(ParserRuleContext ctx) {
     if (!DEBUG) {

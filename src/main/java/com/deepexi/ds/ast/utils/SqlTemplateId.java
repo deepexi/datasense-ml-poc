@@ -6,6 +6,7 @@ public enum SqlTemplateId {
   metric_bind_query_001("metric_bind_query_001"),
   case_when_001("case_when_001"),
   window_row_frame_001("window_row_frame_001"),
+  udf_create_date_by_ymd("udf_create_date_by_ymd"),
   ;
 
   public final String fileName;

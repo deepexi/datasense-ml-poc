@@ -8,7 +8,9 @@ public enum SqlDialect {
   CLICKHOUSE("clickhouse"),
   GAUSSDB("gaussdb"),
   DORIS("doris"),
-  STARROCKS("starrocks");
+  STARROCKS("starrocks"),
+  TEST_DIALECT("test_dialect"), // only for test
+  ;
 
   public final String name;
 

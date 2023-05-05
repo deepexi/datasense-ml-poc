@@ -11,6 +11,12 @@ import java.util.stream.Collectors;
 
 public class ResUtils {
 
+  public static final String DEFAULT_DIR = "default";
+  /**
+   * sql文件路径模板
+   */
+  private static final String SQL_FILE_PATTERN = "sql/%s/%s.sql";
+
   /**
    * all lines start with --! will be removed
    */
@@ -33,25 +39,23 @@ public class ResUtils {
     }
   }
 
-  /**
-   * 如果必要 可以 cache, 因为是常量, 不会变动
-   */
-  private static final String SQL_FILE_PATTERN = "sql/%s/%s.sql";
-
   public static String getSqlTemplate(SqlTemplateId templateId, SqlDialect dialect) {
-    String path4Dialect = String.format(SQL_FILE_PATTERN, dialect.name.toLowerCase(),
-        templateId.fileName);
-    String path4Default = String.format(SQL_FILE_PATTERN, "default", templateId.fileName);
+    String path = String.format(SQL_FILE_PATTERN, dialect.name.toLowerCase(), templateId.fileName);
     try {
-      String sql = getResourceFileAsString(path4Dialect);
+      String sql = getResourceFileAsString(path);
       if (sql != null) {
         return sql;
       }
     } catch (Exception ex) {
       // not sql for this dialect
-      System.out.printf("should provide sql for dialect=[%s], sql_template=[%s]%n", dialect.name,
+      System.out.printf(
+          "should provide sql for dialect=[%s], sql_template=[%s]%n",
+          dialect.name,
           templateId.fileName);
     }
+
+    // if not got, find the default dialect
+    String path4Default = String.format(SQL_FILE_PATTERN, DEFAULT_DIR, templateId.fileName);
     return getResourceFileAsString(path4Default);
   }
 

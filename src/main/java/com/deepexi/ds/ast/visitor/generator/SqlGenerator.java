@@ -3,6 +3,7 @@ package com.deepexi.ds.ast.visitor.generator;
 import static com.deepexi.ds.ast.utils.SqlTemplateId.case_when_001;
 import static com.deepexi.ds.ast.utils.SqlTemplateId.metric_bind_query_001;
 import static com.deepexi.ds.ast.utils.SqlTemplateId.model_001;
+import static com.deepexi.ds.ast.utils.SqlTemplateId.udf_create_date_by_ymd;
 import static com.deepexi.ds.ast.utils.SqlTemplateId.window_row_frame_001;
 
 import com.deepexi.ds.ModelException;
@@ -60,10 +61,17 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
     return orderBySql;
   }
 
-  private String templateFilling(SqlTemplateId templateId, Map<String, String> valuesMap,
+  private String templateFilling(
+      SqlTemplateId templateId,
+      Map<String, String> valuesMap,
       SqlGeneratorContext context) {
-    final String sqlTemplate = ResUtils.getSqlTemplate(templateId,
-        context.getSqlDialect());
+    String sqlTemplate = ResUtils.getSqlTemplate(templateId, context.sqlDialect);
+    if (sqlTemplate == null) {
+      // if sqlTemplate is not found, will throw exception
+      throw new ModelException(
+          String.format("缺少sql模板, name=%s, dialect=%s", templateId.fileName,
+              context.sqlDialect.name));
+    }
     StringSubstitutor sub = new StringSubstitutor(valuesMap);
     return sub.replace(sqlTemplate).trim();
   }
@@ -221,21 +229,25 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
 
   @Override
   public String visitUdf(UdfExpression node, SqlGeneratorContext context) {
-    String pattern = "_fun_(_args_)";
-    String s1 = pattern.replace("_fun_", node.getName());
-    String args = "";
-    if (node.getArgs().size() > 0) {
-      StringBuilder builder = new StringBuilder();
-      for (int i = 0; i < node.getArgs().size(); i++) {
-        if (i > 0) {
-          builder.append(", ");
-        }
-        Expression arg = node.getArgs().get(i);
-        builder.append(process(arg, context));
+    String funName = node.getName();
+    ImmutableList<Expression> args = node.getArgs();
+
+    if (funName.equals("create_date_by_ymd")) {
+      // 需要三个参数
+      if (args.size() != 3) {
+        throw new ModelException("udf " + funName + ": 需三个参数, 当前参数个数=" + args.size());
       }
-      args = builder.toString();
+      String year = process(args.get(0), context);
+      String monthOfYear = process(args.get(1), context);
+      String dayOfMonth = process(args.get(2), context);
+
+      Map<String, String> valuesMap = new HashMap<>();
+      valuesMap.put("year", year);
+      valuesMap.put("monthOfYear", monthOfYear);
+      valuesMap.put("dayOfMonth", dayOfMonth);
+      return templateFilling(udf_create_date_by_ymd, valuesMap, context);
     }
-    return "TODO_UDF__" + s1.replace("_args_", args);
+    throw new RuntimeException("不支持的 udf函数:" + funName);
   }
 
   @Override

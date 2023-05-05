@@ -6,14 +6,8 @@
 --! ============= 以下用于描述 sql模板 ======
 --! sql用途: 解析Model节点时 生成整体sql
 --! sql变量:
---!     aliasSql
---!     sourceSql
---!     columnSql
---!     joinSql
--- dialect: default, template.sql [保留, 用于检测是否命中了正确的dialect]
-with ${aliasSql} as (
-    ${sourceSql}
-    )
-select
-    ${selectSql}
-from ${aliasSql} ${joinSql}
+--!     year
+--!     monthOfYear
+--!     dayOfMonth
+-- dialect: postgres, udf_create_date_by_ymd.sql
+make_date(${year}, ${monthOfYear}, ${dayOfMonth})

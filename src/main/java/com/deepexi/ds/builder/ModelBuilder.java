@@ -12,12 +12,13 @@ import com.deepexi.ds.ast.JoinType;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.Relation;
 import com.deepexi.ds.ast.expression.Expression;
+import com.deepexi.ds.ast.expression.FunctionExpression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.Literal;
-import com.deepexi.ds.ast.source.ModelSource;
 import com.deepexi.ds.ast.source.TableSource;
 import com.deepexi.ds.builder.express.BoolConditionParser;
-import com.deepexi.ds.builder.express.ColumnTableNameRewriter;
+import com.deepexi.ds.builder.express.ColumnInFunctionHandler;
+import com.deepexi.ds.builder.express.ColumnTableNameAdder;
 import com.deepexi.ds.parser.ParserUtils;
 import com.deepexi.ds.ymlmodel.YmlColumn;
 import com.deepexi.ds.ymlmodel.YmlDimension;
@@ -101,10 +102,8 @@ public class ModelBuilder {
     Objects.requireNonNull(source, "source must be present");
 
     if (source instanceof YmlSourceTable) {
-      // this source is external
       YmlSourceTable src = (YmlSourceTable) source;
       TableSource t = new TableSource(src.getDataSource(), Identifier.of(src.getTableName()));
-      // ctx.setSource(t);
       ctx.addRelation(t, true);
     } else if (source instanceof YmlSourceModel) {
       YmlSourceModel src = (YmlSourceModel) source;
@@ -113,8 +112,6 @@ public class ModelBuilder {
       Container subCtx = new Container();
       buildRoot(ymlModel, subCtx);
       Model subModel = subCtx.build();
-      ModelSource modelSource = new ModelSource(subModel);
-      // ctx.setSource(modelSource);
       ctx.addRelation(subModel, true);
     }
   }
@@ -172,9 +169,8 @@ public class ModelBuilder {
 
   private Column parseColumn(YmlColumn col, Relation srcRel, Container ctx) {
     Expression expression = ParserUtils.parseStandaloneExpression(col.getExpr());
-
-    String colName = col.getName();                                     // 该列别名
-    ColumnDataType type1 = ColumnDataType.fromName(col.getDataType()); // col.getDataType()
+    String colAlias = col.getName();
+    ColumnDataType type1 = ColumnDataType.fromName(col.getDataType());
 
     if (expression instanceof Identifier) {
       Identifier colId = (Identifier) expression;
@@ -203,7 +199,7 @@ public class ModelBuilder {
       if (type1 == null) {
         type1 = referColDataType;
       }
-      return new Column(colName, colId, type1);
+      return new Column(colAlias, colId, type1);
     }
 
     if (expression instanceof Literal) {
@@ -214,8 +210,13 @@ public class ModelBuilder {
     }
 
     // 其他情况, 这个列是派生计算而来
-    Column colRaw = new Column(colName, expression, type1);
-    return (Column) new ColumnTableNameRewriter(srcRel.getTableName()).process(colRaw);
+    Column colRaw = new Column(colAlias, expression, type1);
+    Column colWithTable = (Column) new ColumnTableNameAdder(srcRel).process(colRaw);
+    if (expression instanceof FunctionExpression) {
+      // 如果是函数, 需要额外处理一下
+      return (Column) new ColumnInFunctionHandler(ctx.getScopes()).process(colWithTable);
+    }
+    return colWithTable;
   }
 
   private void parseDimension(Relation srcRel, List<YmlDimension> list, Container ctx) {

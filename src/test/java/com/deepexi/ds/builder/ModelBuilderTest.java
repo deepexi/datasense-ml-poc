@@ -62,10 +62,14 @@ public class ModelBuilderTest {
     Map<String, Column> dimLookup = dims.stream()
         .collect(Collectors.toMap(Column::getAlias, Function.identity()));
     Column dimA = dimLookup.get("d_date_sk");
-    // assertEquals("d_date_sk", dimA.getRawExpr());
+    assertTrue(dimA.getExpr() instanceof Identifier);
+    assertEquals("date_dim", ((Identifier) dimA.getExpr()).getPrefix());
+    assertEquals("d_date_sk", ((Identifier) dimA.getExpr()).getValue());
 
     Column dimB = dimLookup.get("d_year");
-    // assertEquals("d_year", dimB.getRawExpr());
+    assertTrue(dimB.getExpr() instanceof Identifier);
+    assertEquals("date_dim", ((Identifier) dimB.getExpr()).getPrefix());
+    assertEquals("d_year", ((Identifier) dimB.getExpr()).getValue());
   }
 
   @Test

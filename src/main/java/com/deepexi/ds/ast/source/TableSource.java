@@ -1,7 +1,10 @@
 package com.deepexi.ds.ast.source;
 
+import static java.util.Collections.EMPTY_LIST;
+
 import com.deepexi.ds.ast.AstNodeVisitor;
 import com.deepexi.ds.ast.Column;
+import com.deepexi.ds.ast.Join;
 import com.deepexi.ds.ast.Relation;
 import com.deepexi.ds.ast.expression.Identifier;
 import java.util.List;
@@ -10,6 +13,7 @@ import lombok.Getter;
 /**
  * this source is from an external table
  */
+@SuppressWarnings("unchecked")
 @Getter
 public class TableSource extends Relation {
 
@@ -34,6 +38,16 @@ public class TableSource extends Relation {
   @Override
   public List<Column> getColumns() {
     return null;
+  }
+
+  @Override
+  public Relation getFrom() {
+    return null;
+  }
+
+  @Override
+  public List<Join> getJoin() {
+    return EMPTY_LIST;
   }
 
   @Override

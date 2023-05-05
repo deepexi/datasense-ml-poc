@@ -64,6 +64,16 @@ public class MetricBindQuery extends Relation {
   }
 
   @Override
+  public Relation getFrom() {
+    return relation;
+  }
+
+  @Override
+  public List<Join> getJoin() {
+    return null;
+  }
+
+  @Override
   public boolean hasAnyColumn() {
     return false;
   }

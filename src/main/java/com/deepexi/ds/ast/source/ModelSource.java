@@ -3,6 +3,7 @@ package com.deepexi.ds.ast.source;
 
 import com.deepexi.ds.ast.AstNodeVisitor;
 import com.deepexi.ds.ast.Column;
+import com.deepexi.ds.ast.Join;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.Relation;
 import com.deepexi.ds.ast.expression.Identifier;
@@ -39,6 +40,16 @@ public class ModelSource extends Relation {
   @Override
   public List<Column> getColumns() {
     return model.getColumns();
+  }
+
+  @Override
+  public Relation getFrom() {
+    return model.getFrom();
+  }
+
+  @Override
+  public List<Join> getJoin() {
+    return model.getJoin();
   }
 
   @Override

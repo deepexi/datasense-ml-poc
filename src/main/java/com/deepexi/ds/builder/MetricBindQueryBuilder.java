@@ -19,7 +19,8 @@ import com.deepexi.ds.ast.window.FrameType;
 import com.deepexi.ds.ast.window.Window;
 import com.deepexi.ds.builder.express.BoolConditionParser;
 import com.deepexi.ds.builder.express.ColumnNameRewriter;
-import com.deepexi.ds.builder.express.ColumnTableNameRewriter;
+import com.deepexi.ds.builder.express.ColumnTableNameAdder;
+import com.deepexi.ds.builder.express.ColumnTableNameReplacer;
 import com.deepexi.ds.builder.express.MetricExpressionParser;
 import com.deepexi.ds.parser.ParserUtils;
 import com.deepexi.ds.ymlmodel.YmlFrameBoundary;
@@ -127,14 +128,13 @@ public class MetricBindQueryBuilder {
 
     // collect all metrics
     List<Column> columns = new ArrayList<>();
-    ColumnTableNameRewriter tableNameRewriter = new ColumnTableNameRewriter(
-        model4Metrics.getName());
+    ColumnTableNameAdder tableNameAdder = new ColumnTableNameAdder(model4Metrics);
     for (YmlMetric m : this.metrics) {
       String alias = m.getName();
       Expression expression = ParserUtils.parseStandaloneExpression(m.getAggregate());
       ColumnDataType dataType = ColumnDataType.fromName(m.getDataType());
       Column rawCol = new Column(alias, expression, dataType);
-      Column column = (Column) tableNameRewriter.process(rawCol);
+      Column column = (Column) tableNameAdder.process(rawCol);
       columns.add(column);
     }
     // name
@@ -217,11 +217,10 @@ public class MetricBindQueryBuilder {
         null);
 
     // window
-    Window window = buildWindow(midMetricId);
+    Window window = buildWindow(midMetric);
 
     // orderBys 处理
-    ColumnTableNameRewriter tableNameReplacer = new ColumnTableNameRewriter(
-        midMetric.getName(),
+    ColumnTableNameReplacer tableNameReplacer = new ColumnTableNameReplacer(
         midMetric.getRelation().getTableName(),
         midMetric.getName()
     );
@@ -249,8 +248,7 @@ public class MetricBindQueryBuilder {
   }
 
   private List<Column> buildColumnForUpperModel(MetricBindQuery midMetric, Window window) {
-    ColumnTableNameRewriter tableNameReplacer = new ColumnTableNameRewriter(
-        midMetric.getName(),
+    ColumnTableNameReplacer tableNameReplacer = new ColumnTableNameReplacer(
         midMetric.getRelation().getTableName(),
         midMetric.getName()
     );
@@ -290,10 +288,10 @@ public class MetricBindQueryBuilder {
   /**
    * 构建 window, 返回的window已经处理过, 基于 fromRelation
    */
-  private Window buildWindow(Identifier fromRelation) {
+  private Window buildWindow(Relation fromRelation) {
     YmlWindow ymlWindow = this.metricQuery.getWindow();
 
-    ColumnTableNameRewriter rewriter = new ColumnTableNameRewriter(fromRelation);
+    ColumnTableNameAdder tableNameAdder = new ColumnTableNameAdder(fromRelation);
     // partitions
     List<Identifier> partitions = EMPTY_LIST;
     if (ymlWindow.getPartitions().size() > 0) {
@@ -302,7 +300,7 @@ public class MetricBindQueryBuilder {
       for (int i = 0; i < ymlPartition.size(); i++) {
         String partitionCol = ymlPartition.get(i);
         Identifier col0 = (Identifier) ParserUtils.parseStandaloneExpression(partitionCol);
-        Identifier col1 = (Identifier) rewriter.process(col0);
+        Identifier col1 = (Identifier) tableNameAdder.process(col0);
         partitions.add(col1);
       }
     }
@@ -315,7 +313,7 @@ public class MetricBindQueryBuilder {
       for (int i = 0; i < ymlOrderBys.size(); i++) {
         YmlOrderBy ymlOrderBy = ymlOrderBys.get(i);
         Identifier col0 = (Identifier) ParserUtils.parseStandaloneExpression(ymlOrderBy.getName());
-        Identifier col1 = (Identifier) rewriter.process(col0);
+        Identifier col1 = (Identifier) tableNameAdder.process(col0);
         OrderByDirection direction1 = OrderByDirection.fromName(ymlOrderBy.getDirection());
         orderBys.add(new OrderBy(col1, direction1));
       }

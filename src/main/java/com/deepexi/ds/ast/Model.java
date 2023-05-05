@@ -69,6 +69,16 @@ public class Model extends Relation {
   }
 
   @Override
+  public Relation getFrom() {
+    return source;
+  }
+
+  @Override
+  public List<Join> getJoin() {
+    return joins;
+  }
+
+  @Override
   public boolean hasAnyColumn() {
     return false;
   }

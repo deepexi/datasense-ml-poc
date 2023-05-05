@@ -14,6 +14,7 @@ import com.deepexi.ds.ast.expression.FunctionExpression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.IntegerLiteral;
 import com.deepexi.ds.ast.expression.StringLiteral;
+import com.deepexi.ds.ast.expression.UdfExpression;
 import org.junit.jupiter.api.Test;
 
 public class DsVisitor4ExpressionTest {
@@ -99,6 +100,19 @@ public class DsVisitor4ExpressionTest {
         testStandalone("MAX(COUNT(*), FUN2(C1,C2))").toString());
     //    assertEquals(xxx, testStandalone(xxx).toString());
     //    assertEquals(xxx, testStandalone(xxx).toString());
+  }
+
+  @Test
+  public void testParse_udf() {
+    Expression expr = testStandalone("udf_function(create_date, '999', t1.c1, t2.c2)");
+    assertTrue(expr instanceof UdfExpression);
+    UdfExpression udf = (UdfExpression) expr;
+
+    assertEquals("create_date", udf.getName());
+    assertEquals(3, udf.getArgs().size());
+    assertEquals(new StringLiteral("'999'"), udf.getArgs().get(0));
+    assertEquals(new Identifier("t1", "c1"), udf.getArgs().get(1));
+    assertEquals(new Identifier("t2", "c2"), udf.getArgs().get(2));
   }
 
   @Test

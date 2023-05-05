@@ -23,6 +23,7 @@ import com.deepexi.ds.ast.expression.FunctionExpression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.IntegerLiteral;
 import com.deepexi.ds.ast.expression.StringLiteral;
+import com.deepexi.ds.ast.expression.UdfExpression;
 import com.deepexi.ds.ast.source.ModelSource;
 import com.deepexi.ds.ast.source.TableSource;
 import com.deepexi.ds.ast.utils.ResUtils;
@@ -219,6 +220,25 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
   }
 
   @Override
+  public String visitUdf(UdfExpression node, SqlGeneratorContext context) {
+    String pattern = "_fun_(_args_)";
+    String s1 = pattern.replace("_fun_", node.getName());
+    String args = "";
+    if (node.getArgs().size() > 0) {
+      StringBuilder builder = new StringBuilder();
+      for (int i = 0; i < node.getArgs().size(); i++) {
+        if (i > 0) {
+          builder.append(", ");
+        }
+        Expression arg = node.getArgs().get(i);
+        builder.append(process(arg, context));
+      }
+      args = builder.toString();
+    }
+    return "TODO_UDF__" + s1.replace("_args_", args);
+  }
+
+  @Override
   public String visitWindow(Window node, SqlGeneratorContext context) {
     if (node.getFrameType() != FrameType.ROWS) {
       throw new ModelException("TODO, current only support rows");
@@ -283,6 +303,7 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
 
     throw new ModelException("if you add new FrameBoundaryBase, you should parse it here");
   }
+
 
   @Override
   public String visitModel(Model node, SqlGeneratorContext context) {

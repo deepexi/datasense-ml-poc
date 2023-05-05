@@ -27,7 +27,9 @@ public class DsVisitorTest {
       "MAX(COUNT(*), FUN2(C1,C2))",
       //
       "case when d_dom <= 3 then 3 when d_dom <=4 then 4 else 9 end",
-      "case when d_dom <= 3 then xxx when d_dom <=4 then yyy end"
+      "case when d_dom <= 3 then xxx when d_dom <=4 then yyy end",
+      // udf
+      "udf_function(create_date, '999', t1.c1, t2.c2)"
   );
 
   public static List<String> case_boolean = Arrays.asList(
@@ -47,10 +49,10 @@ public class DsVisitorTest {
     // all
     // case_boolean.forEach(DsVisitorTest::testBoolean);
     // last
-    testBoolean(case_boolean.get(case_boolean.size() - 1));
+    // testBoolean(case_boolean.get(case_boolean.size() - 1));
 
     // ========  standalone ========
-    //testStandalone(case_standalone.get(case_standalone.size() - 1));
+    testStandalone(case_standalone.get(case_standalone.size() - 1));
     //case_standalone.forEach(DsVisitorTest::testStandalone);
   }
 

@@ -1,6 +1,7 @@
 package com.deepexi.ds.ast.expression;
 
 import com.deepexi.ds.ast.AstNodeVisitor;
+import java.util.Objects;
 import lombok.Getter;
 
 @Getter
@@ -24,5 +25,22 @@ public class StringLiteral extends Literal {
 
   public static StringLiteral of(String v) {
     return new StringLiteral(v);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(value);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof StringLiteral)) {
+      return false;
+    }
+    StringLiteral that = (StringLiteral) o;
+    return com.google.common.base.Objects.equal(value, that.value);
   }
 }

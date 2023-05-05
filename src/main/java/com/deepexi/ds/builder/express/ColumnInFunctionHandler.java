@@ -47,8 +47,6 @@ public class ColumnInFunctionHandler extends BaseColumnIdentifierRewriter {
     if (targetRelation == null) {
       throw new ModelException(String.format("column %s.%s cannot recognized", table, field));
     }
-
     return new Identifier(targetRelation.getTableName().getValue(), field);
-
   }
 }

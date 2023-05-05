@@ -67,7 +67,7 @@ columns:
   - name: d_dom
     expr: date_dim.d_dom
   - name: d_date
-    expr: udf_create_date_by_ymd(d_year, d_moy, d_dom)   # 自定义函数
+    expr: udf_function(create_date_by_ymd, d_year, d_moy, d_dom)   # 自定义函数
     data_type: date
 
 ---

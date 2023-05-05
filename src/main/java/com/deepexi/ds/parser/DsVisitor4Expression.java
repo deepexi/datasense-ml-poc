@@ -1,10 +1,12 @@
 package com.deepexi.ds.parser;
 
+import com.deepexi.ds.DevConfig;
 import com.deepexi.ds.ModelException;
 import com.deepexi.ds.ModelException.TODOException;
 import com.deepexi.ds.antlr4.DsBaseVisitor;
 import com.deepexi.ds.antlr4.DsParser;
 import com.deepexi.ds.antlr4.DsParser.ExpressionContext;
+import com.deepexi.ds.antlr4.DsParser.UdfContext;
 import com.deepexi.ds.ast.expression.ArithmeticExpression;
 import com.deepexi.ds.ast.expression.ArithmeticExpression.ArithmeticOperator;
 import com.deepexi.ds.ast.expression.BooleanLiteral;
@@ -16,6 +18,7 @@ import com.deepexi.ds.ast.expression.FunctionExpression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.IntegerLiteral;
 import com.deepexi.ds.ast.expression.StringLiteral;
+import com.deepexi.ds.ast.expression.UdfExpression;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -28,10 +31,8 @@ import org.antlr.v4.runtime.tree.TerminalNode;
  */
 public class DsVisitor4Expression extends DsBaseVisitor<Expression> {
 
-  private static final boolean DEBUG = false;
-
   private void debug(ParserRuleContext ctx) {
-    if (!DEBUG) {
+    if (!DevConfig.DEBUG) {
       return;
     }
     int childCount = ctx.getChildCount();
@@ -230,6 +231,24 @@ public class DsVisitor4Expression extends DsBaseVisitor<Expression> {
       args.add(arg);
     }
     return new FunctionExpression(funName, args);
+  }
+
+  @Override
+  public Expression visitUdf(UdfContext ctx) {
+    debug(ctx);
+    // udf_function    (     function_name   ,   ... , argN    )
+    int childCount = ctx.getChildCount();
+    String funName = ctx.getChild(2).getText();
+    List<Expression> args = new ArrayList<>();
+    int firstArgIndex = 4;
+    int lastArgIndex = childCount - 2;
+    for (int i = firstArgIndex; i <= lastArgIndex; i = i + 2) {
+      ParseTree child = ctx.getChild(i);
+      boolean isAsterisk = child instanceof TerminalNode && "*".equals(child.getText());
+      Expression arg = isAsterisk ? StringLiteral.of("*") : visit(ctx.getChild(i));
+      args.add(arg);
+    }
+    return new UdfExpression(funName, args);
   }
 
   @Override

@@ -16,6 +16,7 @@ import com.deepexi.ds.ast.expression.FunctionExpression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.IntegerLiteral;
 import com.deepexi.ds.ast.expression.StringLiteral;
+import com.deepexi.ds.ast.expression.UdfExpression;
 import com.deepexi.ds.ast.source.ModelSource;
 import com.deepexi.ds.ast.source.TableSource;
 import com.deepexi.ds.ast.window.FrameBoundary;
@@ -130,7 +131,20 @@ public abstract class BaseColumnIdentifierRewriter implements AstNodeVisitor<Ast
       Expression newArg = (Expression) process(expression, context);
       newArgs.add(newArg);
     }
-    return node.replaceArgs(newArgs);
+    return new FunctionExpression(node.getName(), newArgs);
+  }
+
+  @Override
+  public AstNode visitUdf(UdfExpression node, Void context) {
+    if (node.getArgs().size() == 0) {
+      return node;
+    }
+    List<Expression> newArgs = new ArrayList<>();
+    for (Expression expression : node.getArgs()) {
+      Expression newArg = (Expression) process(expression, context);
+      newArgs.add(newArg);
+    }
+    return new UdfExpression(node.getName(), newArgs);
   }
 
   @Override

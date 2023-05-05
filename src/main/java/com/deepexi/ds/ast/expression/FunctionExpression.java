@@ -5,13 +5,12 @@ import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.Getter;
-import lombok.NonNull;
 
 @Getter
 public class FunctionExpression extends Expression {
 
-  private final String name;
-  private final ImmutableList<Expression> args;
+  protected final String name;
+  protected final ImmutableList<Expression> args;
 
   public FunctionExpression(String name, List<Expression> args) {
     this.name = name;
@@ -27,9 +26,5 @@ public class FunctionExpression extends Expression {
   public String toString() {
     String argsJoin = args.stream().map(Object::toString).collect(Collectors.joining(","));
     return String.format("%s(%s)", name, argsJoin);
-  }
-
-  public FunctionExpression replaceArgs(List<Expression> newArgs) {
-    return new FunctionExpression(name, newArgs);
   }
 }

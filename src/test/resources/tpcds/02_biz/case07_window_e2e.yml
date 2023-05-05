@@ -153,7 +153,7 @@ sql: >-
       partition by s_store_name, d_year 
       order by d_moy 
       rows between unbounded preceding and current row
-    ) acc_mon_paid
+    ) acc_month_profit
   from store_sales_group_by_mon
   order by s_store_name, d_year, d_moy
   limit 100 offset 1

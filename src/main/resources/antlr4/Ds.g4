@@ -55,6 +55,7 @@ primaryExpression
     | number                                                                              #numericLiteral
     | booleanValue                                                                        #booleanLiteral
     | string                                                                              #stringLiteral
+    | UDF_FUNCTION  '(' (expression (',' expression)*)? ')'                               #udf
     | qualifiedName '(' (label=identifier '.')? ASTERISK ')'                              #functionCall
     | qualifiedName '(' (expression (',' expression)*)? ')'                               #functionCall
     | CASE operand=expression whenClause+ (ELSE elseExpression=expression)? END           #simpleCase
@@ -135,6 +136,7 @@ ELSE: 'ELSE' | 'else';
 END: 'END' | 'end';
 TRUE: 'TRUE' | 'true';
 FALSE: 'FALSE' | 'false';
+UDF_FUNCTION: 'UDF_FUNCTION' | 'udf_function';
 
 ALL: 'ALL';
 AND: 'AND';

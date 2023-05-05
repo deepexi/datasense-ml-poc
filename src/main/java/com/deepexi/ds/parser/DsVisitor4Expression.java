@@ -28,7 +28,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
  */
 public class DsVisitor4Expression extends DsBaseVisitor<Expression> {
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   private void debug(ParserRuleContext ctx) {
     if (!DEBUG) {
@@ -208,7 +208,8 @@ public class DsVisitor4Expression extends DsBaseVisitor<Expression> {
   @Override
   public Expression visitStringLiteral(DsParser.StringLiteralContext ctx) {
     debug(ctx);
-    return visitChildren(ctx);
+    return StringLiteral.of(ctx.getChild(0).getText());
+    // return visitChildren(ctx);
   }
 
   @Override

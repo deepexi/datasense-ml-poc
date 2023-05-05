@@ -37,7 +37,8 @@ public class DsVisitorTest {
       "T1.C1 >= 1",
       "T1.C1 <= 1",
       "T1.C1 <> 1",
-      "T1.C1 =T2.C2"
+      "T1.C1 =T2.C2",
+      "T1='hello'"
   );
 
   public static void main(String[] args) {
@@ -46,10 +47,10 @@ public class DsVisitorTest {
     // all
     // case_boolean.forEach(DsVisitorTest::testBoolean);
     // last
-    // testBoolean(case_boolean.get(case_boolean.size() - 1));
+    testBoolean(case_boolean.get(case_boolean.size() - 1));
 
     // ========  standalone ========
-    testStandalone(case_standalone.get(case_standalone.size() - 1));
+    //testStandalone(case_standalone.get(case_standalone.size() - 1));
     //case_standalone.forEach(DsVisitorTest::testStandalone);
   }
 

@@ -13,6 +13,7 @@ import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.FunctionExpression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.IntegerLiteral;
+import com.deepexi.ds.ast.expression.StringLiteral;
 import org.junit.jupiter.api.Test;
 
 public class DsVisitor4ExpressionTest {
@@ -63,6 +64,18 @@ public class DsVisitor4ExpressionTest {
     //    assertEquals(xxx, testBoolean(xxx).toString());
   }
 
+  @Test
+  public void testParse_simple_boolean_2() {
+    Expression expr = testBoolean(" T1.C1='abc' ");
+    assertTrue(expr instanceof CompareExpression);
+    CompareExpression compareExpression = (CompareExpression) expr;
+
+    assertEquals("T1.C1", compareExpression.getLeft().toString());
+
+    assertTrue(compareExpression.getRight() instanceof StringLiteral);
+    assertEquals("'abc'", compareExpression.getRight().toString());
+    assertEquals("=", ((CompareExpression) expr).getOp().getName());
+  }
 
   @Test
   public void testParse_standalone_function() {
@@ -102,7 +115,6 @@ public class DsVisitor4ExpressionTest {
     assertEquals("<=", ((CompareExpression) whenThen0.getWhen()).getOp().getName());
     assertEquals("3", ((CompareExpression) whenThen0.getWhen()).getRight().toString());
     assertEquals("xxx", whenThen0.getThen().toString());
-
 
     WhenThen whenThen1 = caseWhen.getWhenThenList().get(1);
     assertTrue(whenThen1.getWhen() instanceof CompareExpression);

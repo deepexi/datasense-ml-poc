@@ -6,9 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.deepexi.ds.ast.expression.ArithmeticExpression;
+import com.deepexi.ds.ast.expression.BooleanLiteral;
 import com.deepexi.ds.ast.expression.CaseWhenExpression;
 import com.deepexi.ds.ast.expression.CaseWhenExpression.WhenThen;
 import com.deepexi.ds.ast.expression.CompareExpression;
+import com.deepexi.ds.ast.expression.DataTypeLiteral;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.FunctionExpression;
 import com.deepexi.ds.ast.expression.Identifier;
@@ -116,7 +118,21 @@ public class DsVisitor4ExpressionTest {
   }
 
   @Test
-  public void testParse_case_when_1() {
+  public void testParse_udf_cast() {
+    Expression expr = testStandalone("udf_function(cast, date_dim.d_moy, int, string, true)");
+    assertTrue(expr instanceof UdfExpression);
+    UdfExpression udf = (UdfExpression) expr;
+
+    assertEquals("cast", udf.getName());
+    assertEquals(4, udf.getArgs().size());
+    assertEquals(new Identifier("date_dim", "d_moy"), udf.getArgs().get(0));
+    assertEquals(new DataTypeLiteral("int"), udf.getArgs().get(1));
+    assertEquals(new DataTypeLiteral("string"), udf.getArgs().get(2));
+    assertEquals(BooleanLiteral.TRUE, udf.getArgs().get(3));
+  }
+
+  @Test
+  public void testParse_case_when_else_end() {
     String s = "case when d_dom <= 3 then xxx when d_dom <=4 then yyy else zzz end";
     Expression expr = testStandalone(s);
     assertTrue(expr instanceof CaseWhenExpression);

@@ -3,9 +3,15 @@ package com.deepexi.ds.builder.express;
 import com.deepexi.ds.ModelException;
 import com.deepexi.ds.ast.AstNode;
 import com.deepexi.ds.ast.Column;
+import com.deepexi.ds.ast.ColumnDataType;
 import com.deepexi.ds.ast.Relation;
+import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
+import com.deepexi.ds.ast.expression.UdfCastExpression;
+import com.deepexi.ds.ast.expression.UdfExpression;
+import com.deepexi.ds.ast.window.Window;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 把函数中的 Identifier进行处理
@@ -48,5 +54,36 @@ public class ColumnInFunctionHandler extends BaseColumnIdentifierRewriter {
       throw new ModelException(String.format("column %s.%s cannot recognized", table, field));
     }
     return new Identifier(targetRelation.getTableName().getValue(), field);
+  }
+
+  @Override
+  public AstNode visitUdf(UdfExpression node, Void context) {
+    UdfExpression udfExpression = (UdfExpression) super.visitUdf(node, context);
+
+    boolean isDataTypeCast = (node.getArgs().size() > 0)
+        && Objects.equals(node.getName(), "cast");
+    if (isDataTypeCast) {
+      return new UdfCastExpression(udfExpression.getArgs());
+    }
+    return udfExpression;
+  }
+
+  @Override
+  public AstNode visitColumn(Column node, Void context) {
+    Window window = node.getWindow();
+    Window newWindow = window;
+    if (window != null) {
+      newWindow = (Window) process(window, context);
+    }
+    Expression newExpr = (Expression) process(node.getExpr(), context);
+
+    // 可能改写 dataType
+    ColumnDataType dataType = node.getDataType();
+
+    if (dataType == null && newExpr instanceof UdfCastExpression) {
+      dataType = ((UdfCastExpression) newExpr).getToType();
+    }
+
+    return new Column(node.getAlias(), newExpr, dataType, newWindow);
   }
 }

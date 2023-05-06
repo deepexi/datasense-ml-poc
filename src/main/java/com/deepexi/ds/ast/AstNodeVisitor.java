@@ -5,6 +5,7 @@ import com.deepexi.ds.ast.expression.BooleanLiteral;
 import com.deepexi.ds.ast.expression.CaseWhenExpression;
 import com.deepexi.ds.ast.expression.CaseWhenExpression.WhenThen;
 import com.deepexi.ds.ast.expression.CompareExpression;
+import com.deepexi.ds.ast.expression.DataTypeLiteral;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.FunctionExpression;
 import com.deepexi.ds.ast.expression.Identifier;
@@ -70,4 +71,6 @@ public interface AstNodeVisitor<R, C> {
   R visitFrameBoundary(FrameBoundary node, C context);
 
   R visitUdf(UdfExpression node, C context);
+
+  R visitDataTypeLiteral(DataTypeLiteral node, C context);
 }

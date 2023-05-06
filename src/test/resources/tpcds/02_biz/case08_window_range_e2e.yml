@@ -90,19 +90,19 @@ metric_filters: [ sum_ss_net_paid__store_sales > 0 ]
 # 该窗口表示, 按照日期(天), 累计3天, 从3天前开始, 到1天前结束
 # 年内按天 => order by: d_date ====> 推导 partition = dimensions - d_date
 # 3天前, 1天前, 推导出 frame_type, start, end
-#window:
-#  partitions: [ s_store_name, d_year ]
-#  # 保留时间无关 s_store_name
-#  # 按照 day_of_year进行统计, 保留 year, 一年内连续三天(day_of_year) 并非 月内连续三天
-#  order_bys:
-#    - name: d_date                      # 连续 "N天"
-#  frame_type: range                     # "连续" 三天
-#  start:
-#    base: n_preceding                   # 3天前开始 包含
-#    offset: 3
-#  end:
-#    base: n_preceding                   # 1天前结束 包含
-#    offset: 1
+window:
+  partitions: [ s_store_name, d_year ]
+  # 保留时间无关 s_store_name
+  # 按照 day_of_year进行统计, 保留 year, 一年内连续三天(day_of_year) 并非 月内连续三天
+  order_bys:
+    - name: d_date                      # 连续 "N天"
+  frame_type: range                     # "连续" 三天
+  start:
+    base: n_preceding                   # 3天前开始 包含
+    offset: 3
+  end:
+    base: n_preceding                   # 1天前结束 包含
+    offset: 1
 
 ---
 version: v1

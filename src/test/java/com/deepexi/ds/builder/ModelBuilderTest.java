@@ -14,6 +14,7 @@ import com.deepexi.ds.ast.ColumnDataType;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.Relation;
 import com.deepexi.ds.ast.expression.Identifier;
+import com.deepexi.ds.ast.expression.UdfCastExpression;
 import com.deepexi.ds.ast.source.TableSource;
 import com.deepexi.ds.ymlmodel.YmlModel;
 import com.deepexi.ds.ymlmodel.factory.YmlModelParser;
@@ -98,7 +99,7 @@ public class ModelBuilderTest {
     // YmlModel store = YmlModelParser.loadOneModel("tpcds/01_base_table/store.yml");
     YmlModel storeSales = YmlModelParser.loadOneModel("tpcds/01_base_table/store_sales.yml");
     YmlModel root = YmlModelParser.loadOneModel("debug/01_model_join_model.yml");
-    List<YmlModel> ymlModels = Arrays.asList(/*store,*/ storeSales, root);
+    List<YmlModel> ymlModels = Arrays.asList(storeSales, root);
 
     assertThrows(ModelNotFoundException.class, () -> ModelBuilder.singleTreeModel(ymlModels));
   }
@@ -119,5 +120,34 @@ public class ModelBuilderTest {
   public void testBuild_2_tree_illegal() {
     List<YmlModel> ymlModels = YmlModelParser.loadModels("debug/06_two_trees.yml");
     assertThrows(ModelHasManyRootException.class, () -> ModelBuilder.singleTreeModel(ymlModels));
+  }
+
+  @Test
+  public void testBuild_cast() {
+    List<YmlModel> ymlModels = YmlModelParser.loadModels("debug/12_cast.yml");
+    Model rootModel = ModelBuilder.singleTreeModel(ymlModels);
+    assertNotNull(rootModel);
+    assertEquals(4, rootModel.getColumns().size());
+
+    // 隐式cast
+    Column col0 = rootModel.getColumns().get(0);
+    assertTrue(col0.getExpr() instanceof UdfCastExpression);
+    UdfCastExpression cast0 = (UdfCastExpression) col0.getExpr();
+    assertEquals(ColumnDataType.INTEGER, cast0.getFromType());
+    assertEquals(ColumnDataType.STRING, cast0.getToType());
+
+    // 显式 转换: date->string
+    Column col1 = rootModel.getColumns().get(1);
+    assertTrue(col1.getExpr() instanceof UdfCastExpression);
+    UdfCastExpression cast1 = (UdfCastExpression) col1.getExpr();
+    assertEquals(ColumnDataType.INTEGER, cast1.getFromType());
+    assertEquals(ColumnDataType.STRING, cast1.getToType());
+
+    // 显式 转换: string->date
+    Column col2 = rootModel.getColumns().get(2);
+    assertTrue(col2.getExpr() instanceof UdfCastExpression);
+    UdfCastExpression cast2 = (UdfCastExpression) col2.getExpr();
+    assertEquals(ColumnDataType.DATE, cast2.getFromType());
+    assertEquals(ColumnDataType.STRING, cast2.getToType());
   }
 }

@@ -19,6 +19,7 @@ import com.deepexi.ds.ast.expression.BooleanLiteral;
 import com.deepexi.ds.ast.expression.CaseWhenExpression;
 import com.deepexi.ds.ast.expression.CaseWhenExpression.WhenThen;
 import com.deepexi.ds.ast.expression.CompareExpression;
+import com.deepexi.ds.ast.expression.DataTypeLiteral;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.FunctionExpression;
 import com.deepexi.ds.ast.expression.Identifier;
@@ -248,6 +249,11 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
       return templateFilling(udf_create_date_by_ymd, valuesMap, context);
     }
     throw new RuntimeException("不支持的 udf函数:" + funName);
+  }
+
+  @Override
+  public String visitDataTypeLiteral(DataTypeLiteral node, SqlGeneratorContext context) {
+    throw new RuntimeException("TODO");
   }
 
   @Override

@@ -12,6 +12,7 @@ import com.deepexi.ds.ast.expression.BooleanLiteral;
 import com.deepexi.ds.ast.expression.CaseWhenExpression;
 import com.deepexi.ds.ast.expression.CaseWhenExpression.WhenThen;
 import com.deepexi.ds.ast.expression.CompareExpression;
+import com.deepexi.ds.ast.expression.DataTypeLiteral;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.FunctionExpression;
 import com.deepexi.ds.ast.expression.Identifier;
@@ -122,6 +123,11 @@ public class ScopeCollector implements AstNodeVisitor<Void, ScopeCollectorContex
 
   @Override
   public Void visitUdf(UdfExpression node, ScopeCollectorContext context) {
+    throw new UnsupportedException("this node should not be visit");
+  }
+
+  @Override
+  public Void visitDataTypeLiteral(DataTypeLiteral node, ScopeCollectorContext context) {
     throw new UnsupportedException("this node should not be visit");
   }
 

@@ -11,10 +11,12 @@ import com.deepexi.ds.ast.Join;
 import com.deepexi.ds.ast.JoinType;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.Relation;
+import com.deepexi.ds.ast.expression.DataTypeLiteral;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.FunctionExpression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.Literal;
+import com.deepexi.ds.ast.expression.UdfCastExpression;
 import com.deepexi.ds.ast.source.TableSource;
 import com.deepexi.ds.builder.express.BoolConditionParser;
 import com.deepexi.ds.builder.express.ColumnInFunctionHandler;
@@ -28,6 +30,7 @@ import com.deepexi.ds.ymlmodel.YmlSource;
 import com.deepexi.ds.ymlmodel.YmlSourceModel;
 import com.deepexi.ds.ymlmodel.YmlSourceTable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -193,7 +196,13 @@ public class ModelBuilder {
       }
 
       if (type1 != null && referColDataType != null && type1 != referColDataType) {
-        throw new ModelException("TODO, 类型转换需要添加");
+        // 隐式cast
+        UdfCastExpression udfCast = new UdfCastExpression(Arrays.asList(
+            new Identifier(fromTable.getTableName().getValue(), referColumn.getAlias()),
+            new DataTypeLiteral(referColDataType.name),
+            new DataTypeLiteral(type1.name)
+        ));
+        return new Column(colAlias, udfCast, type1);
       }
 
       if (type1 == null) {

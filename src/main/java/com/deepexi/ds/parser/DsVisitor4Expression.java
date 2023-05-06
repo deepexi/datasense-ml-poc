@@ -5,6 +5,8 @@ import com.deepexi.ds.ModelException;
 import com.deepexi.ds.ModelException.TODOException;
 import com.deepexi.ds.antlr4.DsBaseVisitor;
 import com.deepexi.ds.antlr4.DsParser;
+import com.deepexi.ds.antlr4.DsParser.DataTypeLiteralContext;
+import com.deepexi.ds.antlr4.DsParser.DataTypeValueContext;
 import com.deepexi.ds.antlr4.DsParser.ExpressionContext;
 import com.deepexi.ds.antlr4.DsParser.UdfContext;
 import com.deepexi.ds.ast.expression.ArithmeticExpression;
@@ -13,6 +15,7 @@ import com.deepexi.ds.ast.expression.BooleanLiteral;
 import com.deepexi.ds.ast.expression.CaseWhenExpression;
 import com.deepexi.ds.ast.expression.CaseWhenExpression.WhenThen;
 import com.deepexi.ds.ast.expression.CompareOperator;
+import com.deepexi.ds.ast.expression.DataTypeLiteral;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.FunctionExpression;
 import com.deepexi.ds.ast.expression.Identifier;
@@ -73,7 +76,7 @@ public class DsVisitor4Expression extends DsBaseVisitor<Expression> {
     if (childCount == 1) {
       // like  1+2
       //       child0
-      return visit(ctx.valueExpression);
+      return visit(ctx.valueExpression());
     }
 
     if (childCount == 2) {
@@ -211,6 +214,12 @@ public class DsVisitor4Expression extends DsBaseVisitor<Expression> {
     debug(ctx);
     return StringLiteral.of(ctx.getChild(0).getText());
     // return visitChildren(ctx);
+  }
+
+  @Override
+  public Expression visitDataTypeLiteral(DataTypeLiteralContext ctx) {
+    debug(ctx);
+    return new DataTypeLiteral(ctx.getChild(0).getText());
   }
 
   @Override

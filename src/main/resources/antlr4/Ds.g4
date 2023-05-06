@@ -55,6 +55,7 @@ primaryExpression
     | number                                                                              #numericLiteral
     | booleanValue                                                                        #booleanLiteral
     | string                                                                              #stringLiteral
+    | dataTypeValue                                                                       #dataTypeLiteral
     | UDF_FUNCTION  '(' (expression (',' expression)*)? ')'                               #udf
     | qualifiedName '(' (label=identifier '.')? ASTERISK ')'                              #functionCall
     | qualifiedName '(' (expression (',' expression)*)? ')'                               #functionCall
@@ -105,6 +106,14 @@ number
     : MINUS? DECIMAL_VALUE  #decimalLiteral
     | MINUS? DOUBLE_VALUE   #doubleLiteral
     | MINUS? INTEGER_VALUE  #integerLiteral
+    ;
+
+dataTypeValue
+    : 'INT' | 'int'
+    | 'STRING' | 'string'
+    | 'DATE' | 'date'
+    | 'TIMESTAMP' | 'timestamp'
+    | 'TIME' | 'time'
     ;
 
 nonReserved

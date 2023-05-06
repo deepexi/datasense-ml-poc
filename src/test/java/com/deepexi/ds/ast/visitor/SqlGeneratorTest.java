@@ -160,6 +160,21 @@ public class SqlGeneratorTest {
     assertNotNull(sql);
   }
 
+  @Test
+  public void testColumnCast() {
+    List<YmlModel> ymlModels = YmlModelParser.loadModels("debug/12_cast.yml");
+    Model rootModel = ModelBuilder.singleTreeModel(ymlModels);
+
+    // generate sql
+    SqlGenerator generator = new SqlGenerator();
+    SqlGeneratorContext context = new SqlGeneratorPgContext(rootModel);
+    String sql = generator.process(context.getRoot(), context);
+    assertNotNull(sql);
+    assertTrue(noPlaceHolder(sql)); // 所有占位符都已被替换
+    System.out.println(sql);
+    assertNotNull(sql);
+  }
+
 
   @Test
   public void testVisitMetricBindQuery_case01() {

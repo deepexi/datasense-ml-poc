@@ -18,6 +18,7 @@ import com.deepexi.ds.ast.expression.FunctionExpression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.IntegerLiteral;
 import com.deepexi.ds.ast.expression.StringLiteral;
+import com.deepexi.ds.ast.expression.UdfCastExpression;
 import com.deepexi.ds.ast.expression.UdfExpression;
 import com.deepexi.ds.ast.source.ModelSource;
 import com.deepexi.ds.ast.source.TableSource;
@@ -122,12 +123,17 @@ public class ScopeCollector implements AstNodeVisitor<Void, ScopeCollectorContex
   }
 
   @Override
-  public Void visitUdf(UdfExpression node, ScopeCollectorContext context) {
+  public Void visitUdfExpression(UdfExpression node, ScopeCollectorContext context) {
     throw new UnsupportedException("this node should not be visit");
   }
 
   @Override
   public Void visitDataTypeLiteral(DataTypeLiteral node, ScopeCollectorContext context) {
+    throw new UnsupportedException("this node should not be visit");
+  }
+
+  @Override
+  public Void visitUdfCastExpression(UdfCastExpression node, ScopeCollectorContext context) {
     throw new UnsupportedException("this node should not be visit");
   }
 

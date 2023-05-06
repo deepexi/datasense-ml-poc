@@ -114,6 +114,7 @@ dataTypeValue
     | 'DATE' | 'date'
     | 'TIMESTAMP' | 'timestamp'
     | 'TIME' | 'time'
+    | 'UNKNOWN_TYPE' | 'unknown_type'
     ;
 
 nonReserved

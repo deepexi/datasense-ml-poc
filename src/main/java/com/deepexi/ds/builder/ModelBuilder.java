@@ -199,7 +199,6 @@ public class ModelBuilder {
         // 隐式cast
         UdfCastExpression udfCast = new UdfCastExpression(Arrays.asList(
             new Identifier(fromTable.getTableName().getValue(), referColumn.getAlias()),
-            new DataTypeLiteral(referColDataType.name),
             new DataTypeLiteral(type1.name)
         ));
         return new Column(colAlias, udfCast, type1);

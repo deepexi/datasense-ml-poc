@@ -8,12 +8,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.Getter;
 
+/**
+ * 类型转换
+ */
 @Getter
 public class UdfCastExpression extends UdfExpression {
 
   public static final String NAME = "cast";
   private final Identifier castColId;
-  private final ColumnDataType fromType;
   private final ColumnDataType toType;
   private final List<Expression> castArgs;
 
@@ -21,14 +23,13 @@ public class UdfCastExpression extends UdfExpression {
     super(NAME, args);
 
     castColId = (Identifier) args.get(0);
+
     DataTypeLiteral from = (DataTypeLiteral) args.get(1);
-    fromType = ColumnDataType.fromName(from.getValue());
+    toType = ColumnDataType.fromName(from.getValue());
 
-    DataTypeLiteral to = (DataTypeLiteral) args.get(2);
-    toType = ColumnDataType.fromName(to.getValue());
-
-    List<Expression> tmp = new ArrayList<>(args.size() - 3);
-    for (int i = 3; i < args.size(); i++) {
+    int startArgIndex = 2;
+    List<Expression> tmp = new ArrayList<>(args.size() - startArgIndex);
+    for (int i = startArgIndex; i < args.size(); i++) {
       tmp.add(args.get(i));
     }
     this.castArgs = ImmutableList.copyOf(tmp);
@@ -36,14 +37,13 @@ public class UdfCastExpression extends UdfExpression {
 
   @Override
   public <R, C> R accept(AstNodeVisitor<R, C> visitor, C context) {
-    throw new RuntimeException("TODO");
+    return visitor.visitUdfCastExpression(this, context);
   }
 
   @Override
   public String toString() {
     String argsJoin = castArgs.stream().map(Object::toString).collect(Collectors.joining(","));
-    return String.format("%s: %s => %s args=(%s)", castColId.toString(),
-        fromType.name,
+    return String.format("%s: => %s args=(%s)", castColId.toString(),
         toType.name,
         argsJoin);
   }

@@ -25,6 +25,7 @@ import com.deepexi.ds.ast.expression.FunctionExpression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.IntegerLiteral;
 import com.deepexi.ds.ast.expression.StringLiteral;
+import com.deepexi.ds.ast.expression.UdfCastExpression;
 import com.deepexi.ds.ast.expression.UdfExpression;
 import com.deepexi.ds.ast.source.ModelSource;
 import com.deepexi.ds.ast.source.TableSource;
@@ -229,7 +230,7 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
   }
 
   @Override
-  public String visitUdf(UdfExpression node, SqlGeneratorContext context) {
+  public String visitUdfExpression(UdfExpression node, SqlGeneratorContext context) {
     String funName = node.getName();
     ImmutableList<Expression> args = node.getArgs();
 
@@ -249,6 +250,11 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
       return templateFilling(udf_create_date_by_ymd, valuesMap, context);
     }
     throw new RuntimeException("不支持的 udf函数:" + funName);
+  }
+
+  @Override
+  public String visitUdfCastExpression(UdfCastExpression node, SqlGeneratorContext context) {
+    return null;
   }
 
   @Override

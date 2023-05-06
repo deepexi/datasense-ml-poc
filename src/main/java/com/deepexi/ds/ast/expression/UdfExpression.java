@@ -13,6 +13,6 @@ public class UdfExpression extends FunctionExpression {
 
   @Override
   public <R, C> R accept(AstNodeVisitor<R, C> visitor, C context) {
-    return visitor.visitUdf(this, context);
+    return visitor.visitUdfExpression(this, context);
   }
 }

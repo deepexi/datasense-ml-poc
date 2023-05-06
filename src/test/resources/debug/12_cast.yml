@@ -15,13 +15,13 @@ columns:
     expr: date_dim.d_year
     data_type: string                                           # 原int => string, 隐式转换
   - name: d_moy
-    expr: udf_function(cast, date_dim.d_moy, int, string) # 显示强转换
+    expr: udf_function(cast, date_dim.d_moy, string)            # 显示强转换
     # date_type 会自动推导
   - name: created_at_str
-    expr: udf_function(cast, date_dim.created_at, date, string, '%Y-%m-%d %H:%M:%S')
+    expr: udf_function(cast, date_dim.created_at, string, '%Y-%m-%d %H:%M:%S')
     # date_type 会自动推导
   - name: updated_at
-    expr: udf_function(cast, date_dim.updated_at_str, string, date, '%Y/%m/%d %H')
+    expr: udf_function(cast, date_dim.updated_at_str, date, '%Y/%m/%d %H')
     # date_type 会自动推导
 
 ---

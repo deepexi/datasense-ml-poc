@@ -57,8 +57,8 @@ public class ColumnInFunctionHandler extends BaseColumnIdentifierRewriter {
   }
 
   @Override
-  public AstNode visitUdf(UdfExpression node, Void context) {
-    UdfExpression udfExpression = (UdfExpression) super.visitUdf(node, context);
+  public AstNode visitUdfExpression(UdfExpression node, Void context) {
+    UdfExpression udfExpression = (UdfExpression) super.visitUdfExpression(node, context);
 
     boolean isDataTypeCast = (node.getArgs().size() > 0)
         && Objects.equals(node.getName(), "cast");

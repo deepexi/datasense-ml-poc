@@ -134,7 +134,6 @@ public class ModelBuilderTest {
     Column col0 = rootModel.getColumns().get(0);
     assertTrue(col0.getExpr() instanceof UdfCastExpression);
     UdfCastExpression cast0 = (UdfCastExpression) col0.getExpr();
-    assertEquals(ColumnDataType.INTEGER, cast0.getFromType());
     assertEquals(ColumnDataType.STRING, cast0.getToType());
 
     // 显式 转换: int->string
@@ -142,7 +141,6 @@ public class ModelBuilderTest {
     assertEquals(ColumnDataType.STRING, col1.getDataType()); // 生成
     assertTrue(col1.getExpr() instanceof UdfCastExpression);
     UdfCastExpression cast1 = (UdfCastExpression) col1.getExpr();
-    assertEquals(ColumnDataType.INTEGER, cast1.getFromType());
     assertEquals(ColumnDataType.STRING, cast1.getToType());
 
     // 显式 转换: date->string
@@ -150,7 +148,6 @@ public class ModelBuilderTest {
     assertEquals(ColumnDataType.STRING, col2.getDataType()); // 生成
     assertTrue(col2.getExpr() instanceof UdfCastExpression);
     UdfCastExpression cast2 = (UdfCastExpression) col2.getExpr();
-    assertEquals(ColumnDataType.DATE, cast2.getFromType());
     assertEquals(ColumnDataType.STRING, cast2.getToType());
     String pattern2 = ((StringLiteral) (cast2.getCastArgs().get(0))).getValue();
     assertEquals("'%Y-%m-%d %H:%M:%S'", pattern2);
@@ -160,7 +157,6 @@ public class ModelBuilderTest {
     assertEquals(ColumnDataType.DATE, col3.getDataType()); // 生成
     assertTrue(col3.getExpr() instanceof UdfCastExpression);
     UdfCastExpression cast3 = (UdfCastExpression) col3.getExpr();
-    assertEquals(ColumnDataType.STRING, cast3.getFromType());
     assertEquals(ColumnDataType.DATE, cast3.getToType());
     String pattern3 = ((StringLiteral) (cast3.getCastArgs().get(0))).getValue();
     assertEquals("'%Y/%m/%d %H'", pattern3);

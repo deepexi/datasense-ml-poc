@@ -17,6 +17,7 @@ import com.deepexi.ds.ast.expression.FunctionExpression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.IntegerLiteral;
 import com.deepexi.ds.ast.expression.StringLiteral;
+import com.deepexi.ds.ast.expression.UdfCastExpression;
 import com.deepexi.ds.ast.expression.UdfExpression;
 import com.deepexi.ds.ast.source.ModelSource;
 import com.deepexi.ds.ast.source.TableSource;
@@ -136,7 +137,7 @@ public abstract class BaseColumnIdentifierRewriter implements AstNodeVisitor<Ast
   }
 
   @Override
-  public AstNode visitUdf(UdfExpression node, Void context) {
+  public AstNode visitUdfExpression(UdfExpression node, Void context) {
     if (node.getArgs().size() == 0) {
       return node;
     }
@@ -151,6 +152,11 @@ public abstract class BaseColumnIdentifierRewriter implements AstNodeVisitor<Ast
   @Override
   public AstNode visitDataTypeLiteral(DataTypeLiteral node, Void context) {
     return node;
+  }
+
+  @Override
+  public AstNode visitUdfCastExpression(UdfCastExpression node, Void context) {
+    throw new RuntimeException("should not be visit");
   }
 
   @Override

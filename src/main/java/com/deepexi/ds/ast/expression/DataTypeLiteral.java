@@ -14,6 +14,11 @@ public class DataTypeLiteral extends Literal {
   }
 
   @Override
+  public String toString() {
+    return value;
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (this == o) {
       return true;

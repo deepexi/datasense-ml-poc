@@ -1,6 +1,7 @@
 package com.deepexi.ds.ast;
 
 import com.deepexi.ds.ModelException.UnsupportedException;
+import com.deepexi.ds.ast.expression.ArithmeticExpression;
 import com.deepexi.ds.ast.expression.BooleanLiteral;
 import com.deepexi.ds.ast.expression.CaseWhenExpression;
 import com.deepexi.ds.ast.expression.CaseWhenExpression.WhenThen;
@@ -76,4 +77,6 @@ public interface AstNodeVisitor<R, C> {
   R visitDataTypeLiteral(DataTypeLiteral node, C context);
 
   R visitUdfCastExpression(UdfCastExpression node, C context);
+
+  R visitArithmeticExpression(ArithmeticExpression node, C context);
 }

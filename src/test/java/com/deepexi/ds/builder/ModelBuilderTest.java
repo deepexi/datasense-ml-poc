@@ -128,7 +128,7 @@ public class ModelBuilderTest {
     List<YmlModel> ymlModels = YmlModelParser.loadModels("debug/12_cast.yml");
     Model rootModel = ModelBuilder.singleTreeModel(ymlModels);
     assertNotNull(rootModel);
-    assertEquals(4, rootModel.getColumns().size());
+    assertEquals(6, rootModel.getColumns().size());
 
     // 隐式cast
     Column col0 = rootModel.getColumns().get(0);

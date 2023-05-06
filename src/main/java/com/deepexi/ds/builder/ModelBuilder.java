@@ -2,6 +2,7 @@ package com.deepexi.ds.builder;
 
 import static java.util.Collections.EMPTY_LIST;
 
+import com.deepexi.ds.DevConfig;
 import com.deepexi.ds.ModelException;
 import com.deepexi.ds.ModelException.ColumnNotExistException;
 import com.deepexi.ds.ModelException.ModelNotFoundException;
@@ -164,13 +165,13 @@ public class ModelBuilder {
 
     List<Column> columns = new ArrayList<>(list.size());
     for (YmlColumn col : list) {
-      Column column = parseColumn(col, srcRel, ctx);
+      Column column = parseColumnOfAllCase(col, srcRel, ctx);
       columns.add(column);
     }
     ctx.setColumns(columns);
   }
 
-  private Column parseColumn(YmlColumn col, Relation srcRel, Container ctx) {
+  private Column parseColumnOfAllCase(YmlColumn col, Relation srcRel, Container ctx) {
     Expression expression = ParserUtils.parseStandaloneExpression(col.getExpr());
     String colAlias = col.getName();
     ColumnDataType type1 = ColumnDataType.fromName(col.getDataType());
@@ -207,6 +208,11 @@ public class ModelBuilder {
       if (type1 == null) {
         type1 = referColDataType;
       }
+      if (type1 == null) {
+        if (DevConfig.DEBUG) {
+          System.out.println(String.format("column %s data type is null", colAlias));
+        }
+      }
       return new Column(colAlias, colId, type1);
     }
 
@@ -218,6 +224,11 @@ public class ModelBuilder {
     }
 
     // 其他情况, 这个列是派生计算而来
+    if (type1 == null) {
+      if (DevConfig.DEBUG) {
+        System.out.println(String.format("column %s data type is null", colAlias));
+      }
+    }
     Column colRaw = new Column(colAlias, expression, type1);
     Column colWithTable = (Column) new ColumnTableNameAdder(srcRel).process(colRaw);
     if (expression instanceof FunctionExpression) {

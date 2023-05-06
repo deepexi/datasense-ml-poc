@@ -7,6 +7,7 @@ import com.deepexi.ds.ast.Join;
 import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.OrderBy;
+import com.deepexi.ds.ast.expression.ArithmeticExpression;
 import com.deepexi.ds.ast.expression.BooleanLiteral;
 import com.deepexi.ds.ast.expression.CaseWhenExpression;
 import com.deepexi.ds.ast.expression.CaseWhenExpression.WhenThen;
@@ -157,6 +158,13 @@ public abstract class BaseColumnIdentifierRewriter implements AstNodeVisitor<Ast
   @Override
   public AstNode visitUdfCastExpression(UdfCastExpression node, Void context) {
     throw new RuntimeException("should not be visit");
+  }
+
+  @Override
+  public AstNode visitArithmeticExpression(ArithmeticExpression node, Void context) {
+    Expression left = (Expression) process(node.getLeft(), context);
+    Expression right = (Expression) process(node.getRight(), context);
+    return new ArithmeticExpression(left, right, node.getOp());
   }
 
   @Override

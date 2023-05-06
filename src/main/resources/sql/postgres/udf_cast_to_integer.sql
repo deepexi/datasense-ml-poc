@@ -7,4 +7,4 @@
 --! sql用途: 解析Model节点时 生成整体sql
 --! sql变量:
 --!     castWhat
-cast(${castWhat} AS text)
+cast(${castWhat} AS bigint)

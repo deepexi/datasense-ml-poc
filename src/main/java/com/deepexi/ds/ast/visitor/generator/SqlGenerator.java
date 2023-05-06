@@ -15,6 +15,7 @@ import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.OrderBy;
 import com.deepexi.ds.ast.Relation;
+import com.deepexi.ds.ast.expression.ArithmeticExpression;
 import com.deepexi.ds.ast.expression.BooleanLiteral;
 import com.deepexi.ds.ast.expression.CaseWhenExpression;
 import com.deepexi.ds.ast.expression.CaseWhenExpression.WhenThen;
@@ -254,7 +255,48 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
 
   @Override
   public String visitUdfCastExpression(UdfCastExpression node, SqlGeneratorContext context) {
-    throw new RuntimeException("TODO");
+    String castWhat = process(node.getCastWhat(), context);
+    Map<String, String> valuesMap = new HashMap<>();
+    valuesMap.put("castWhat", castWhat);
+
+    switch (node.getToType()) {
+      case BOOL:
+        return templateFilling(SqlTemplateId.udf_cast_to_bool, valuesMap, context);
+      case DATE:
+        return templateFilling(SqlTemplateId.udf_cast_to_date, valuesMap, context);
+      case DATETIME:
+        return templateFilling(SqlTemplateId.udf_cast_to_datetime, valuesMap, context);
+      case DECIMAL:
+        List<Expression> castArgs = node.getCastArgs();
+        String castSyntaxError = "cast decimal syntax: udf_function(cast, xxx, decimal, precision, scale)";
+        // 参数校验
+        if (castArgs.size() != 2) {
+          throw new ModelException(castSyntaxError);
+        }
+        boolean allInteger = castArgs.stream().allMatch(arg -> arg instanceof IntegerLiteral);
+        if (!allInteger) {
+          throw new ModelException(castSyntaxError);
+        }
+        IntegerLiteral precision = (IntegerLiteral) castArgs.get(0);
+        IntegerLiteral scale = (IntegerLiteral) castArgs.get(1);
+
+        valuesMap.put("precision", String.valueOf(precision.getValue()));
+        valuesMap.put("scale", String.valueOf(scale.getValue()));
+        return templateFilling(SqlTemplateId.udf_cast_to_decimal, valuesMap, context);
+      case INTEGER:
+        return templateFilling(SqlTemplateId.udf_cast_to_integer, valuesMap, context);
+      case STRING:
+        return templateFilling(SqlTemplateId.udf_cast_to_string, valuesMap, context);
+      case TIME:
+      case TIMESTAMP:
+      default:
+        throw new RuntimeException("TODO");
+    }
+  }
+
+  @Override
+  public String visitArithmeticExpression(ArithmeticExpression node, SqlGeneratorContext context) {
+    throw new ModelException("TODO");
   }
 
   @Override

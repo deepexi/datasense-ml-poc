@@ -23,6 +23,10 @@ columns:
   - name: updated_at
     expr: udf_function(cast, date_dim.updated_at_str, date, '%Y/%m/%d %H')
     # date_type 会自动推导
+  - name: ss_net_paid2
+    expr: udf_function(cast, store_sales.ss_net_paid, decimal, 10, 2)
+  - name: ss_net_paid_in_cent
+    expr: udf_function(cast, 100 * ss_net_paid, int)
 
 ---
 version: v1

@@ -2,4 +2,8 @@
 
 mvn clean generate-sources
 # in case first fail
-mvn clean generate-sources
+if [ $? -eq 0 ]; then
+    :
+else
+  mvn clean generate-sources
+fi

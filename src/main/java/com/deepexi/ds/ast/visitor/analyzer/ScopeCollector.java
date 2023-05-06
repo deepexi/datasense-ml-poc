@@ -8,6 +8,7 @@ import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.OrderBy;
 import com.deepexi.ds.ast.Relation;
+import com.deepexi.ds.ast.expression.ArithmeticExpression;
 import com.deepexi.ds.ast.expression.BooleanLiteral;
 import com.deepexi.ds.ast.expression.CaseWhenExpression;
 import com.deepexi.ds.ast.expression.CaseWhenExpression.WhenThen;
@@ -134,6 +135,11 @@ public class ScopeCollector implements AstNodeVisitor<Void, ScopeCollectorContex
 
   @Override
   public Void visitUdfCastExpression(UdfCastExpression node, ScopeCollectorContext context) {
+    throw new UnsupportedException("this node should not be visit");
+  }
+
+  @Override
+  public Void visitArithmeticExpression(ArithmeticExpression node, ScopeCollectorContext context) {
     throw new UnsupportedException("this node should not be visit");
   }
 

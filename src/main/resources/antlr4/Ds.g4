@@ -109,11 +109,14 @@ number
     ;
 
 dataTypeValue
-    : 'INT' | 'int'
-    | 'STRING' | 'string'
+    : 'BOOL' | 'bool'
     | 'DATE' | 'date'
-    | 'TIMESTAMP' | 'timestamp'
+    | 'DATETIME' | 'datetime'
+    | 'DECIMAL' | 'decimal'
+    | 'INT' | 'int'
+    | 'STRING' | 'string'
     | 'TIME' | 'time'
+    | 'TIMESTAMP' | 'timestamp'
     | 'UNKNOWN_TYPE' | 'unknown_type'
     ;
 

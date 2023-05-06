@@ -13,7 +13,6 @@
 --!     orderBySql
 --!     limitSql
 --!     offsetSql
--- dialect: default, model_001.sql --
 with ${aliasSql} as (
     ${sourceSql}
 )

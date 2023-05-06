@@ -9,5 +9,4 @@
 --!     year
 --!     monthOfYear
 --!     dayOfMonth
--- dialect: postgres, udf_create_date_by_ymd.sql
 make_date(${year}, ${monthOfYear}, ${dayOfMonth})

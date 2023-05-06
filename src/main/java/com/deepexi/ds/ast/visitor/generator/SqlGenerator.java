@@ -254,7 +254,7 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
 
   @Override
   public String visitUdfCastExpression(UdfCastExpression node, SqlGeneratorContext context) {
-    return null;
+    throw new RuntimeException("TODO");
   }
 
   @Override

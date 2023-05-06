@@ -8,7 +8,6 @@
 --! sql变量:
 --!     whenThenSql
 --!     elseSql
--- dialect: default, case_when_001.sql
 case
     ${whenThenSql}
     ${elseSql}

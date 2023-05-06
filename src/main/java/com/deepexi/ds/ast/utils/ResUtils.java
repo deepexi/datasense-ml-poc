@@ -1,5 +1,6 @@
 package com.deepexi.ds.ast.utils;
 
+import com.deepexi.ds.DevConfig;
 import com.deepexi.ds.ModelException;
 import com.deepexi.ds.ast.SqlDialect;
 import java.io.BufferedReader;
@@ -11,18 +12,20 @@ import java.util.stream.Collectors;
 
 public class ResUtils {
 
-  public static final String DEFAULT_DIR = "default";
+  private static final String DEFAULT_DIR = "default";
   /**
    * sql文件路径模板
    */
   private static final String SQL_FILE_PATTERN = "sql/%s/%s.sql";
-
+  private static final String PATTERN_DEBUG = "-- res/sql/%s/%s.sql\n";
   /**
    * all lines start with --! will be removed
    */
-  public static Predicate<String> NOT_COMMENT = line -> !line.startsWith("--!");
+  private static Predicate<String> NOT_COMMENT = (String line) -> !line.startsWith("--!");
 
-  public static String getResourceFileAsString(String fileName) throws ModelException {
+
+  private static String getResourceFileAsString(String fileName, String debugInfo)
+      throws ModelException {
     ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 
     try (InputStream is = classLoader.getResourceAsStream(fileName)) {
@@ -31,8 +34,13 @@ public class ResUtils {
       }
       try (InputStreamReader isr = new InputStreamReader(is);
           BufferedReader reader = new BufferedReader(isr)) {
-        return reader.lines().filter(NOT_COMMENT)
+        String template = reader.lines()
+            .filter(NOT_COMMENT)
             .collect(Collectors.joining(System.lineSeparator()));
+        if (DevConfig.DEBUG) {
+          template = debugInfo + template;
+        }
+        return template;
       }
     } catch (IOException e) {
       throw new ModelException(e);
@@ -42,7 +50,8 @@ public class ResUtils {
   public static String getSqlTemplate(SqlTemplateId templateId, SqlDialect dialect) {
     String path = String.format(SQL_FILE_PATTERN, dialect.name.toLowerCase(), templateId.fileName);
     try {
-      String sql = getResourceFileAsString(path);
+      String debugInfo = String.format(PATTERN_DEBUG, dialect.name, templateId.fileName);
+      String sql = getResourceFileAsString(path, debugInfo);
       if (sql != null) {
         return sql;
       }
@@ -55,8 +64,9 @@ public class ResUtils {
     }
 
     // if not got, find the default dialect
+    String debugInfo = String.format(PATTERN_DEBUG, DEFAULT_DIR, templateId.fileName);
     String path4Default = String.format(SQL_FILE_PATTERN, DEFAULT_DIR, templateId.fileName);
-    return getResourceFileAsString(path4Default);
+    return getResourceFileAsString(path4Default, debugInfo);
   }
 
   // 检测sql中是否有占位符 ${.*?}

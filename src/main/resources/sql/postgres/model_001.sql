@@ -13,7 +13,6 @@
 --!     orderBySql
 --!     limitSql
 --!     offsetSql
--- dialect: postgres, model_001.sql --
 with ${aliasSql} as (
     ${sourceSql}
 )

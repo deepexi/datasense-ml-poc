@@ -14,7 +14,6 @@
 --!     orderBySql
 --!     limitSql
 --!     offsetSql
--- dialect: default, metric_bind_query_001.sql --
 with ${aliasSql} as (
     ${modelSql}
 )

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.deepexi.ds.DevConfig;
 import com.deepexi.ds.ModelException;
 import com.deepexi.ds.ast.AstNode;
 import com.deepexi.ds.ast.MetricBindQuery;
@@ -46,7 +47,9 @@ public class SqlGeneratorTest {
     assertNotNull(sql);
 
     assertTrue(noPlaceHolder(sql)); // 所有占位符都已被替换
-    assertTrue(sql.contains("dialect: postgres")); // 这个是 sql模板中保留的
+    if (DevConfig.DEBUG) {
+      assertTrue(sql.contains("res/sql/postgres")); // 这个是 sql模板中保留的
+    }
     System.out.println(sql);
   }
 

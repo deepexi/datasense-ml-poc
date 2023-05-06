@@ -1,6 +1,7 @@
 package com.deepexi.ds.ast.visitor;
 
 import static com.deepexi.ds.ast.utils.ResUtils.noPlaceHolder;
+import static com.deepexi.ds.ast.visitor.generator.IdentifierShowPolicy.NO_TABLE_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -278,7 +279,7 @@ public class SqlGeneratorTest {
 
     // generate sql
     SqlGenerator generator = new SqlGenerator();
-    SqlGeneratorContext context = new SqlGeneratorPgContext(node);
+    SqlGeneratorContext context = new SqlGeneratorPgContext(node, NO_TABLE_NAME);
     String sql = generator.process(context.getRoot(), context);
     assertNotNull(sql);
     assertTrue(noPlaceHolder(sql)); // 所有占位符都已被替换
@@ -293,7 +294,7 @@ public class SqlGeneratorTest {
 
     // generate sql
     SqlGenerator generator = new SqlGenerator();
-    SqlGeneratorContext context = new SqlGeneratorPgContext(node);
+    SqlGeneratorContext context = new SqlGeneratorPgContext(node, NO_TABLE_NAME);
     String sql = generator.process(context.getRoot(), context);
     assertNotNull(sql);
     assertTrue(noPlaceHolder(sql)); // 所有占位符都已被替换
@@ -312,7 +313,7 @@ public class SqlGeneratorTest {
         node,
         SqlDialect.TEST_DIALECT,
         IdentifierQuotePolicy.NO_QUOTE,
-        IdentifierShowPolicy.NO_TABLE_NAME);
+        NO_TABLE_NAME);
     assertThrows(ModelException.class, () -> generator.process(context.getRoot(), context));
   }
 }

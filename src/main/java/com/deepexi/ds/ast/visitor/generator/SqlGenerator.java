@@ -113,8 +113,8 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
 
   @Override
   public String visitMetricBindQuery(MetricBindQuery node, SqlGeneratorContext context) {
-    String modelSql = process(node.getRelation(), context);
     String aliasSql = process(node.getRelation().getTableName(), context);
+    String cteSql = utilCreateCte(node, context);
 
     String whereSql = ""; // where optional
     if (node.getModelFilters().size() > 0) {
@@ -184,9 +184,9 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
 
     // 组装模板
     Map<String, String> valuesMap = new HashMap<>();
-    valuesMap.put("aliasSql", aliasSql);
-    valuesMap.put("modelSql", ResUtils.indent(modelSql));
+    valuesMap.put("cteSql", cteSql);
     valuesMap.put("selectSql", ResUtils.indent(selectSql));
+    valuesMap.put("aliasSql", aliasSql);
     valuesMap.put("whereSql", whereSql);
     valuesMap.put("groupBySql", groupBySql);
     valuesMap.put("havingSql", havingSql);
@@ -341,45 +341,46 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
 
   @Override
   public String visitWindow(Window node, SqlGeneratorContext context) {
-    if (node.getFrameType() != FrameType.ROWS) {
-      throw new ModelException("TODO, current only support rows");
-    }
-
-    // partitionSql
-    String partitionSql = "";
-    if (node.getPartitions() != null && node.getPartitions().size() > 0) {
-      ImmutableList<Identifier> partitions = node.getPartitions();
-      StringBuilder builder = new StringBuilder();
-      builder.append("partition by ");
-      for (int i = 0; i < partitions.size(); i++) {
-        if (i > 0) {
-          builder.append(", ");
+    if (node.getFrameType() == FrameType.ROWS) {
+      // partitionSql
+      String partitionSql = "";
+      if (node.getPartitions() != null && node.getPartitions().size() > 0) {
+        ImmutableList<Identifier> partitions = node.getPartitions();
+        StringBuilder builder = new StringBuilder();
+        builder.append("partition by ");
+        for (int i = 0; i < partitions.size(); i++) {
+          if (i > 0) {
+            builder.append(", ");
+          }
+          Identifier identifier = partitions.get(i);
+          builder.append(process(identifier, context));    // 用 prefix.value
         }
-        Identifier identifier = partitions.get(i);
-        builder.append(process(identifier, context));    // 用 prefix.value
+        partitionSql = builder.toString();
       }
-      partitionSql = builder.toString();
+
+      String orderBySql = genOrderBySql(node.getOrderBys(), context);
+      String frameStart = "";
+      if (node.getFrameStart() != null) {
+        frameStart = process(node.getFrameStart(), context);
+      }
+
+      String frameEnd = "";
+      if (node.getFrameEnd() != null) {
+        frameEnd = process(node.getFrameEnd(), context);
+      }
+      String frameType = node.getFrameType().name;
+
+      Map<String, String> valuesMap = new HashMap<>();
+      valuesMap.put("partitionSql", partitionSql);
+      valuesMap.put("orderBySql", orderBySql);
+      valuesMap.put("frameType", frameType);
+      valuesMap.put("frameStart", frameStart);
+      valuesMap.put("frameEnd", frameEnd);
+      return templateFilling(window_row_frame_001, valuesMap, context);
     }
 
-    String orderBySql = genOrderBySql(node.getOrderBys(), context);
-    String frameStart = "";
-    if (node.getFrameStart() != null) {
-      frameStart = process(node.getFrameStart(), context);
-    }
 
-    String frameEnd = "";
-    if (node.getFrameEnd() != null) {
-      frameEnd = process(node.getFrameEnd(), context);
-    }
-    String frameType = node.getFrameType().name;
-
-    Map<String, String> valuesMap = new HashMap<>();
-    valuesMap.put("partitionSql", partitionSql);
-    valuesMap.put("orderBySql", orderBySql);
-    valuesMap.put("frameType", frameType);
-    valuesMap.put("frameStart", frameStart);
-    valuesMap.put("frameEnd", frameEnd);
-    return templateFilling(window_row_frame_001, valuesMap, context);
+    throw new ModelException("TODO, current only support rows");
   }
 
   @Override
@@ -453,7 +454,7 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
 
     // 组装模板
     Map<String, String> valuesMap = new HashMap<>();
-    valuesMap.put("cteSql", ResUtils.indent(cteSql));
+    valuesMap.put("cteSql", cteSql);
     valuesMap.put("selectSql", ResUtils.indent(selectSql));
     valuesMap.put("sourceTableAlias", sourceTableAlias);
     valuesMap.put("joinSql", joinSql);

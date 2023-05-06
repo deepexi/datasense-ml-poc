@@ -11,8 +11,8 @@
 --!     frameType
 --!     frameStart
 --!     frameEnd
-over (
-    ${partitionSql}
-    ${orderBySql}
-    ${frameType} between ${frameStart} and ${frameEnd}
-)
+    over (
+        ${partitionSql}
+        ${orderBySql}
+        ${frameType} between ${frameStart} and ${frameEnd}
+    )

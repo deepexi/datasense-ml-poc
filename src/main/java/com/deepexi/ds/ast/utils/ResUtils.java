@@ -74,6 +74,24 @@ public class ResUtils {
     return !(sql.matches("\\$\\{.*?}"));
   }
 
+  /**
+   * 添加缩进 基本原则: 如果模板中 某个变量块 有缩进, 则 需要给这个加缩进. 如下的模板
+   * <pre>
+   * ${alias} as (
+   *     ${querySql}
+   * )
+   * </pre>
+   * alias 不缩进, querySql 缩进
+   * <p>
+   * 如果一个模板整体缩进, 则不需要添加, 如下几个变量无需缩进
+   * <pre>
+   *    over (
+   *         ${partitionSql}
+   *         ${orderBySql}
+   *         ${frameType} between ${frameStart} and ${frameEnd}
+   *     )
+   * </pre>
+   */
   public static String indent(String in) {
     return in.replaceAll("\n", "\n    ");
   }

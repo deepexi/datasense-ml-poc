@@ -202,9 +202,8 @@ public class MetricBindQueryBuilder {
     // 之上还有一层 MetricBindQuery, 完成窗口运算, 记做 upper
 
     // ======== 处理 midMetric
-    String midMetricName = "_mid_";
-    // String midMetricName = "_mid_" + metricQuery.getName() ;
-    Identifier midMetricId = Identifier.of(midMetricName);
+    String midLayerName = generateMidLayerAlias(metricQuery);
+    Identifier midMetricId = Identifier.of(midLayerName);
     MetricBindQuery midMetric = new MetricBindQuery(
         midMetricId,
         model4Metrics,
@@ -338,4 +337,9 @@ public class MetricBindQueryBuilder {
     return new FrameBoundary(leftBase, boundary.getOffset());
   }
 
+  private static String generateMidLayerAlias(YmlMetricQuery metricQuery) {
+    // String midMetricName = "_mid_";
+    String midMetricName = "_mid_" + metricQuery.getName();
+    return midMetricName;
+  }
 }

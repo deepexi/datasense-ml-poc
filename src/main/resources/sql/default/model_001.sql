@@ -13,8 +13,7 @@
 --!     orderBySql
 --!     limitSql
 --!     offsetSql
-with
-    ${cteSql}
+with ${cteSql}
 select
     ${selectSql}
 from ${sourceTableAlias} ${joinSql}

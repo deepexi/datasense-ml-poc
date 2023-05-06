@@ -7,11 +7,19 @@ import lombok.Getter;
 @Getter
 public class StringLiteral extends Literal {
 
+  private static final String singleQuote = "'";
   private final String value;
 
   public StringLiteral(String s) {
     super();
     this.value = s;
+  }
+
+  public String removeSingleQuote() {
+    if (value.startsWith(singleQuote) && value.endsWith(singleQuote)) {
+      return value.substring(1, value.length() - 2);
+    }
+    return value;
   }
 
   @Override

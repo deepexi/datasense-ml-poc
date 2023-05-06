@@ -12,3 +12,7 @@
   - 如 udf_function(cast, date_dim.year, string)
   - 如 udf_function(cast, date_dim.date, string, %Y-%m-%d %H:%M:%S)
   - 如 udf_function(cast, date_dim.date_str, date, %Y-%m-%d %H:%M:%S)
+
+- date_diff(day|month|year, date0, date1|base_date)
+  - base_date 是可以看做一个常量日期使用, 目前设置为 1970-01-01
+  - udf_function(date_diff, day, created_at, base_date)

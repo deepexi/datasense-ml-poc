@@ -1,5 +1,6 @@
 package com.deepexi.ds.ast;
 
+import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
 import java.util.Arrays;
 import java.util.Objects;
@@ -8,10 +9,11 @@ import lombok.Getter;
 @Getter
 public class OrderBy extends AstNode {
 
-  private final Identifier name;
+  // private final Identifier name;
+  private final Expression name;
   private final OrderByDirection direction;
 
-  public OrderBy(Identifier name, OrderByDirection direction) {
+  public OrderBy(Expression name, OrderByDirection direction) {
     this.name = name;
     this.direction = direction;
   }

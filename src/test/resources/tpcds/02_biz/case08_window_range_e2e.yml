@@ -86,22 +86,26 @@ name: by_day__sum_ss_net_paid__store_sales
 metric_names: [ sum_ss_net_paid__store_sales ]
 dimensions: [ s_store_name, d_date ]
 model_filters: [ d_year=2000, s_store_name='able' ]
-metric_filters: [ sum_ss_net_paid__store_sales > 0 ]
-# 该窗口表示, 按照日期(天), 累计3天, 从3天前开始, 到1天前结束
-# 年内按天 => order by: d_date ====> 推导 partition = dimensions - d_date
-# 3天前, 1天前, 推导出 frame_type, start, end
+#metric_filters: [ sum_ss_net_paid__store_sales > 0 ]
+# 业务语义: 连续三天累加, 翻译如下
+# 窗口
+# partition中保留:
+#   与日期无关的维度 s_store_name
+#   比日期粒度更高的维度(这里没有了)
+# 日期维度 d_date 作为 order_by字段
+# 连续日期 => 窗口为 range模式
+# start => n_preceding , 3 (向前 3)
+# end => n_preceding , 1 (向前 1)
 window:
-  partitions: [ s_store_name, d_year ]
-  # 保留时间无关 s_store_name
-  # 按照 day_of_year进行统计, 保留 year, 一年内连续三天(day_of_year) 并非 月内连续三天
+  partitions: [ s_store_name ]
   order_bys:
-    - name: d_date                      # 连续 "N天"
-  frame_type: range                     # "连续" 三天
-  start:
-    base: n_preceding                   # 3天前开始 包含
-    offset: 3
+    - name: d_date                        # 连续 "N天", 要用日期
+      # 以下是统一格式 day对应天, d_date对应日期列. udf_function date_diff base_date 固定格式
+      expr: udf_function(date_diff, day, d_date, base_date)
+  frame_type: range                       # "连续" N {天|月|年}
+  start: { base: n_preceding, offset: 3 } # 3天前开始 包含
   end:
-    base: n_preceding                   # 1天前结束 包含
+    base: n_preceding                     # 1天前结束 包含
     offset: 1
 
 ---

@@ -341,7 +341,7 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
 
   @Override
   public String visitWindow(Window node, SqlGeneratorContext context) {
-    if (node.getFrameType() == FrameType.ROWS) {
+    if (node.getFrameType() == FrameType.ROWS || node.getFrameType() == FrameType.RANGE) {
       // partitionSql
       String partitionSql = "";
       if (node.getPartitions() != null && node.getPartitions().size() > 0) {
@@ -378,7 +378,6 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
       valuesMap.put("frameEnd", frameEnd);
       return templateFilling(window_row_frame_001, valuesMap, context);
     }
-
 
     throw new ModelException("TODO, current only support rows");
   }

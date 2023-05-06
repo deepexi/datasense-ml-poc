@@ -140,6 +140,7 @@ nonReserved
     | UNIQUE
     | WINDOW
     | YEAR
+    | BASE_DATE
     ;
 
 CASE: 'CASE' | 'case';
@@ -151,6 +152,15 @@ TRUE: 'TRUE' | 'true';
 FALSE: 'FALSE' | 'false';
 UDF_FUNCTION: 'UDF_FUNCTION' | 'udf_function';
 
+DAY: 'DAY' | 'day';
+YEAR: 'YEAR' | 'year';
+MONTH: 'MONTH' | 'month';
+HOUR: 'HOUR' | 'hour';
+MINUTE: 'MINUTE' | 'minute';
+SECOND: 'SECOND' | 'second';
+BASE_DATE: 'BASE_DATE' | 'base_date';
+
+
 ALL: 'ALL';
 AND: 'AND';
 ANY: 'ANY';
@@ -160,14 +170,12 @@ BY: 'BY';
 CAST: 'CAST';
 COUNT: 'COUNT';
 DATE: 'DATE';
-DAY: 'DAY';
 DESC: 'DESC';
 DISTINCT: 'DISTINCT';
 EXCEPT: 'EXCEPT';
 EXCLUDING: 'EXCLUDING';
 FIRST: 'FIRST';
 FOLLOWING: 'FOLLOWING';
-HOUR: 'HOUR';
 IF: 'IF';
 IN: 'IN';
 INCLUDING: 'INCLUDING';
@@ -176,8 +184,6 @@ IS: 'IS';
 LAST: 'LAST';
 LEADING: 'LEADING';
 LIMIT: 'LIMIT';
-MINUTE: 'MINUTE';
-MONTH: 'MONTH';
 NO: 'NO';
 NONE: 'NONE';
 NOT: 'NOT';
@@ -188,7 +194,6 @@ ON: 'ON';
 OR: 'OR';
 OVER: 'OVER';
 RANGE: 'RANGE';
-SECOND: 'SECOND';
 SET: 'SET';
 SUBSTRING: 'SUBSTRING';
 TEXT: 'TEXT';
@@ -198,7 +203,6 @@ TO: 'TO';
 TRIM: 'TRIM';
 UNIQUE: 'UNIQUE';
 WINDOW: 'WINDOW';
-YEAR: 'YEAR';
 
 EQ: '=';
 NEQ: '<>' | '!=';

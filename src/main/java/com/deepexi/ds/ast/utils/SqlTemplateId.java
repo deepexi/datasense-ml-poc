@@ -3,6 +3,7 @@ package com.deepexi.ds.ast.utils;
 public enum SqlTemplateId {
 
   model_001("model_001"),
+  model_001_cte("model_001_cte"),
   metric_bind_query_001("metric_bind_query_001"),
   case_when_001("case_when_001"),
   window_row_frame_001("window_row_frame_001"),

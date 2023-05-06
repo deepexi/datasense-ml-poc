@@ -69,7 +69,7 @@ public class MetricBindQuery extends Relation {
   }
 
   @Override
-  public List<Join> getJoin() {
+  public List<Join> getJoins() {
     return null;
   }
 

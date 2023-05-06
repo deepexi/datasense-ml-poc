@@ -6,18 +6,8 @@
 --! ============= 以下用于描述 sql模板 ======
 --! sql用途: 解析Model节点时 生成整体sql
 --! sql变量:
---!     aliasSql
---!     sourceSql
---!     columnSql
---!     joinSql
---!     orderBySql
---!     limitSql
---!     offsetSql
-with ${aliasSql} as (
-    ${sourceSql}
+--!     alias
+--!     querySql
+${alias} as (
+    ${querySql}
 )
-select
-    ${selectSql}
-from ${aliasSql} ${joinSql}
-    ${orderBySql}
-    ${limitSql} ${offsetSql}

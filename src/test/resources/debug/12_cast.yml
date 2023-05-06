@@ -46,6 +46,7 @@ columns:
   - name: d_dom
     data_type: int
   - name: created_at
+    expr: udf_function(create_date_by_ymd, d_year, d_moy, d_dom)
     data_type: date
   - name: updated_at_str
-    data_type: string
+    expr: udf_function(cast, udf_function(create_date_by_ymd, d_year, d_moy, d_dom), string)

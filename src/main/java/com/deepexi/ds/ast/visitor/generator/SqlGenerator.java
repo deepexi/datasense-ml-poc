@@ -3,6 +3,7 @@ package com.deepexi.ds.ast.visitor.generator;
 import static com.deepexi.ds.ast.utils.SqlTemplateId.case_when_001;
 import static com.deepexi.ds.ast.utils.SqlTemplateId.metric_bind_query_001;
 import static com.deepexi.ds.ast.utils.SqlTemplateId.model_001;
+import static com.deepexi.ds.ast.utils.SqlTemplateId.model_001_cte;
 import static com.deepexi.ds.ast.utils.SqlTemplateId.udf_create_date_by_ymd;
 import static com.deepexi.ds.ast.utils.SqlTemplateId.window_row_frame_001;
 
@@ -64,9 +65,7 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
     return orderBySql;
   }
 
-  private String templateFilling(
-      SqlTemplateId templateId,
-      Map<String, String> valuesMap,
+  private String templateFilling(SqlTemplateId templateId, Map<String, String> valuesMap,
       SqlGeneratorContext context) {
     String sqlTemplate = ResUtils.getSqlTemplate(templateId, context.sqlDialect);
     if (sqlTemplate == null) {
@@ -77,6 +76,39 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
     }
     StringSubstitutor sub = new StringSubstitutor(valuesMap);
     return sub.replace(sqlTemplate).trim();
+  }
+
+  private String utilCreateCte(Relation r, SqlGeneratorContext context) {
+    // cte 包含: from + join
+    StringBuilder builder = new StringBuilder();
+
+    // from
+    Relation from = r.getFrom();
+    String alias = from.getTableName().getValue();
+    String fromSql = process(from, context);
+
+    Map<String, String> valuesMap4From = new HashMap<>();
+    valuesMap4From.put("alias", alias);
+    valuesMap4From.put("querySql", ResUtils.indent(fromSql));
+    String cteFrom = templateFilling(model_001_cte, valuesMap4From, context);
+
+    builder.append(cteFrom);
+
+    // join中的 model 也需要一并放到 with中
+    for (int i = 0; i < r.getJoins().size(); i++) {
+      Model model = r.getJoins().get(i).getModel();
+      String joinAlias = model.getTableName().getValue();
+      String joinSql = process(model, context).trim();
+
+      Map<String, String> valuesMap = new HashMap<>();
+      valuesMap.put("alias", joinAlias);
+      valuesMap.put("querySql", ResUtils.indent(joinSql));
+      String cteJoin = templateFilling(model_001_cte, valuesMap, context);
+
+      builder.append(", \n");
+      builder.append(cteJoin);
+    }
+    return builder.toString();
   }
 
   @Override
@@ -161,6 +193,7 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
     valuesMap.put("orderBySql", orderBySql);
     valuesMap.put("limitSql", limitSql);
     valuesMap.put("offsetSql", offsetSql);
+
     return templateFilling(metric_bind_query_001, valuesMap, context);
   }
 
@@ -169,8 +202,7 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
     String field = process(node.getName(), context);
     String direction = node.getDirection().name;
     // like: tableA.colX desc
-    return "_field_ _direction_".replace("_field_", field)
-        .replace("_direction_", direction);
+    return "_field_ _direction_".replace("_field_", field).replace("_direction_", direction);
   }
 
   @Override
@@ -296,7 +328,10 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
 
   @Override
   public String visitArithmeticExpression(ArithmeticExpression node, SqlGeneratorContext context) {
-    throw new ModelException("TODO");
+    String left = process(node.getLeft(), context);
+    String right = process(node.getRight(), context);
+    String op = node.getOp().name;
+    return left + op + right;
   }
 
   @Override
@@ -370,18 +405,16 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
     throw new ModelException("if you add new FrameBoundaryBase, you should parse it here");
   }
 
-
   @Override
   public String visitModel(Model node, SqlGeneratorContext context) {
     final String ALL_COLUMN = "*";
 
     // sourceAlias
     Relation source = node.getSource();
-    Identifier alias = source.getTableName();
-    String aliasSql = process(alias, context);
+    String sourceTableAlias = process(source.getTableName(), context);
 
-    // sourceSql
-    String sourceSql = process(source, context);
+    // cteSql
+    String cteSql = utilCreateCte(node, context);
 
     // selectSql
     String selectSql = ALL_COLUMN;
@@ -420,9 +453,9 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
 
     // 组装模板
     Map<String, String> valuesMap = new HashMap<>();
-    valuesMap.put("aliasSql", aliasSql);
-    valuesMap.put("sourceSql", ResUtils.indent(sourceSql));
+    valuesMap.put("cteSql", ResUtils.indent(cteSql));
     valuesMap.put("selectSql", ResUtils.indent(selectSql));
+    valuesMap.put("sourceTableAlias", sourceTableAlias);
     valuesMap.put("joinSql", joinSql);
     valuesMap.put("orderBySql", orderBySql);
     valuesMap.put("limitSql", limitSql);
@@ -444,16 +477,12 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
     String alias = node.getAlias();
     String colExpr = process(node.getExpr(), context);
     if (node.getWindow() == null) {
-      return "colExpr as alias"
-          .replace("colExpr", colExpr)
-          .replace("alias", alias);
+      return "colExpr as alias".replace("colExpr", colExpr).replace("alias", alias);
     }
 
     // has window
     String windowStr = "\n" + process(node.getWindow(), context);
-    return "colExpr window as alias"
-        .replace("colExpr", colExpr)
-        .replace("window", windowStr)
+    return "colExpr window as alias".replace("colExpr", colExpr).replace("window", windowStr)
         .replace("alias", alias);
   }
 
@@ -529,9 +558,8 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
       if (!quotePolicy.hasQuote()) {
         return tableName + "." + fieldName;
       } else {
-        return quotePolicy.quote() + tableName + quotePolicy.quote()
-            + "." +
-            quotePolicy.quote() + fieldName + quotePolicy.quote();
+        return quotePolicy.quote() + tableName + quotePolicy.quote() + "." + quotePolicy.quote()
+            + fieldName + quotePolicy.quote();
       }
     }
 

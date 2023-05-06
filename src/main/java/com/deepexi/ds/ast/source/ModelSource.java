@@ -48,8 +48,8 @@ public class ModelSource extends Relation {
   }
 
   @Override
-  public List<Join> getJoin() {
-    return model.getJoin();
+  public List<Join> getJoins() {
+    return model.getJoins();
   }
 
   @Override

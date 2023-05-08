@@ -131,7 +131,11 @@ public class YmlModelParser {
     return joins;
   }
 
-  private static final List<String> COLUMN_KEYS_SET = Arrays.asList("name", "expr", "data_type");
+  private static final List<String> COLUMN_KEYS_SET = Arrays.asList(
+      "name",
+      "expr",
+      "data_type",
+      "date_part");
 
   private static List<YmlColumn> parseColumn(List<Map<String, Object>> list) {
     if (list == null || list.isEmpty()) {
@@ -146,13 +150,14 @@ public class YmlModelParser {
       }
       String name = ParserUtils.getStringElseThrow(col, "name");
       String expr = ParserUtils.getStringElse(col, "expr", name);
-      String type = ParserUtils.getStringElse(col, "data_type", null);
-      columns.add(new YmlColumn(name, expr, type));
+      String dataType = ParserUtils.getStringElse(col, "data_type", null);
+      String datePart = ParserUtils.getStringElse(col, "date_part", null);
+      columns.add(new YmlColumn(name, expr, dataType, datePart));
     }
     return columns;
   }
 
-  private static final List<String> DIM_KEYS_SET = Arrays.asList("name");
+  private static final List<String> DIM_ALLOWS_KEY = Arrays.asList("name");
 
   private static List<YmlDimension> parseDimension(List<Object> list) {
     if (list == null || list.isEmpty()) {
@@ -170,7 +175,7 @@ public class YmlModelParser {
       for (Object kv : list) {
         Map<String, Object> dim = (Map<String, Object>) kv;
         for (String key : dim.keySet()) {
-          if (!DIM_KEYS_SET.contains(key)) {
+          if (!DIM_ALLOWS_KEY.contains(key)) {
             throw new ModelException(String.format("key:[%s] is not allowed", key));
           }
           if (Objects.equals(key, "name")) {

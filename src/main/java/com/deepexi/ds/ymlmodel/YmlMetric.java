@@ -19,7 +19,8 @@ public class YmlMetric {
   public YmlMetric(String name,
       String modelName,
       List<String> dimensions,
-      String aggregate, String dataType) {
+      String aggregate,
+      String dataType) {
     this.name = name;
     this.modelName = modelName;
     this.dimensions = ImmutableList.copyOf(dimensions);

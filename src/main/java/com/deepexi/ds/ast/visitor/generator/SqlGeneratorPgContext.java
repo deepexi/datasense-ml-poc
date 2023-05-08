@@ -16,4 +16,12 @@ public class SqlGeneratorPgContext extends SqlGeneratorContext {
         IdentifierShowPolicy.SHOW_TABLE_NAME
     );
   }
+
+  public SqlGeneratorPgContext(AstNode root, IdentifierShowPolicy showPolicy) {
+    super(root,
+        SqlDialect.POSTGRES,
+        IdentifierQuotePolicy.NO_QUOTE,
+        showPolicy
+    );
+  }
 }

@@ -3,14 +3,17 @@ package com.deepexi.ds.ymlmodel.factory;
 import static java.util.Collections.EMPTY_LIST;
 
 import com.deepexi.ds.ComponentType;
+import com.deepexi.ds.ModelException;
 import com.deepexi.ds.ymlmodel.YmlFrameBoundary;
 import com.deepexi.ds.ymlmodel.YmlMetricQuery;
 import com.deepexi.ds.ymlmodel.YmlMetricQuery.YmlOrderBy;
 import com.deepexi.ds.ymlmodel.YmlWindow;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import org.yaml.snakeyaml.Yaml;
 
@@ -100,18 +103,20 @@ public class YmlMetricQueryParser {
     return orderBys;
   }
 
+  private static final List<String> WINDOW_ALLOWS_KEY = Arrays.asList("trailing");
+
   private static YmlWindow parseWindow(Map<String, Object> mapHasWindow) {
     if (!mapHasWindow.containsKey("window")) {
       return null;
     }
     Map<String, Object> windowMap = (Map<String, Object>) mapHasWindow.get("window");
-    List<String> partitions = (List<String>) windowMap.get("partitions");
-    List<YmlOrderBy> orderBys = parseOrderBy(windowMap);
-    String frameType = (String) windowMap.get("frame_type");
-    YmlFrameBoundary start = parseBoundary((Map<String, Object>) windowMap.get("start"));
-    YmlFrameBoundary end = parseBoundary((Map<String, Object>) windowMap.get("end"));
-    //
-    return new YmlWindow(partitions, orderBys, frameType, start, end);
+    for (Entry<String, Object> kv : windowMap.entrySet()) {
+      if (!WINDOW_ALLOWS_KEY.contains(kv.getKey())) {
+        throw new ModelException(String.format("key:[%s] is not allowed", kv.getKey()));
+      }
+    }
+    String trailing = (String) windowMap.get("trailing");
+    return new YmlWindow(trailing);
   }
 
   private static YmlFrameBoundary parseBoundary(Map<String, Object> boundaryInfo) {

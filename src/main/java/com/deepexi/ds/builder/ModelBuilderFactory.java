@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings("UnstableApiUsage")
-public class ModelBuilderFactory {
+class ModelBuilderFactory {
 
   private final List<YmlModel> models;
   private final Map<String, YmlModel> lookup = new HashMap<>();

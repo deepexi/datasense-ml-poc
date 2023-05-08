@@ -6,7 +6,7 @@
 --! ============= 以下用于描述 sql模板 ======
 --! sql用途: 类型转换
 --! sql变量:
---!     year
---!     monthOfYear
---!     dayOfMonth
-make_date(${year}, ${monthOfYear}, ${dayOfMonth})
+--!     castWhat
+--!     precision
+--!     scale
+cast(${castWhat} AS NUMERIC(${precision}, ${scale}))

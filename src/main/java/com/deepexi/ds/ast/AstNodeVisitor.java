@@ -1,15 +1,18 @@
 package com.deepexi.ds.ast;
 
 import com.deepexi.ds.ModelException.UnsupportedException;
+import com.deepexi.ds.ast.expression.ArithmeticExpression;
 import com.deepexi.ds.ast.expression.BooleanLiteral;
 import com.deepexi.ds.ast.expression.CaseWhenExpression;
 import com.deepexi.ds.ast.expression.CaseWhenExpression.WhenThen;
 import com.deepexi.ds.ast.expression.CompareExpression;
+import com.deepexi.ds.ast.expression.DataTypeLiteral;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.FunctionExpression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.IntegerLiteral;
 import com.deepexi.ds.ast.expression.StringLiteral;
+import com.deepexi.ds.ast.expression.UdfCastExpression;
 import com.deepexi.ds.ast.expression.UdfExpression;
 import com.deepexi.ds.ast.source.ModelSource;
 import com.deepexi.ds.ast.source.TableSource;
@@ -69,5 +72,11 @@ public interface AstNodeVisitor<R, C> {
 
   R visitFrameBoundary(FrameBoundary node, C context);
 
-  R visitUdf(UdfExpression node, C context);
+  R visitUdfExpression(UdfExpression node, C context);
+
+  R visitDataTypeLiteral(DataTypeLiteral node, C context);
+
+  R visitUdfCastExpression(UdfCastExpression node, C context);
+
+  R visitArithmeticExpression(ArithmeticExpression node, C context);
 }

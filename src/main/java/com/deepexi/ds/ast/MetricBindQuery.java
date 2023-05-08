@@ -1,5 +1,7 @@
 package com.deepexi.ds.ast;
 
+import static java.util.Collections.EMPTY_LIST;
+
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.google.common.collect.ImmutableList;
@@ -69,8 +71,8 @@ public class MetricBindQuery extends Relation {
   }
 
   @Override
-  public List<Join> getJoin() {
-    return null;
+  public List<Join> getJoins() {
+    return EMPTY_LIST;
   }
 
   @Override

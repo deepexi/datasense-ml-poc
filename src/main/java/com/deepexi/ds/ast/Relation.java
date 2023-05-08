@@ -14,7 +14,7 @@ public abstract class Relation extends AstNode {
 
   public abstract Relation getFrom();
 
-  public abstract List<Join> getJoin();
+  public abstract List<Join> getJoins();
 
   /**
    * 是否包含任意列, 用于某些 "select * " 构建的 Relation

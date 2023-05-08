@@ -1,0 +1,166 @@
+# 业务: 按照 [year,month,门店] 统计 sales_order 按月累计 销售额, 净利润,
+# 年在 [2000, 2001], 销售额 > 0
+# 多个指标(销售额, 净利润)
+# order by limit offset
+# 窗口: 连续3天累计
+
+---
+version: v1
+resource: model_debug
+sql: >-
+  with store_sales_detail as (
+    select
+      ss_net_paid,
+      ss_net_profit,
+      date_dim.d_year,
+      date_dim.d_moy,
+      date_dim.d_dom,
+      store.s_store_name
+    from store_sales 
+      inner join date_dim on ss_sold_date_sk=date_dim.d_date_sk
+      inner join store on ss_store_sk=store.s_store_sk
+  ),
+  store_sales_group_by as (
+    select
+      s_store_name,
+      d_year,
+      d_moy,
+      d_dom,
+      sum(ss_net_paid) as sum_paid,
+      sum(ss_net_profit) as sum_profit
+    from store_sales_detail
+    where d_year>=2000 and d_year<=2001
+    group by s_store_name, d_year, d_moy, d_dom
+    having sum(ss_net_paid) > 0
+  )
+  select 
+    s_store_name,
+    d_year,
+    d_moy,
+    d_dom,
+  	sum(sum_paid) over (
+      partition by s_store_name
+      order by make_date(d_year, d_moy, d_dom) - date '1970-01-01' 
+      range between 2 preceding and current row
+    ) acc_sum_paid,
+    sum(sum_profit) over (
+      partition by s_store_name
+      order by make_date(d_year, d_moy, d_dom) - date '1970-01-01' 
+      range between 2 preceding and current row
+    ) acc_acc_profit
+  	-- ,sum_paid
+  	-- ,sum_profit
+  from store_sales_group_by
+  order by s_store_name, d_year, d_moy, d_dom
+  limit 100 offset 0
+
+
+---
+version: v1
+resource: model_def
+name: store
+source:
+  source_type: table
+  table: store
+  datasource: ds_id_ck01
+joins:
+dimensions:
+columns:
+  - name: s_store_sk
+    data_type: int
+  - name: s_store_name
+    data_type: string
+
+---
+version: v1
+resource: model_def
+name: date_dim
+source:
+  source_type: table
+  table: date_dim
+  datasource: ds_id_ck01
+joins:
+dimensions:
+columns:
+  - name: d_date_sk
+    data_type: int
+  - name: d_year
+    data_type: int
+  - name: d_moy
+    data_type: int
+  - name: d_dom
+    data_type: int
+
+---
+version: v1
+resource: model_def
+name: store_sales
+source:
+  source_type: table
+  table: store_sales
+  datasource: ds_id_ck01
+joins:
+  - model_name: date_dim
+    conditions: [ ss_sold_date_sk=date_dim.d_date_sk ]
+  - model_name: store
+    conditions: [ ss_store_sk=store.s_store_sk ]
+dimensions: [ s_store_name, d_year, d_moy, d_dom ]
+columns:
+  - name: ss_net_paid
+    data_type: decimal
+  - name: ss_net_profit
+    data_type: decimal
+  - name: s_store_name
+    expr: store.s_store_name
+  - name: d_year
+    expr: date_dim.d_year
+    date_part: year
+  - name: d_moy
+    expr: date_dim.d_moy
+    date_part: month
+  - name: d_dom
+    expr: date_dim.d_dom
+    date_part: day
+
+
+---
+version: v1
+resource: metric_def
+name: metric_sum_paid
+model_name: store_sales
+dimensions: [ s_store_name, d_year, d_moy, d_dom ]
+agg: sum(ss_net_paid)
+
+---
+version: v1
+resource: metric_def
+name: metric_sum_profit
+model_name: store_sales
+dimensions: [ s_store_name, d_year, d_moy, d_dom ]
+agg: sum(ss_net_profit)
+
+---
+version: v1
+resource: metrics_query
+name: query__metric_sum_paid
+metric_names: [ metric_sum_paid, metric_sum_profit ]
+dimensions: [ s_store_name, d_year, d_moy, d_dom ]
+# model_filters 填写维度名
+model_filters: [ d_year>=2000, d_year<=2001 ]
+# metric_filters 填写指标名称
+metric_filters: [ metric_sum_paid > 0 ]
+window:
+#  trailing: unbounded   month # 月初至今
+#  trailing: unbounded year   # 年初至今
+  trailing: 3 day            # 连续三天
+#  trailing: 3 month          # 连续三月
+#  trailing: unbounded        # 按次累计
+#  trailing: 3                # 连续3次
+order_bys:
+  - name: s_store_name
+    direction: asc
+  - name: d_year
+  - name: d_moy
+  - name: d_dom
+limit: 100
+offset: 0

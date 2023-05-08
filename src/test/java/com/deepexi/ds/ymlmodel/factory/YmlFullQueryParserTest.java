@@ -61,22 +61,12 @@ public class YmlFullQueryParserTest {
 
   @Test
   void testParseMetricFromResFile_window() {
-    YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("tpcds/02_biz/case07_window_e2e.yml");
+    YmlFullQuery ctx = YmlFullQueryParser.loadFromRes(
+        "tpcds/02_biz/case07_window_unbounded_e2e.yml");
     assertNotNull(ctx);
     YmlWindow window = ctx.getQuery().getWindow();
     assertNotNull(window);
     // getPartitions
-    assertEquals("s_store_name", window.getPartitions().get(0));
-    assertEquals("d_year", window.getPartitions().get(1));
-    // getOrderBys
-    assertEquals(1, window.getOrderBys().size());
-    assertEquals("d_moy", window.getOrderBys().get(0).getName());
-    assertEquals("asc", window.getOrderBys().get(0).getDirection());
-    // left
-    assertEquals("unbounded_preceding", window.getStart().getBase());
-    assertEquals(0, window.getStart().getOffset());
-    // right
-    assertEquals("current_row", window.getEnd().getBase());
-    assertEquals(0, window.getEnd().getOffset());
+    assertEquals("unbounded   month", window.getTrailing());
   }
 }

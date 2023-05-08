@@ -46,7 +46,7 @@ public class TableSource extends Relation {
   }
 
   @Override
-  public List<Join> getJoin() {
+  public List<Join> getJoins() {
     return EMPTY_LIST;
   }
 

@@ -1,0 +1,52 @@
+---
+version: v1
+resource: model_def
+name: store_sales
+source:
+  source_type: table
+  table: store_sales
+  datasource: ds_id_ck01
+joins:
+  - model_name: date_dim
+    join_type: inner
+    conditions: [ "ss_sold_date_sk=date_dim.d_date_sk" ]
+columns:
+  - name: d_year
+    expr: date_dim.d_year
+    data_type: string                                           # 原int => string, 隐式转换
+  - name: d_moy
+    expr: udf_function(cast, date_dim.d_moy, string)            # 显示强转换
+    # date_type 会自动推导
+  - name: created_at_str
+    expr: udf_function(cast, date_dim.created_at, string, '%Y-%m-%d %H:%M:%S')
+    # date_type 会自动推导
+  - name: updated_at
+    expr: udf_function(cast, date_dim.updated_at_str, date, '%Y/%m/%d %H')
+    # date_type 会自动推导
+  - name: ss_net_paid2
+    expr: udf_function(cast, store_sales.ss_net_paid, decimal, 10, 2)
+  - name: ss_net_paid_in_cent
+    expr: udf_function(cast, 100 * ss_net_paid, int)
+
+---
+version: v1
+resource: model_def
+name: date_dim
+source:
+  source_type: table
+  table: date_dim
+  datasource: ds_id_ck01
+columns:
+  - name: d_date_sk
+    data_type: int
+  - name: d_year
+    data_type: int
+  - name: d_moy
+    data_type: int
+  - name: d_dom
+    data_type: int
+  - name: created_at
+    expr: udf_function(create_date_by_ymd, d_year, d_moy, d_dom)
+    data_type: date
+  - name: updated_at_str
+    expr: udf_function(cast, udf_function(create_date_by_ymd, d_year, d_moy, d_dom), string)

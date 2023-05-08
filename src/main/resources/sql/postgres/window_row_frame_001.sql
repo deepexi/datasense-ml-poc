@@ -11,9 +11,8 @@
 --!     frameType
 --!     frameStart
 --!     frameEnd
--- dialect: postgres, window_row_frame_001.sql --
-over (
-    ${partitionSql}
-    ${orderBySql}
-    ${frameType} between ${frameStart} and ${frameEnd}
-)
+    over (
+        ${partitionSql}
+        ${orderBySql}
+        ${frameType} between ${frameStart} and ${frameEnd}
+    )

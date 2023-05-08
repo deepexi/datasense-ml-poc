@@ -7,15 +7,18 @@ import com.deepexi.ds.ast.Join;
 import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.OrderBy;
+import com.deepexi.ds.ast.expression.ArithmeticExpression;
 import com.deepexi.ds.ast.expression.BooleanLiteral;
 import com.deepexi.ds.ast.expression.CaseWhenExpression;
 import com.deepexi.ds.ast.expression.CaseWhenExpression.WhenThen;
 import com.deepexi.ds.ast.expression.CompareExpression;
+import com.deepexi.ds.ast.expression.DataTypeLiteral;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.FunctionExpression;
 import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.IntegerLiteral;
 import com.deepexi.ds.ast.expression.StringLiteral;
+import com.deepexi.ds.ast.expression.UdfCastExpression;
 import com.deepexi.ds.ast.expression.UdfExpression;
 import com.deepexi.ds.ast.source.ModelSource;
 import com.deepexi.ds.ast.source.TableSource;
@@ -42,7 +45,7 @@ public abstract class BaseColumnIdentifierRewriter implements AstNodeVisitor<Ast
       newWindow = (Window) process(window, context);
     }
     Expression newExpr = (Expression) process(node.getExpr(), context);
-    return new Column(node.getAlias(), newExpr, node.getDataType(), newWindow);
+    return new Column(node.getAlias(), newExpr, node.getDataType(), node.getDatePart(), newWindow);
   }
 
 
@@ -135,7 +138,7 @@ public abstract class BaseColumnIdentifierRewriter implements AstNodeVisitor<Ast
   }
 
   @Override
-  public AstNode visitUdf(UdfExpression node, Void context) {
+  public AstNode visitUdfExpression(UdfExpression node, Void context) {
     if (node.getArgs().size() == 0) {
       return node;
     }
@@ -145,6 +148,23 @@ public abstract class BaseColumnIdentifierRewriter implements AstNodeVisitor<Ast
       newArgs.add(newArg);
     }
     return new UdfExpression(node.getName(), newArgs);
+  }
+
+  @Override
+  public AstNode visitDataTypeLiteral(DataTypeLiteral node, Void context) {
+    return node;
+  }
+
+  @Override
+  public AstNode visitUdfCastExpression(UdfCastExpression node, Void context) {
+    throw new RuntimeException("should not be visit");
+  }
+
+  @Override
+  public AstNode visitArithmeticExpression(ArithmeticExpression node, Void context) {
+    Expression left = (Expression) process(node.getLeft(), context);
+    Expression right = (Expression) process(node.getRight(), context);
+    return new ArithmeticExpression(left, right, node.getOp());
   }
 
   @Override

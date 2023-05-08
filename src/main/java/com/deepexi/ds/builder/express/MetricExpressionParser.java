@@ -8,7 +8,7 @@ import com.deepexi.ds.ast.expression.StringLiteral;
 import com.deepexi.ds.parser.ParserUtils;
 import com.deepexi.ds.ymlmodel.YmlMetric;
 import com.google.common.collect.ImmutableSet;
-import java.util.Set;
+import java.util.Collection;
 
 /**
  * <pre>
@@ -23,7 +23,7 @@ public class MetricExpressionParser {
   private final ImmutableSet<YmlMetric> metricDef;
   private final String dimFilter;
 
-  public MetricExpressionParser(Set<YmlMetric> metricDef, String dimFilter) {
+  public MetricExpressionParser(Collection<YmlMetric> metricDef, String dimFilter) {
     this.metricDef = ImmutableSet.copyOf(metricDef);
     this.dimFilter = dimFilter;
   }

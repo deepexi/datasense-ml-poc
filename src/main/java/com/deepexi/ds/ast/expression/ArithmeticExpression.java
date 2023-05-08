@@ -1,6 +1,5 @@
 package com.deepexi.ds.ast.expression;
 
-import com.deepexi.ds.ModelException.TODOException;
 import com.deepexi.ds.ast.AstNodeVisitor;
 import java.util.Arrays;
 import java.util.Objects;
@@ -21,7 +20,7 @@ public class ArithmeticExpression extends BinaryExpression {
 
   @Override
   public <R, C> R accept(AstNodeVisitor<R, C> visitor, C context) {
-    throw new TODOException("TODO");
+    return visitor.visitArithmeticExpression(this, context);
   }
 
   public enum ArithmeticOperator implements BinaryOperator {

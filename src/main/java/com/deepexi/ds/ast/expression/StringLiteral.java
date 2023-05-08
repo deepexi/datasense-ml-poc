@@ -1,17 +1,25 @@
 package com.deepexi.ds.ast.expression;
 
 import com.deepexi.ds.ast.AstNodeVisitor;
-import java.util.Objects;
+import com.google.common.base.Objects;
 import lombok.Getter;
 
 @Getter
 public class StringLiteral extends Literal {
 
+  private static final String singleQuote = "'";
   private final String value;
 
   public StringLiteral(String s) {
     super();
     this.value = s;
+  }
+
+  public String removeSingleQuote() {
+    if (value.startsWith(singleQuote) && value.endsWith(singleQuote)) {
+      return value.substring(1, value.length() - 2);
+    }
+    return value;
   }
 
   @Override
@@ -27,10 +35,6 @@ public class StringLiteral extends Literal {
     return new StringLiteral(v);
   }
 
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(value);
-  }
 
   @Override
   public boolean equals(Object o) {
@@ -41,6 +45,11 @@ public class StringLiteral extends Literal {
       return false;
     }
     StringLiteral that = (StringLiteral) o;
-    return com.google.common.base.Objects.equal(value, that.value);
+    return Objects.equal(value, that.value);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(value);
   }
 }

@@ -74,7 +74,7 @@ public class Model extends Relation {
   }
 
   @Override
-  public List<Join> getJoin() {
+  public List<Join> getJoins() {
     return joins;
   }
 

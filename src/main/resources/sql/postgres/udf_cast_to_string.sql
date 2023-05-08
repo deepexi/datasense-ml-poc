@@ -4,7 +4,7 @@
 --! sql文件命名规范: {该sql所处node名}_{数字编号}.sql, 如 metric_bind_query_001.sql表示 MetricBindQuery中使用该文件
 --! 占位符方式: ${变量名}, 如 ${aliasSql}
 --! ============= 以下用于描述 sql模板 ======
---! sql用途: 解析Model节点时 生成整体sql
+--! sql用途: 类型转换
 --! sql变量:
 --!     castWhat
 cast(${castWhat} AS text)

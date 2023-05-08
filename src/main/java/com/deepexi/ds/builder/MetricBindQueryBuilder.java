@@ -1,18 +1,26 @@
 package com.deepexi.ds.builder;
 
+import static com.deepexi.ds.ast.expression.ArithmeticExpression.ArithmeticOperator.ADD;
+import static com.deepexi.ds.ast.expression.ArithmeticExpression.ArithmeticOperator.MUL;
+import static com.deepexi.ds.ast.expression.UdfExpression.BASE_DATE_19700101;
 import static java.util.Collections.EMPTY_LIST;
 
 import com.deepexi.ds.ModelException;
 import com.deepexi.ds.ModelException.TODOException;
 import com.deepexi.ds.ast.Column;
 import com.deepexi.ds.ast.ColumnDataType;
+import com.deepexi.ds.ast.DateTimeUnit;
 import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.OrderBy;
 import com.deepexi.ds.ast.OrderBy.OrderByDirection;
 import com.deepexi.ds.ast.Relation;
+import com.deepexi.ds.ast.expression.ArithmeticExpression;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
+import com.deepexi.ds.ast.expression.IntegerLiteral;
+import com.deepexi.ds.ast.expression.UdfExpression;
+import com.deepexi.ds.ast.expression.UdfExtractDatePart;
 import com.deepexi.ds.ast.window.FrameBoundary;
 import com.deepexi.ds.ast.window.FrameBoundaryBase;
 import com.deepexi.ds.ast.window.FrameType;
@@ -32,6 +40,7 @@ import com.deepexi.ds.ymlmodel.YmlModel;
 import com.deepexi.ds.ymlmodel.YmlWindow;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +48,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 
 @SuppressWarnings("unchecked")
 public class MetricBindQueryBuilder {
@@ -46,7 +56,8 @@ public class MetricBindQueryBuilder {
   private YmlMetricQuery metricQuery;
 
   // 需要查询的指标
-  private Set<YmlMetric> metrics;
+//  private Set<YmlMetric> metrics;
+  private List<YmlMetric> metrics;
 
   // 关联的 model, 如果一个孤立的model 不被引用, 将不会出现在此集合中
   private Model model4Metrics;
@@ -72,7 +83,7 @@ public class MetricBindQueryBuilder {
     // 查找 YmlMetric, 并解析其依赖的 Model
     Map<String, YmlMetric> existMetrics = ymlFullQuery.getMetrics().stream()
         .collect(Collectors.toMap(YmlMetric::getName, Function.identity()));
-    metrics = new HashSet<>();
+    metrics = new ArrayList<>();
     metricQuery.getMetricNames().forEach(m -> {
       YmlMetric element = existMetrics.get(m);
       if (element == null) {
@@ -133,7 +144,7 @@ public class MetricBindQueryBuilder {
       String alias = m.getName();
       Expression expression = ParserUtils.parseStandaloneExpression(m.getAggregate());
       ColumnDataType dataType = ColumnDataType.fromName(m.getDataType());
-      Column rawCol = new Column(alias, expression, dataType);
+      Column rawCol = new Column(alias, expression, dataType, null, null);
       Column column = (Column) tableNameAdder.process(rawCol);
       columns.add(column);
     }
@@ -153,9 +164,12 @@ public class MetricBindQueryBuilder {
             String.format("dim [%s] not found in columns of model[%s]", dimName,
                 model4Metrics.getName().getValue()));
       }
-      Column dim = new Column(dimOfModel.getAlias(),
+      Column dim = new Column(
+          dimOfModel.getAlias(),
           new Identifier(model4Metrics.getName().getValue(), dimOfModel.getAlias()),
-          dimOfModel.getDataType()
+          dimOfModel.getDataType(),
+          dimOfModel.getDatePart(),
+          null
       );
       dimensions.add(dim);
     });
@@ -276,6 +290,7 @@ public class MetricBindQueryBuilder {
           noWindow.getAlias(),
           noWindow.getExpr(),
           noWindow.getDataType(),
+          noWindow.getDatePart(),
           window
       );
       upperColumns.add(hasWindow);
@@ -287,40 +302,223 @@ public class MetricBindQueryBuilder {
   /**
    * 构建 window, 返回的window已经处理过, 基于 fromRelation
    */
-  private Window buildWindow(Relation fromRelation) {
+  private Window buildWindow(MetricBindQuery fromRelation) {
     YmlWindow ymlWindow = this.metricQuery.getWindow();
+    if (ymlWindow == null) {
+      return null;
+    }
 
-    ColumnTableNameAdder tableNameAdder = new ColumnTableNameAdder(fromRelation);
+    // 分析 trailing 的语义, 然后组装 window
+    String trailing = ymlWindow.getTrailing().trim();
+    String[] parts = trailing.split(" ");
+    List<String> foo = Arrays.stream(parts)
+        .filter(StringUtils::isNotEmpty).collect(
+            Collectors.toList());
+
+    if (foo.size() == 1) {
+      // 按次数累计
+      throw new ModelException("TODO");
+    }
+    if (foo.size() == 2) {
+      DateTimeUnit dateTimeUnit = DateTimeUnit.fromName(foo.get(1));
+      if (dateTimeUnit == null) {
+        throw new ModelException("unrecognized datetime unit:" + foo.get(1));
+      }
+      String intOrUnbounded = foo.get(0);
+      boolean unbounded = Objects.equals(intOrUnbounded, "unbounded");
+      if (unbounded) {
+        return buildWindowUnbounded(fromRelation, dateTimeUnit);
+      } else {
+        int intValue = Integer.parseInt(foo.get(0));
+        return buildWindowRange(fromRelation, intValue, dateTimeUnit);
+      }
+    }
+    throw new ModelException("not support");
+  }
+
+  private static Window buildWindowRange(MetricBindQuery from, int value, DateTimeUnit unit) {
     // partitions
     List<Identifier> partitions = EMPTY_LIST;
-    if (ymlWindow.getPartitions().size() > 0) {
-      ImmutableList<String> ymlPartition = ymlWindow.getPartitions();
-      partitions = new ArrayList<>(ymlPartition.size());
-      for (int i = 0; i < ymlPartition.size(); i++) {
-        String partitionCol = ymlPartition.get(i);
-        Identifier col0 = (Identifier) ParserUtils.parseStandaloneExpression(partitionCol);
-        Identifier col1 = (Identifier) tableNameAdder.process(col0);
-        partitions.add(col1);
+    if (from.getDimensions().size() > 0) {
+      partitions = new ArrayList<>(from.getDimensions().size());
+      for (int i = 0; i < from.getDimensions().size(); i++) {
+        Column dimCol = from.getDimensions().get(i);
+        boolean keepThisDimForPartition = (dimCol.getDatePart() == null);
+        // 注意 >, 比如连续3月, 不保留 任何日期相关 partition
+        if (keepThisDimForPartition) {
+          partitions.add(new Identifier(from.getName().getValue(), dimCol.getAlias()));
+        }
       }
     }
 
-    // orderBys
+    // 把所有时间相关维度全部提取出来
+    Column dateCol = null;
+    Column dateTimeCol = null;
+    Column timestampCol = null;
+    Column yearCol = null;
+    Column monthCol = null;
+    Column dayCol = null;
+    for (int i = 0; i < from.getDimensions().size(); i++) {
+      Column dimCol = from.getDimensions().get(i);
+      if (dimCol.getDatePart() == null) {
+        continue;
+      }
+      switch (dimCol.getDatePart()) {
+        case DATE:
+          dateCol = dimCol;
+          break;
+        case DATETIME:
+          dateTimeCol = dimCol;
+          break;
+        case TIMESTAMP:
+          timestampCol = dimCol;
+          break;
+        case YEAR:
+          yearCol = dimCol;
+          break;
+        case MONTH:
+          monthCol = dimCol;
+          break;
+        case DAY:
+          dayCol = dimCol;
+          break;
+        case HOUR:
+        case MINUTE:
+        case SECOND:
+        default:
+          break;
+      }
+    }
+
+    // order by. 比如连续3月|天, 需要对日期进行int化, 然后进行
+    List<OrderBy> orderBys = new ArrayList<>(1); // 日期
+
+    if (unit == DateTimeUnit.YEAR) { // 年, 必须有可以 包含年信息的列
+      if (yearCol != null) {
+        Identifier orderByColId = new Identifier(from.getName().getValue(), yearCol.getAlias());
+        orderBys.add(new OrderBy(orderByColId, OrderByDirection.ASC));
+      }
+      //
+      else if (dateCol != null) {
+        Identifier dateColId = new Identifier(from.getName().getValue(), dateCol.getAlias());
+        UdfExtractDatePart getYear = new UdfExtractDatePart(dateColId, DateTimeUnit.DATE,
+            DateTimeUnit.YEAR);
+        orderBys.add(new OrderBy(getYear, OrderByDirection.ASC));
+      }
+      //
+      else if (dateTimeCol != null) {
+        Identifier dateColId = new Identifier(from.getName().getValue(), dateTimeCol.getAlias());
+        UdfExtractDatePart getYear = new UdfExtractDatePart(dateColId, DateTimeUnit.DATETIME,
+            DateTimeUnit.YEAR);
+        orderBys.add(new OrderBy(getYear, OrderByDirection.ASC));
+      }
+      //
+      else if (timestampCol != null) {
+        Identifier dateColId = new Identifier(from.getName().getValue(), timestampCol.getAlias());
+        UdfExtractDatePart getYear = new UdfExtractDatePart(dateColId, DateTimeUnit.TIMESTAMP,
+            DateTimeUnit.YEAR);
+        orderBys.add(new OrderBy(getYear, OrderByDirection.ASC));
+      } else {
+        throw new ModelException(
+            "window year, but not provided column: year or datetime or date or timestamp");
+      }
+    }
+
+    // 计算月份差
+    else if (unit == DateTimeUnit.MONTH) {
+      if (yearCol != null && monthCol != null) {
+        Identifier yearColId = new Identifier(from.getName().getValue(), yearCol.getAlias());
+        Identifier monthColId = new Identifier(from.getName().getValue(), monthCol.getAlias());
+        // 12 * year
+        ArithmeticExpression diffYear = new ArithmeticExpression(yearColId, IntegerLiteral.of(12),
+            MUL);
+        // 12 * year + month
+        ArithmeticExpression diffMonth = new ArithmeticExpression(diffYear, monthColId, ADD);
+        orderBys.add(new OrderBy(diffMonth, OrderByDirection.ASC));
+      } else if (dateCol != null) {
+        throw new TODOException();
+      } else if (dateTimeCol != null) {
+        throw new TODOException();
+      } else if (timestampCol != null) {
+        throw new TODOException();
+      } else {
+        throw new ModelException(
+            "window year, but not provided column: year or datetime or date or timestamp");
+      }
+    }
+
+    // 计算日期差
+    else if (unit == DateTimeUnit.DAY) {
+      if (yearCol != null && monthCol != null && dayCol != null) {
+        Identifier yearColId = new Identifier(from.getName().getValue(), yearCol.getAlias());
+        Identifier monthColId = new Identifier(from.getName().getValue(), monthCol.getAlias());
+        Identifier dayColId = new Identifier(from.getName().getValue(), dayCol.getAlias());
+        UdfExpression createDateByYMD = new UdfExpression("create_date_by_ymd",
+            Arrays.asList(yearColId, monthColId, dayColId));
+        UdfExpression dateDiff = new UdfExpression("date_diff", Arrays.asList(
+            createDateByYMD,
+            BASE_DATE_19700101
+        ));
+        orderBys.add(new OrderBy(dateDiff, OrderByDirection.ASC));
+      } else if (dateCol != null) {
+        Identifier dateColId = new Identifier(from.getName().getValue(), dateCol.getAlias());
+        UdfExpression dateDiff = new UdfExpression("date_diff", Arrays.asList(
+            dateColId,
+            BASE_DATE_19700101
+        ));
+        orderBys.add(new OrderBy(dateDiff, OrderByDirection.ASC));
+      } else if (dateTimeCol != null) {
+        throw new TODOException();
+      } else if (timestampCol != null) {
+        throw new TODOException();
+      } else {
+        throw new ModelException(
+            "window year, but not provided column: year or datetime or date or timestamp");
+      }
+    }
+
+    // 比如 3天: 2 preceding ~ current row
+    FrameBoundary start = new FrameBoundary(FrameBoundaryBase.N_PRECEDING, value - 1);
+    FrameType frameType = FrameType.RANGE;
+    FrameBoundary end = new FrameBoundary(FrameBoundaryBase.CURRENT_ROW, 0);
+    return new Window(partitions, orderBys, frameType, start, end);
+  }
+
+  private static Window buildWindowUnbounded(MetricBindQuery from, DateTimeUnit unit) {
+    // partitions
+    List<Identifier> partitions = EMPTY_LIST;
+    if (from.getDimensions().size() > 0) {
+      partitions = new ArrayList<>(from.getDimensions().size());
+      for (int i = 0; i < from.getDimensions().size(); i++) {
+        Column dimCol = from.getDimensions().get(i);
+        boolean keepThisDimForPartition = (dimCol.getDatePart() == null)
+            || (dimCol.getDatePart().grainOrder >= unit.grainOrder);
+        // 注意 >=, 比如月初至今, 需要保留 月作为 partition
+        // 保留: 日期无关dim || 日期相关且粒度大于当前 unit
+        if (keepThisDimForPartition) {
+          partitions.add(new Identifier(from.getName().getValue(), dimCol.getAlias()));
+        }
+      }
+    }
+
+    // orderBys = 原dimension 中更细 1级 的时间粒度
     List<OrderBy> orderBys = EMPTY_LIST;
-    if (ymlWindow.getOrderBys().size() > 0) {
-      ImmutableList<YmlOrderBy> ymlOrderBys = ymlWindow.getOrderBys();
-      orderBys = new ArrayList<>(ymlOrderBys.size());
-      for (int i = 0; i < ymlOrderBys.size(); i++) {
-        YmlOrderBy ymlOrderBy = ymlOrderBys.get(i);
-        Identifier col0 = (Identifier) ParserUtils.parseStandaloneExpression(ymlOrderBy.getName());
-        Identifier col1 = (Identifier) tableNameAdder.process(col0);
-        OrderByDirection direction1 = OrderByDirection.fromName(ymlOrderBy.getDirection());
-        orderBys.add(new OrderBy(col1, direction1));
+    if (partitions.size() > 0) {
+      orderBys = new ArrayList<>(from.getDimensions().size());
+      for (int i = 0; i < from.getDimensions().size(); i++) {
+        Column dimCol = from.getDimensions().get(i);
+        boolean keepThisDimForOrderBy = (dimCol.getDatePart() != null)
+            && ((dimCol.getDatePart().grainOrder + 1) == unit.grainOrder);
+        if (keepThisDimForOrderBy) {
+          Identifier orderByColId = new Identifier(from.getName().getValue(), dimCol.getAlias());
+          orderBys.add(new OrderBy(orderByColId, OrderByDirection.ASC));
+        }
       }
     }
 
-    FrameType frameType = FrameType.fromName(ymlWindow.getFrameType());
-    FrameBoundary start = parseFromYml(ymlWindow.getStart());
-    FrameBoundary end = parseFromYml(ymlWindow.getEnd());
+    FrameBoundary start = new FrameBoundary(FrameBoundaryBase.UNBOUNDED_PRECEDING, 0);
+    FrameType frameType = FrameType.ROWS;
+    FrameBoundary end = new FrameBoundary(FrameBoundaryBase.CURRENT_ROW, 0);
 
     return new Window(partitions, orderBys, frameType, start, end);
   }

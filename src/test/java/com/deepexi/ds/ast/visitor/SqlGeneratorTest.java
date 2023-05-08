@@ -4,17 +4,14 @@ import static com.deepexi.ds.ast.utils.ResUtils.noPlaceHolder;
 import static com.deepexi.ds.ast.visitor.generator.IdentifierShowPolicy.NO_TABLE_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.deepexi.ds.DevConfig;
-import com.deepexi.ds.ModelException;
 import com.deepexi.ds.ast.AstNode;
 import com.deepexi.ds.ast.MetricBindQuery;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.Relation;
 import com.deepexi.ds.ast.SqlDialect;
-import com.deepexi.ds.ast.visitor.generator.IdentifierQuotePolicy;
 import com.deepexi.ds.ast.visitor.generator.IdentifierQuotePolicy.IdentifierPolicyBackTick;
 import com.deepexi.ds.ast.visitor.generator.IdentifierQuotePolicy.IdentifierPolicyNoQuote;
 import com.deepexi.ds.ast.visitor.generator.IdentifierShowPolicy;
@@ -274,7 +271,8 @@ public class SqlGeneratorTest {
 
   @Test
   public void testVisitMetricBindQuery_case07() {
-    YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("tpcds/02_biz/case07_window_e2e.yml");
+    YmlFullQuery ctx = YmlFullQueryParser.loadFromRes(
+        "tpcds/02_biz/case07_window_unbounded_e2e.yml");
     Relation node = new MetricBindQueryBuilder(ctx).build();
 
     // generate sql
@@ -289,11 +287,13 @@ public class SqlGeneratorTest {
 
   @Test
   public void testVisitMetricBindQuery_case08() {
-    YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("tpcds/02_biz/case08_window_range_e2e.yml");
+    YmlFullQuery ctx = YmlFullQueryParser.loadFromRes(
+        "tpcds/02_biz/case08_window_3_day_e2e.yml");
     Relation node = new MetricBindQueryBuilder(ctx).build();
 
     // generate sql
     SqlGenerator generator = new SqlGenerator();
+    // SqlGeneratorContext context = new SqlGeneratorPgContext(node);
     SqlGeneratorContext context = new SqlGeneratorPgContext(node, NO_TABLE_NAME);
     String sql = generator.process(context.getRoot(), context);
     assertNotNull(sql);
@@ -303,17 +303,19 @@ public class SqlGeneratorTest {
   }
 
   @Test
-  public void testVisitMetricBindQuery_case08_sql_template_not_exists() {
-    YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("tpcds/02_biz/case08_window_range_e2e.yml");
+  public void testVisitMetricBindQuery_case09() {
+    YmlFullQuery ctx = YmlFullQueryParser.loadFromRes(
+        "tpcds/02_biz/case09_window_3_day_e2e.yml");
     Relation node = new MetricBindQueryBuilder(ctx).build();
 
     // generate sql
     SqlGenerator generator = new SqlGenerator();
-    SqlGeneratorContext context = new SqlGeneratorContext(
-        node,
-        SqlDialect.TEST_DIALECT,
-        IdentifierQuotePolicy.NO_QUOTE,
-        NO_TABLE_NAME);
-    assertThrows(ModelException.class, () -> generator.process(context.getRoot(), context));
+    // SqlGeneratorContext context = new SqlGeneratorPgContext(node);
+    SqlGeneratorContext context = new SqlGeneratorPgContext(node, NO_TABLE_NAME);
+    String sql = generator.process(context.getRoot(), context);
+    assertNotNull(sql);
+    assertTrue(noPlaceHolder(sql)); // 所有占位符都已被替换
+    System.out.println(sql);
+    assertNotNull(sql);
   }
 }

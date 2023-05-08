@@ -15,11 +15,18 @@ import lombok.Getter;
 @Getter
 public class UdfCastExpression extends UdfExpression {
 
-  public static final String NAME = "cast";
+  private static final String NAME = "cast";
   private final Expression castWhat;
   private final ColumnDataType toType;
   private final List<Expression> castArgs;
 
+  /**
+   * <pre>
+   * arg0 = cast_what,
+   * arg1 = cast_to_what_type
+   * arg2..N = cast args
+   * </pre>
+   */
   public UdfCastExpression(List<Expression> args) {
     super(NAME, args);
 

@@ -45,7 +45,7 @@ public abstract class BaseColumnIdentifierRewriter implements AstNodeVisitor<Ast
       newWindow = (Window) process(window, context);
     }
     Expression newExpr = (Expression) process(node.getExpr(), context);
-    return new Column(node.getAlias(), newExpr, node.getDataType(), newWindow);
+    return new Column(node.getAlias(), newExpr, node.getDataType(), node.getDatePart(), newWindow);
   }
 
 

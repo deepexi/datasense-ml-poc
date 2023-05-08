@@ -5,6 +5,7 @@ import static com.deepexi.ds.ast.utils.SqlTemplateId.metric_bind_query_001;
 import static com.deepexi.ds.ast.utils.SqlTemplateId.model_001;
 import static com.deepexi.ds.ast.utils.SqlTemplateId.model_001_cte;
 import static com.deepexi.ds.ast.utils.SqlTemplateId.udf_create_date_by_ymd;
+import static com.deepexi.ds.ast.utils.SqlTemplateId.udf_date_diff;
 import static com.deepexi.ds.ast.utils.SqlTemplateId.window_row_frame_001;
 
 import com.deepexi.ds.ModelException;
@@ -281,6 +282,19 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
       valuesMap.put("monthOfYear", monthOfYear);
       valuesMap.put("dayOfMonth", dayOfMonth);
       return templateFilling(udf_create_date_by_ymd, valuesMap, context);
+    }
+    //
+    else if (funName.equals("date_diff")) {
+      // 2个参数 dateA, dateB
+      if (args.size() != 2) {
+        throw new ModelException("udf " + funName + ": 需2个参数, 当前参数个数=" + args.size());
+      }
+      String dateA = process(args.get(0), context);
+      String dateB = process(args.get(1), context);
+      Map<String, String> valuesMap = new HashMap<>();
+      valuesMap.put("dateA", dateA);
+      valuesMap.put("dateB", dateB);
+      return templateFilling(udf_date_diff, valuesMap, context);
     }
     throw new RuntimeException("不支持的 udf函数:" + funName);
   }

@@ -8,6 +8,7 @@ import com.deepexi.ds.ModelException.ColumnNotExistException;
 import com.deepexi.ds.ModelException.ModelNotFoundException;
 import com.deepexi.ds.ast.Column;
 import com.deepexi.ds.ast.ColumnDataType;
+import com.deepexi.ds.ast.DateTimeUnit;
 import com.deepexi.ds.ast.Join;
 import com.deepexi.ds.ast.JoinType;
 import com.deepexi.ds.ast.Model;
@@ -41,6 +42,9 @@ import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.Getter;
 
+/**
+ * 这个类需要重写, 要从叶子节点开始进行构建
+ */
 @SuppressWarnings("unchecked")
 @Getter
 public class ModelBuilder {
@@ -174,15 +178,16 @@ public class ModelBuilder {
   private Column parseColumnOfAllCase(YmlColumn col, Relation srcRel, Container ctx) {
     Expression expression = ParserUtils.parseStandaloneExpression(col.getExpr());
     String colAlias = col.getName();
-    ColumnDataType type1 = ColumnDataType.fromName(col.getDataType());
+    ColumnDataType dataType = ColumnDataType.fromName(col.getDataType());
+    DateTimeUnit dateTimeUnit = DateTimeUnit.fromName(col.getDatePart());
 
     if (expression instanceof Identifier) {
-      Identifier colId = (Identifier) expression;
       // 这个 column 由其他列 直接得来. eg
       // tableA.colX as alias
       // 该字段类型, 该字段所引用的列 的类型
       // 如果有一个, 则使用
       // 如果不同, 则需要 类型转换
+      Identifier colId = (Identifier) expression;
       Relation fromTable = srcRel;
       if (colId.getPrefix() != null) {
         fromTable = assertTableInScope(colId.getPrefix(), ctx.getScopes());
@@ -195,25 +200,36 @@ public class ModelBuilder {
       if (referColumn != null) {
         referColDataType = referColumn.getDataType();
       }
+      if (referColumn != null && dateTimeUnit == null) {
+        dateTimeUnit = referColumn.getDatePart();
+      }
 
-      if (type1 != null && referColDataType != null && type1 != referColDataType) {
+      if (dataType != null && referColDataType != null && dataType != referColDataType) {
         // 隐式cast
         UdfCastExpression udfCast = new UdfCastExpression(Arrays.asList(
             new Identifier(fromTable.getTableName().getValue(), referColumn.getAlias()),
-            new DataTypeLiteral(type1.name)
+            new DataTypeLiteral(dataType.name)
         ));
-        return new Column(colAlias, udfCast, type1);
+        // TODO 隐式cast, 需要指定是否为日期相关列
+        if (udfCast.getToType() == ColumnDataType.DATE) {
+          dateTimeUnit = DateTimeUnit.DATE;
+        } else if (udfCast.getToType() == ColumnDataType.DATETIME) {
+          dateTimeUnit = DateTimeUnit.DATETIME;
+        } else if (udfCast.getToType() == ColumnDataType.TIMESTAMP) {
+          dateTimeUnit = DateTimeUnit.TIMESTAMP;
+        }
+        return new Column(colAlias, udfCast, dataType, dateTimeUnit, null);
       }
 
-      if (type1 == null) {
-        type1 = referColDataType;
+      if (dataType == null) {
+        dataType = referColDataType;
       }
-      if (type1 == null) {
+      if (dataType == null) {
         if (DevConfig.DEBUG) {
           System.out.println(String.format("column %s data type is null", colAlias));
         }
       }
-      return new Column(colAlias, colId, type1);
+      return new Column(colAlias, colId, dataType, dateTimeUnit, null);
     }
 
     if (expression instanceof Literal) {
@@ -224,12 +240,12 @@ public class ModelBuilder {
     }
 
     // 其他情况, 这个列是派生计算而来
-    if (type1 == null) {
+    if (dataType == null) {
       if (DevConfig.DEBUG) {
         System.out.println(String.format("column %s data type is null", colAlias));
       }
     }
-    Column colRaw = new Column(colAlias, expression, type1);
+    Column colRaw = new Column(colAlias, expression, dataType, dateTimeUnit, null);
     Column colWithTable = (Column) new ColumnTableNameAdder(srcRel).process(colRaw);
     if (expression instanceof FunctionExpression) {
       // 如果是函数, 需要额外处理一下
@@ -255,7 +271,8 @@ public class ModelBuilder {
       }
       // 重新组装 dimension, 比如 原来引用 tableA.colA => {currentTable}.colA
       Identifier expr = new Identifier(ctx.getName().getValue(), refCol.getAlias());
-      Column dim = new Column(refCol.getAlias(), expr, refCol.getDataType());
+      Column dim = new Column(refCol.getAlias(), expr, refCol.getDataType(), refCol.getDatePart(),
+          null);
       dims.add(dim);
     }
     ctx.setDimensions(dims);

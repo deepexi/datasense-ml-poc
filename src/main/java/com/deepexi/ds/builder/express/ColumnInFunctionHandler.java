@@ -4,6 +4,7 @@ import com.deepexi.ds.ModelException;
 import com.deepexi.ds.ast.AstNode;
 import com.deepexi.ds.ast.Column;
 import com.deepexi.ds.ast.ColumnDataType;
+import com.deepexi.ds.ast.DateTimeUnit;
 import com.deepexi.ds.ast.Relation;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
@@ -88,13 +89,20 @@ public class ColumnInFunctionHandler extends BaseColumnIdentifierRewriter {
     }
     Expression newExpr = (Expression) process(node.getExpr(), context);
 
-    // 可能改写 dataType
+    // 可能改写 dataType, datePart
     ColumnDataType dataType = node.getDataType();
-
+    DateTimeUnit dateTimeUnit = node.getDatePart();
     if (dataType == null && newExpr instanceof UdfCastExpression) {
       dataType = ((UdfCastExpression) newExpr).getToType();
+      if (dataType == ColumnDataType.DATE) {
+        dateTimeUnit = DateTimeUnit.DATE;
+      } else if (dataType == ColumnDataType.DATETIME) {
+        dateTimeUnit = DateTimeUnit.DATETIME;
+      } else if (dataType == ColumnDataType.TIMESTAMP) {
+        dateTimeUnit = DateTimeUnit.TIMESTAMP;
+      }
     }
 
-    return new Column(node.getAlias(), newExpr, dataType, newWindow);
+    return new Column(node.getAlias(), newExpr, dataType, dateTimeUnit, newWindow);
   }
 }

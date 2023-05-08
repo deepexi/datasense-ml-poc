@@ -8,7 +8,7 @@ public enum SqlTemplateId {
   case_when_001("case_when_001"),
   window_row_frame_001("window_row_frame_001"),
   udf_create_date_by_ymd("udf_create_date_by_ymd"),
-
+  udf_date_diff("udf_date_diff"),
   // === udf cast ===
   udf_cast_to_bool("udf_cast_to_bool"),
   udf_cast_to_date("udf_cast_to_date"),

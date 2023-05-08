@@ -10,8 +10,9 @@ public class YmlColumn {
   private final String name;
   private final String expr;
   private final String dataType;
+  private final String datePart;
 
-  public YmlColumn(String name, String expr, String dataType) {
+  public YmlColumn(String name, String expr, String dataType, String datePart) {
     if (name == null) {
       throw new FieldMissException("column.name");
     }
@@ -21,5 +22,6 @@ public class YmlColumn {
     this.name = name;
     this.expr = expr;
     this.dataType = dataType;
+    this.datePart = datePart;
   }
 }

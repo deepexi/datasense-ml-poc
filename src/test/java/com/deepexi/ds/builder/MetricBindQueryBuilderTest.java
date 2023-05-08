@@ -26,16 +26,19 @@ public class MetricBindQueryBuilderTest {
   }
 
   @Test
-  public void testBuild_window_frame_rows() {
-    YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("tpcds/02_biz/case07_window_e2e.yml");
+  public void testBuild_window_unbounded() {
+    YmlFullQuery ctx = YmlFullQueryParser.loadFromRes(
+        "tpcds/02_biz/case07_window_unbounded_e2e.yml");
     Relation fullAst = new MetricBindQueryBuilder(ctx).build();
     assertNotNull(fullAst);
   }
 
   @Test
-  public void testBuild_window_frame_range() {
-    YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("tpcds/02_biz/case08_window_range_e2e.yml");
+  public void testBuild_window_range_3_day() {
+    YmlFullQuery ctx = YmlFullQueryParser.loadFromRes(
+        "tpcds/02_biz/case08_window_3_day_e2e.yml");
     Relation fullAst = new MetricBindQueryBuilder(ctx).build();
     assertNotNull(fullAst);
   }
+
 }

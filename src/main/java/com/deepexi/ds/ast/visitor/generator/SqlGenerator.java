@@ -78,8 +78,8 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
 
   @Override
   public String visitMetricBindQuery(MetricBindQuery node, SqlGeneratorContext context) {
-    String modelSql = process(node.getRelation(), context);
-    String aliasSql = process(node.getRelation().getTableName(), context);
+    String modelSql = process(node.getSource(), context);
+    String aliasSql = process(node.getSource().getTableName(), context);
 
     String whereSql = ""; // where optional
     if (node.getModelFilters().size() > 0) {
@@ -110,18 +110,13 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
 
     // selectSql
     StringBuilder selectBuilder = new StringBuilder();
-    for (int i = 0; i < node.getDimensions().size(); i++) {
-      Column ele = node.getDimensions().get(i);
+    for (int i = 0; i < node.getColumns().size(); i++) {
+      Column ele = node.getColumns().get(i);
       String oneDim = process(ele, context); // 有别名
       if (i > 0) {
         selectBuilder.append(", \n");
       }
       selectBuilder.append(oneDim);
-    }
-    for (int i = 0; i < node.getMetrics().size(); i++) {
-      Column column = node.getMetrics().get(i);
-      String colStr = process(column, context);
-      selectBuilder.append(", \n").append(colStr);
     }
     String selectSql = selectBuilder.toString();
 

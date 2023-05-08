@@ -11,7 +11,7 @@ import lombok.Getter;
 public class MetricBindQuery extends Relation {
 
   private final Identifier name;                          // 该 metric 名
-  private final Relation relation;                        // 该查询所依赖的 "表", from 子句
+  private final Relation source;                          // 该查询所依赖的 "表", from 子句
   private final ImmutableList<Column> metrics;            // 每个指标的, select中的聚合函数
   // 查询有关的条件
   private final ImmutableList<Expression> metricFilters;  // having 子句中的过滤条件
@@ -28,7 +28,7 @@ public class MetricBindQuery extends Relation {
 
   public MetricBindQuery(
       Identifier queryName,
-      Relation relation,
+      Relation source,
       List<Expression> metricFilters,
       List<Column> dimensions,
       List<Expression> modelFilters,
@@ -37,7 +37,7 @@ public class MetricBindQuery extends Relation {
       Integer limit,
       Integer offset) {
     this.name = queryName;
-    this.relation = relation;
+    this.source = source;
     this.metricFilters = ImmutableList.copyOf(metricFilters);
     this.dimensions = ImmutableList.copyOf(dimensions);
     this.modelFilters = ImmutableList.copyOf(modelFilters);
@@ -65,7 +65,7 @@ public class MetricBindQuery extends Relation {
 
   @Override
   public Relation getFrom() {
-    return relation;
+    return source;
   }
 
   @Override

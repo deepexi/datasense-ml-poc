@@ -221,7 +221,7 @@ public class MetricBindQueryBuilder {
 
     // orderBys 处理
     ColumnTableNameReplacer tableNameReplacer = new ColumnTableNameReplacer(
-        midMetric.getRelation().getTableName(),
+        midMetric.getSource().getTableName(),
         midMetric.getName()
     );
 
@@ -249,7 +249,7 @@ public class MetricBindQueryBuilder {
 
   private List<Column> buildColumnForUpperModel(MetricBindQuery midMetric, Window window) {
     ColumnTableNameReplacer tableNameReplacer = new ColumnTableNameReplacer(
-        midMetric.getRelation().getTableName(),
+        midMetric.getSource().getTableName(),
         midMetric.getName()
     );
 

@@ -77,7 +77,7 @@ public class ScopeCollector implements AstNodeVisitor<Void, ScopeCollectorContex
   @Override
   public Void visitMetricBindQuery(MetricBindQuery node, ScopeCollectorContext context) {
     // Model model = node.getModel();
-    Relation relation = node.getRelation();
+    Relation relation = node.getSource();
     ScopeCollectorContext subContext = new ScopeCollectorContext(relation);
     process(relation, subContext);
     // 处理完毕收集

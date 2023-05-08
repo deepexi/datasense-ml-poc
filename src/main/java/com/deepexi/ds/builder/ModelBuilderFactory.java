@@ -19,6 +19,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * 此类的作用是
+ * <pre>
+ * 1. 自动查找 List<YmlModel>的 root
+ * 2. 目前仅支持 单根</pre>
+ * hello
+ */
 @SuppressWarnings("UnstableApiUsage")
 class ModelBuilderFactory {
 

@@ -149,6 +149,7 @@ model_filters: [ d_year>=2000, d_year<=2001 ]
 # metric_filters 填写指标名称
 metric_filters: [ metric_sum_paid > 0 ]
 window:
+#  include_current: true       # 是否包含本行
   trailing: unbounded   month # 月初至今
 #  trailing: unbounded year   # 年初至今
 #  trailing: 3 day            # 连续三天

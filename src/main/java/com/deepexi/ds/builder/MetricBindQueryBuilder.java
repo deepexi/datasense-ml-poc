@@ -31,7 +31,6 @@ import com.deepexi.ds.builder.express.ColumnTableNameAdder;
 import com.deepexi.ds.builder.express.ColumnTableNameReplacer;
 import com.deepexi.ds.builder.express.MetricExpressionParser;
 import com.deepexi.ds.parser.ParserUtils;
-import com.deepexi.ds.ymlmodel.YmlFrameBoundary;
 import com.deepexi.ds.ymlmodel.YmlFullQuery;
 import com.deepexi.ds.ymlmodel.YmlMetric;
 import com.deepexi.ds.ymlmodel.YmlMetricQuery;
@@ -521,18 +520,6 @@ public class MetricBindQueryBuilder {
     FrameBoundary end = new FrameBoundary(FrameBoundaryBase.CURRENT_ROW, 0);
 
     return new Window(partitions, orderBys, frameType, start, end);
-  }
-
-  private FrameBoundary parseFromYml(YmlFrameBoundary boundary) {
-    if (boundary == null) {
-      throw new ModelException("window must have two boundary");
-    }
-    String ymlLeftBase = boundary.getBase();
-    FrameBoundaryBase leftBase = FrameBoundaryBase.fromName(ymlLeftBase);
-    if (leftBase == null) {
-      throw new ModelException("window base not support " + ymlLeftBase);
-    }
-    return new FrameBoundary(leftBase, boundary.getOffset());
   }
 
   private static String generateMidLayerAlias(YmlMetricQuery metricQuery) {

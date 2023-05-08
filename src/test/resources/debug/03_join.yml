@@ -1,0 +1,108 @@
+---
+version: v1
+resource: model_def
+name: date_dim
+source:
+  source_type: table
+  table: date_dim
+  datasource: ds_id_ck01
+joins:
+dimensions:
+columns:
+  - name: d_date_sk
+    data_type: int
+  - name: d_year
+    data_type: int
+    date_part: year
+  - name: d_moy
+    data_type: int
+    date_part: month
+  - name: d_dom
+    data_type: int
+    date_part: day
+  - name: d_date
+    data_type: date
+    date_part: date
+
+---
+version: v1
+resource: model_def
+name: store_sales
+source:
+  source_type: table
+  table: store_sales
+  datasource: ds_id_ck01
+joins:
+dimensions:
+columns:
+  - name: ss_sold_date_sk
+    data_type: int
+  - name: ss_item_sk
+    data_type: int
+
+---
+version: v1
+resource: model_def
+name: item
+source:
+  source_type: table
+  table: item
+  datasource: ds_id_ck01
+joins:
+dimensions:
+columns:
+  - name: i_item_sk
+    data_type: int
+  - name: i_item_id
+    data_type: string
+  - name: i_product_name
+    data_type: string
+
+---
+# store_sales join store
+version: v1
+resource: model_def
+name: join1
+source:
+  source_type: model_def
+  model_name: store_sales
+joins:
+  - model_name: date_dim
+    conditions: [ ss_sold_date_sk=date_dim.d_date_sk ]
+dimensions:
+columns:
+  - name: ss_item_sk
+  - name: ss_sold_date_sk
+  - name: d_year
+    expr: date_dim.d_year
+  - name: d_moy
+    expr: date_dim.d_moy
+  - name: d_dom
+    expr: date_dim.d_dom
+  - name: d_date
+    expr: date_dim.d_date
+
+---
+version: v1
+resource: model_def
+name: join2
+source:
+  source_type: model_def
+  model_name: join1
+joins:
+  - model_name: item
+    join_type: inner
+    conditions: [ "1=1", "ss_item_sk=item.i_item_sk" ]
+dimensions:
+columns:
+  - name: i_product_name
+    expr: item.i_product_name
+  - name: ss_sold_date_sk
+  - name: d_year
+    expr: join1.d_year
+  - name: d_moy
+    expr: join1.d_moy
+  - name: d_dom
+    expr: join1.d_dom
+  - name: d_date
+    expr: join1.d_date

@@ -4,15 +4,16 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public enum SqlDialect {
-  POSTGRES("postgres"),
-  CLICKHOUSE("clickhouse"),
-  GAUSSDB("gaussdb"),
-  DORIS("doris"),
-  STARROCKS("starrocks"),
-  TEST_DIALECT("test_dialect"), // only for test
+  POSTGRES("postgres", true),
+  CLICKHOUSE("clickhouse", true),
+  GAUSSDB("gaussdb", true),
+  DORIS("doris", false),
+  STARROCKS("starrocks", false),
+  TEST_DIALECT("test_dialect", false), // only for test
   ;
 
   public final String name;
+  public final boolean supportWindowRange;
 
   public static SqlDialect fromName(String name) {
     if (name == null) {
@@ -24,7 +25,8 @@ public enum SqlDialect {
         .findAny().orElse(null);
   }
 
-  SqlDialect(String name) {
+  SqlDialect(String name, boolean supportWindowRange) {
     this.name = name;
+    this.supportWindowRange = supportWindowRange;
   }
 }

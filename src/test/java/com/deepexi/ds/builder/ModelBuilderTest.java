@@ -11,6 +11,7 @@ import com.deepexi.ds.ModelException.ModelHasManyRootException;
 import com.deepexi.ds.ModelException.ModelNotFoundException;
 import com.deepexi.ds.ast.Column;
 import com.deepexi.ds.ast.ColumnDataType;
+import com.deepexi.ds.ast.DateTimeUnit;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.Relation;
 import com.deepexi.ds.ast.expression.Identifier;
@@ -19,6 +20,7 @@ import com.deepexi.ds.ast.expression.UdfCastExpression;
 import com.deepexi.ds.ast.source.TableSource;
 import com.deepexi.ds.ymlmodel.YmlModel;
 import com.deepexi.ds.ymlmodel.factory.YmlModelParser;
+import com.google.common.collect.ImmutableList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -103,6 +105,23 @@ public class ModelBuilderTest {
     List<YmlModel> ymlModels = Arrays.asList(storeSales, root);
 
     assertThrows(ModelNotFoundException.class, () -> ModelBuilder.singleTreeModel(ymlModels));
+  }
+
+
+  @Test
+  public void testBuild_column_parse() {
+    List<YmlModel> ymlModels = YmlModelParser.loadModels("debug/03_join.yml");
+    Model join2 = ModelBuilder.singleTreeModel(ymlModels);
+    assertNotNull(join2);
+    assertEquals("join2", join2.getTableName().getValue());
+    ImmutableList<Column> columns = join2.getColumns();
+    //
+    Column colYear = columns.stream().filter(x -> x.getAlias().equals("d_year")).findAny()
+        .orElse(null);
+    assertNotNull(colYear);
+    // 这些属性是从 source/join 传递过来的
+    assertEquals(DateTimeUnit.YEAR, colYear.getDatePart());
+    assertEquals(ColumnDataType.INTEGER, colYear.getDataType());
   }
 
   @Test

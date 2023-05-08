@@ -42,9 +42,6 @@ import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.Getter;
 
-/**
- * 这个类需要重写, 要从叶子节点开始进行构建
- */
 @SuppressWarnings("unchecked")
 @Getter
 public class ModelBuilder {
@@ -210,7 +207,6 @@ public class ModelBuilder {
             new Identifier(fromTable.getTableName().getValue(), referColumn.getAlias()),
             new DataTypeLiteral(dataType.name)
         ));
-        // TODO 隐式cast, 需要指定是否为日期相关列
         if (udfCast.getToType() == ColumnDataType.DATE) {
           dateTimeUnit = DateTimeUnit.DATE;
         } else if (udfCast.getToType() == ColumnDataType.DATETIME) {

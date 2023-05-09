@@ -118,11 +118,11 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
     String cteSql = utilCreateCte(node, context);
 
     String whereSql = ""; // where optional
-    if (node.getModelFilters().size() > 0) {
+    if (node.getWhere().size() > 0) {
       StringBuilder whereBuilder = new StringBuilder();
       whereBuilder.append("where ");
-      for (int i = 0; i < node.getModelFilters().size(); i++) {
-        Expression ele = node.getModelFilters().get(i);
+      for (int i = 0; i < node.getWhere().size(); i++) {
+        Expression ele = node.getWhere().get(i);
         String oneWhere = process(ele, context);
         if (i > 0) {
           whereBuilder.append(" and ");
@@ -134,8 +134,8 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
 
     // groupBy
     StringBuilder groupByBuilder = new StringBuilder();
-    for (int i = 0; i < node.getDimensions().size(); i++) {
-      Column ele = node.getDimensions().get(i);
+    for (int i = 0; i < node.getGroupBy().size(); i++) {
+      Column ele = node.getGroupBy().get(i);
       String expr = process(ele.getExpr(), context); // TODO 仅有表达式
       if (i > 0) {
         groupByBuilder.append(", ");
@@ -158,14 +158,14 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
 
     // havingSql
     String havingSql = "";
-    if (node.getMetricFilters().size() > 0) {
+    if (node.getHaving().size() > 0) {
       StringBuilder havingBuilder = new StringBuilder();
       havingBuilder.append("having ");
-      for (int i = 0; i < node.getMetricFilters().size(); i++) {
+      for (int i = 0; i < node.getHaving().size(); i++) {
         if (i > 0) {
           havingBuilder.append(" and ");
         }
-        Expression expression = node.getMetricFilters().get(i);
+        Expression expression = node.getHaving().get(i);
         String expr = process(expression, context);
         havingBuilder.append(expr);
       }

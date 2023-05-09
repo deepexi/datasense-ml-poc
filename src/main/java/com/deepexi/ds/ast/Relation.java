@@ -8,12 +8,24 @@ import java.util.List;
  */
 public abstract class Relation extends AstNode {
 
+  /**
+   * 表名
+   */
   public abstract Identifier getTableName();
 
+  /**
+   * 表列
+   */
   public abstract List<Column> getColumns();
 
+  /**
+   * 表来源: from xxx
+   */
   public abstract Relation getFrom();
 
+  /**
+   * 表来源: from xx join xx, join xx
+   */
   public abstract List<Join> getJoins();
 
   /**

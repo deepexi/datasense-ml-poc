@@ -15,6 +15,7 @@ import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.OrderBy;
 import com.deepexi.ds.ast.OrderBy.OrderByDirection;
 import com.deepexi.ds.ast.Relation;
+import com.deepexi.ds.ast.SqlDialect;
 import com.deepexi.ds.ast.expression.ArithmeticExpression;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
@@ -55,7 +56,6 @@ public class MetricBindQueryBuilder {
   private YmlMetricQuery metricQuery;
 
   // 需要查询的指标
-//  private Set<YmlMetric> metrics;
   private List<YmlMetric> metrics;
 
   // 关联的 model, 如果一个孤立的model 不被引用, 将不会出现在此集合中
@@ -137,7 +137,7 @@ public class MetricBindQueryBuilder {
     }
 
     // collect all metrics
-    List<Column> columns = new ArrayList<>();
+    List<Column> metricsCol = new ArrayList<>();
     ColumnTableNameAdder tableNameAdder = new ColumnTableNameAdder(model4Metrics);
     for (YmlMetric m : this.metrics) {
       String alias = m.getName();
@@ -145,7 +145,7 @@ public class MetricBindQueryBuilder {
       ColumnDataType dataType = ColumnDataType.fromName(m.getDataType());
       Column rawCol = new Column(alias, expression, dataType, null, null);
       Column column = (Column) tableNameAdder.process(rawCol);
-      columns.add(column);
+      metricsCol.add(column);
     }
     // name
     Identifier metricQueryName = Identifier.of(metricQuery.getName());
@@ -197,14 +197,20 @@ public class MetricBindQueryBuilder {
       orderBys.add(new OrderBy(name1, direction1));
     });
 
+    // columns = dimension + metrics
+    List<Column> selectColumns = new ArrayList<>();
+    selectColumns.addAll(dimensions);
+    selectColumns.addAll(metricsCol);
+
     if (this.metricQuery.getWindow() == null) {
       return new MetricBindQuery(
-          metricQueryName,
-          model4Metrics,
-          metricFilters,
-          dimensions,
-          modelFilters,
-          columns,
+          metricQueryName,    // id
+          model4Metrics,      // from
+          modelFilters,       // where
+          dimensions,         // groupBy
+          metricFilters,      // having
+          selectColumns,      // select字段
+          // orderBy limit offset
           orderBys,
           metricQuery.getLimit(),
           metricQuery.getOffset());
@@ -218,12 +224,13 @@ public class MetricBindQueryBuilder {
     String midLayerName = generateMidLayerAlias(metricQuery);
     Identifier midMetricId = Identifier.of(midLayerName);
     MetricBindQuery midMetric = new MetricBindQuery(
-        midMetricId,
-        model4Metrics,
-        metricFilters,
-        dimensions,
-        modelFilters,
-        columns,
+        midMetricId,    // id
+        model4Metrics,  // relation
+        modelFilters,   // where
+        dimensions,     // groupBy
+        metricFilters,  // having
+        selectColumns,  // select字段
+        // orderBy limit offset
         EMPTY_LIST,
         null,
         null);
@@ -244,7 +251,7 @@ public class MetricBindQueryBuilder {
     });
 
     // column 处理
-    List<Column> upperColumns = buildColumnForUpperModel(midMetric, window);
+    List<Column> upperColumns = buildColumnForUpperModel(midMetric, metricsCol, window);
 
     // 最终返回一个 Model
     return new Model(
@@ -259,7 +266,9 @@ public class MetricBindQueryBuilder {
     );
   }
 
-  private List<Column> buildColumnForUpperModel(MetricBindQuery midMetric, Window window) {
+  private List<Column> buildColumnForUpperModel(MetricBindQuery midMetric,
+      List<Column> metrics,
+      Window window) {
     ColumnTableNameReplacer tableNameReplacer = new ColumnTableNameReplacer(
         midMetric.getSource().getTableName(),
         midMetric.getName()
@@ -267,16 +276,15 @@ public class MetricBindQueryBuilder {
 
     // 指标维度列, 改写 tableName即可
     List<Column> upperColumns = new ArrayList<>();
-    for (int i = 0; i < midMetric.getDimensions().size(); i++) {
-      Column dimInMid = midMetric.getDimensions().get(i);
+    for (int i = 0; i < midMetric.getGroupBy().size(); i++) {
+      Column dimInMid = midMetric.getGroupBy().get(i);
       Column column = (Column) tableNameReplacer.process(dimInMid);
       upperColumns.add(column);
     }
 
     // 指标列, 改tableName, 该字段名,  加window
-    for (int i = 0; i < midMetric.getMetrics().size(); i++) {
+    for (Column metricInMid : metrics) {
       // 改 tableName
-      Column metricInMid = midMetric.getMetrics().get(i);
       Column columnInToTable = (Column) tableNameReplacer.process(metricInMid);
 
       // 改 fieldName
@@ -310,25 +318,25 @@ public class MetricBindQueryBuilder {
     // 分析 trailing 的语义, 然后组装 window
     String trailing = ymlWindow.getTrailing().trim();
     String[] parts = trailing.split(" ");
-    List<String> foo = Arrays.stream(parts)
+    List<String> trailingInfo = Arrays.stream(parts)
         .filter(StringUtils::isNotEmpty).collect(
             Collectors.toList());
 
-    if (foo.size() == 1) {
+    if (trailingInfo.size() == 1) {
       // 按次数累计
       throw new ModelException("TODO");
     }
-    if (foo.size() == 2) {
-      DateTimeUnit dateTimeUnit = DateTimeUnit.fromName(foo.get(1));
+    if (trailingInfo.size() == 2) {
+      DateTimeUnit dateTimeUnit = DateTimeUnit.fromName(trailingInfo.get(1));
       if (dateTimeUnit == null) {
-        throw new ModelException("unrecognized datetime unit:" + foo.get(1));
+        throw new ModelException("unrecognized datetime unit:" + trailingInfo.get(1));
       }
-      String intOrUnbounded = foo.get(0);
+      String intOrUnbounded = trailingInfo.get(0);
       boolean unbounded = Objects.equals(intOrUnbounded, "unbounded");
       if (unbounded) {
         return buildWindowUnbounded(fromRelation, dateTimeUnit);
       } else {
-        int intValue = Integer.parseInt(foo.get(0));
+        int intValue = Integer.parseInt(trailingInfo.get(0));
         return buildWindowRange(fromRelation, intValue, dateTimeUnit);
       }
     }
@@ -338,10 +346,10 @@ public class MetricBindQueryBuilder {
   private static Window buildWindowRange(MetricBindQuery from, int value, DateTimeUnit unit) {
     // partitions
     List<Identifier> partitions = EMPTY_LIST;
-    if (from.getDimensions().size() > 0) {
-      partitions = new ArrayList<>(from.getDimensions().size());
-      for (int i = 0; i < from.getDimensions().size(); i++) {
-        Column dimCol = from.getDimensions().get(i);
+    if (from.getGroupBy().size() > 0) {
+      partitions = new ArrayList<>(from.getGroupBy().size());
+      for (int i = 0; i < from.getGroupBy().size(); i++) {
+        Column dimCol = from.getGroupBy().get(i);
         boolean keepThisDimForPartition = (dimCol.getDatePart() == null);
         // 注意 >, 比如连续3月, 不保留 任何日期相关 partition
         if (keepThisDimForPartition) {
@@ -357,8 +365,8 @@ public class MetricBindQueryBuilder {
     Column yearCol = null;
     Column monthCol = null;
     Column dayCol = null;
-    for (int i = 0; i < from.getDimensions().size(); i++) {
-      Column dimCol = from.getDimensions().get(i);
+    for (int i = 0; i < from.getGroupBy().size(); i++) {
+      Column dimCol = from.getGroupBy().get(i);
       if (dimCol.getDatePart() == null) {
         continue;
       }
@@ -455,16 +463,12 @@ public class MetricBindQueryBuilder {
         UdfExpression createDateByYMD = new UdfExpression("create_date_by_ymd",
             Arrays.asList(yearColId, monthColId, dayColId));
         UdfExpression dateDiff = new UdfExpression("date_diff", Arrays.asList(
-            createDateByYMD,
-            BASE_DATE_19700101
-        ));
+            createDateByYMD, BASE_DATE_19700101));
         orderBys.add(new OrderBy(dateDiff, OrderByDirection.ASC));
       } else if (dateCol != null) {
         Identifier dateColId = new Identifier(from.getName().getValue(), dateCol.getAlias());
         UdfExpression dateDiff = new UdfExpression("date_diff", Arrays.asList(
-            dateColId,
-            BASE_DATE_19700101
-        ));
+            dateColId, BASE_DATE_19700101));
         orderBys.add(new OrderBy(dateDiff, OrderByDirection.ASC));
       } else if (dateTimeCol != null) {
         throw new TODOException();
@@ -486,10 +490,10 @@ public class MetricBindQueryBuilder {
   private static Window buildWindowUnbounded(MetricBindQuery from, DateTimeUnit unit) {
     // partitions
     List<Identifier> partitions = EMPTY_LIST;
-    if (from.getDimensions().size() > 0) {
-      partitions = new ArrayList<>(from.getDimensions().size());
-      for (int i = 0; i < from.getDimensions().size(); i++) {
-        Column dimCol = from.getDimensions().get(i);
+    if (from.getGroupBy().size() > 0) {
+      partitions = new ArrayList<>(from.getGroupBy().size());
+      for (int i = 0; i < from.getGroupBy().size(); i++) {
+        Column dimCol = from.getGroupBy().get(i);
         boolean keepThisDimForPartition = (dimCol.getDatePart() == null)
             || (dimCol.getDatePart().grainOrder >= unit.grainOrder);
         // 注意 >=, 比如月初至今, 需要保留 月作为 partition
@@ -503,9 +507,9 @@ public class MetricBindQueryBuilder {
     // orderBys = 原dimension 中更细 1级 的时间粒度
     List<OrderBy> orderBys = EMPTY_LIST;
     if (partitions.size() > 0) {
-      orderBys = new ArrayList<>(from.getDimensions().size());
-      for (int i = 0; i < from.getDimensions().size(); i++) {
-        Column dimCol = from.getDimensions().get(i);
+      orderBys = new ArrayList<>(from.getGroupBy().size());
+      for (int i = 0; i < from.getGroupBy().size(); i++) {
+        Column dimCol = from.getGroupBy().get(i);
         boolean keepThisDimForOrderBy = (dimCol.getDatePart() != null)
             && ((dimCol.getDatePart().grainOrder + 1) == unit.grainOrder);
         if (keepThisDimForOrderBy) {

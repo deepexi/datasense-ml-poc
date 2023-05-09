@@ -241,7 +241,9 @@ public class SqlGeneratorTest {
   public void testVisitMetricBindQuery_case05() {
     YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("tpcds/02_biz/case05_e2e.yml");
     MetricBindQuery node = (MetricBindQuery) new MetricBindQueryBuilder(ctx).build();
-    assertEquals(2, node.getMetrics().size());
+    // 5列, 3个维度, 2个指标
+    assertEquals(3, node.getGroupBy().size());
+    assertEquals(5, node.getColumns().size());
 
     // generate sql
     SqlGenerator generator = new SqlGenerator();
@@ -257,7 +259,9 @@ public class SqlGeneratorTest {
   public void testVisitMetricBindQuery_case06() {
     YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("tpcds/02_biz/case06_order_by_e2e.yml");
     MetricBindQuery node = (MetricBindQuery) new MetricBindQueryBuilder(ctx).build();
-    assertEquals(2, node.getMetrics().size());
+    // 5列, 3个维度, 2个指标
+    assertEquals(3, node.getGroupBy().size());
+    assertEquals(5, node.getColumns().size());
 
     // generate sql
     SqlGenerator generator = new SqlGenerator();

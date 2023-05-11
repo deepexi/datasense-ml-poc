@@ -18,6 +18,7 @@ import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.StringLiteral;
 import com.deepexi.ds.ast.expression.UdfCastExpression;
 import com.deepexi.ds.ast.source.TableSource;
+import com.deepexi.ds.astbuilder.model.ModelBuilder;
 import com.deepexi.ds.ymlmodel.YmlModel;
 import com.deepexi.ds.ymlmodel.factory.YmlModelParser;
 import com.google.common.collect.ImmutableList;
@@ -127,6 +128,7 @@ public class ModelBuilderTest {
   @Test
   public void testBuild_stack_join_illegal() {
     List<YmlModel> ymlModels = YmlModelParser.loadModels("debug/04_pile_join_illegal.yml");
+    // Model model = ModelBuilder.singleTreeModel(ymlModels);
     assertThrows(ModelException.class, () -> ModelBuilder.singleTreeModel(ymlModels));
   }
 

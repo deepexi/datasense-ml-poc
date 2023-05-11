@@ -2,7 +2,7 @@ package com.deepexi.ds.ast.visitor.generator;
 
 
 import com.deepexi.ds.ast.AstNode;
-import com.deepexi.ds.ast.SqlDialect;
+import com.deepexi.ds.SqlDialect;
 import lombok.Getter;
 
 @Getter

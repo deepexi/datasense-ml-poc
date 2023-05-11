@@ -1,6 +1,4 @@
-package com.deepexi.ds.builder;
-
-import static java.util.Collections.EMPTY_LIST;
+package com.deepexi.ds.astbuilder.model;
 
 import com.deepexi.ds.DevConfig;
 import com.deepexi.ds.ModelException;
@@ -20,7 +18,7 @@ import com.deepexi.ds.ast.expression.Identifier;
 import com.deepexi.ds.ast.expression.Literal;
 import com.deepexi.ds.ast.expression.UdfCastExpression;
 import com.deepexi.ds.ast.source.TableSource;
-import com.deepexi.ds.builder.express.BoolConditionParser;
+import com.deepexi.ds.builder.express.BaseColumnIdentifierChecker;
 import com.deepexi.ds.builder.express.ColumnInFunctionHandler;
 import com.deepexi.ds.builder.express.ColumnTableNameAdder;
 import com.deepexi.ds.parser.ParserUtils;
@@ -39,140 +37,111 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import lombok.Data;
 import lombok.Getter;
 
 @SuppressWarnings("unchecked")
 @Getter
 public class ModelBuilder {
 
-  @Data
-  private static class Container {
+  private final List<YmlModel> models;          // all models
+  private final Map<String, YmlModel> lookup;   // modelName--YmlModel
+  private final YmlModel entry;                 // root of the models
 
-    private Identifier name;
-    private Relation source;
-    private List<Join> joins;
-    private List<Column> columns;
-    private List<Column> dimensions;
-    private List<Relation> scopes = new ArrayList<>();
-
-    Model build() {
-      return new Model(name, source, joins, columns, dimensions);
-    }
-
-    void addRelation(Relation r, boolean isSource) {
-      scopes.add(r);
-      if (isSource) {
-        source = r;
-      }
-    }
+  /**
+   * internal usage
+   */
+  ModelBuilder(List<YmlModel> models, YmlModel entry) {
+    this.models = models;
+    this.entry = entry;
+    lookup = models.stream().collect(Collectors.toMap(YmlModel::getName, Function.identity()));
   }
-
-  private final List<YmlModel> models;
-  private final Map<String, YmlModel> lookup;
-  private final YmlModel entry;
 
   public static Model singleTreeModel(List<YmlModel> models) {
     ModelBuilder builder = new ModelBuilderFactory(models).create();
     return builder.build();
   }
 
-  public ModelBuilder(List<YmlModel> models, YmlModel entry) {
-    this.models = models;
-    this.entry = entry;
-    lookup = models.stream().collect(Collectors.toMap(YmlModel::getName, Function.identity()));
-  }
-
   public Model build() {
-    Container ctx = new Container();
-    buildRoot(entry, ctx);
-    return ctx.build();
+    ModelPartCollector collector = new ModelPartCollector();
+    buildRoot(entry, collector);
+    Model notRewrite = collector.build();
+    Model rewrite = (Model) new ColumnTableNameAdder(notRewrite.getSource()).process(notRewrite);
+    new BaseColumnIdentifierChecker(rewrite).process(rewrite);
+    return rewrite;
   }
 
-  private void buildRoot(YmlModel root, Container ctx) {
-    // name => identifier
-    ctx.setName(Identifier.of(root.getName()));
-    // source
-    parseSource(root.getSource(), ctx);
-    Relation srcRel = ctx.getSource();
-    // joins
-    parseJoins(srcRel, root.getJoins(), ctx);
-    // columns
-    parseColumn(srcRel, root.getColumns(), ctx);
-    // dimensions
-    parseDimension(srcRel, root.getDimensions(), ctx);
+  private void buildRoot(YmlModel root, ModelPartCollector collector) {
+    collector.setName(Identifier.of(root.getName())); // name => identifier
+    // 先序处理 source / join
+    parseSource(root.getSource(), collector);         // source
+    parseJoins(root.getJoins(), collector);           // joins
+    parseColumn(root.getColumns(), collector);        // columns
+    parseDimension(root.getDimensions(), collector);  // dimensions
   }
 
-  private void parseSource(YmlSource source, Container ctx) {
+  private void parseSource(YmlSource source, ModelPartCollector collector) {
     Objects.requireNonNull(source, "source must be present");
 
     if (source instanceof YmlSourceTable) {
+      // YmlSourceTable 已经是外部资源, 无需在分析下去
       YmlSourceTable src = (YmlSourceTable) source;
       TableSource t = new TableSource(src.getDataSource(), Identifier.of(src.getTableName()));
-      ctx.addRelation(t, true);
+      collector.addSource(t);
     } else if (source instanceof YmlSourceModel) {
       YmlSourceModel src = (YmlSourceModel) source;
       String modelName = src.getModelName();
       YmlModel ymlModel = requireModel(modelName);
-      Container subCtx = new Container();
-      buildRoot(ymlModel, subCtx);
-      Model subModel = subCtx.build();
-      ctx.addRelation(subModel, true);
+      ModelPartCollector subCollector = new ModelPartCollector();
+      buildRoot(ymlModel, subCollector);
+      Model subModel = subCollector.build();
+      collector.addSource(subModel);
     }
   }
 
-  private void parseJoins(Relation srcRel, List<YmlJoin> joins, Container ctx) {
+  private void parseJoins(List<YmlJoin> joins, ModelPartCollector ctx) {
     if (joins == null || joins.isEmpty()) {
-      ctx.setJoins(EMPTY_LIST);
       return;
     }
 
-    List<Join> joinList = new ArrayList<>(joins.size());
     for (YmlJoin join : joins) {
       String modelName = join.getModelName();
       YmlModel ymlModel = requireModel(modelName);
-      Container subCtx = new Container();
+      ModelPartCollector subCtx = new ModelPartCollector();
       buildRoot(ymlModel, subCtx);
       Model subModel = subCtx.build();
-      ctx.addRelation(subModel, false);
+      ctx.addScope(subModel);
 
       // join type
       JoinType joinType = JoinType.fromName(join.getJoinType());
       if (joinType == null) {
         joinType = JoinType.INNER;
       }
+
       // condition
       List<String> conditions = join.getConditions();
       List<Expression> expressions = new ArrayList<>();
       if (conditions != null && conditions.size() > 0) {
         for (String literal : conditions) {
-          // 目前 literal中是一个 原子条件
-          // 多个条件之间是 Logic.AND 运算
-          Expression expr = new BoolConditionParser(literal, ctx.getScopes(), srcRel).parse();
+          // 目前 literal中是一个 原子条件, 多个条件之间是 Logic.AND 运算
+          Expression expr = ParserUtils.parseBooleanExpression(literal);
           expressions.add(expr);
         }
       }
-      // done
-      joinList.add(new Join(subModel, joinType, expressions));
+      ctx.addJoin(new Join(subModel, joinType, expressions));
     }
-    ctx.setJoins(joinList);
   }
 
-  private void parseColumn(Relation srcRel, List<YmlColumn> list, Container ctx) {
+  private void parseColumn(List<YmlColumn> list, ModelPartCollector ctx) {
     if (list == null || list.isEmpty()) {
-      ctx.setColumns(EMPTY_LIST);
       return;
     }
-
-    List<Column> columns = new ArrayList<>(list.size());
     for (YmlColumn col : list) {
-      Column column = parseColumnOfAllCase(col, srcRel, ctx);
-      columns.add(column);
+      Column column = parseColumnOfAllCase(col, ctx.getSource(), ctx);
+      ctx.addColumn(column);
     }
-    ctx.setColumns(columns);
   }
 
-  private Column parseColumnOfAllCase(YmlColumn col, Relation srcRel, Container ctx) {
+  private Column parseColumnOfAllCase(YmlColumn col, Relation srcRel, ModelPartCollector ctx) {
     Expression expression = ParserUtils.parseStandaloneExpression(col.getExpr());
     String colAlias = col.getName();
     ColumnDataType dataType = ColumnDataType.fromName(col.getDataType());
@@ -201,17 +170,19 @@ public class ModelBuilder {
         dateTimeUnit = referColumn.getDatePart();
       }
 
-      if (dataType != null && referColDataType != null && dataType != referColDataType) {
-        // 隐式cast
+      boolean needCast = dataType != null
+          && referColDataType != null
+          && dataType != referColDataType;
+      if (needCast) {
         UdfCastExpression udfCast = new UdfCastExpression(Arrays.asList(
             new Identifier(fromTable.getTableName().getValue(), referColumn.getAlias()),
             new DataTypeLiteral(dataType.name)
         ));
-        if (udfCast.getToType() == ColumnDataType.DATE) {
+        if (dataType == ColumnDataType.DATE) {
           dateTimeUnit = DateTimeUnit.DATE;
-        } else if (udfCast.getToType() == ColumnDataType.DATETIME) {
+        } else if (dataType == ColumnDataType.DATETIME) {
           dateTimeUnit = DateTimeUnit.DATETIME;
-        } else if (udfCast.getToType() == ColumnDataType.TIMESTAMP) {
+        } else if (dataType == ColumnDataType.TIMESTAMP) {
           dateTimeUnit = DateTimeUnit.TIMESTAMP;
         }
         return new Column(colAlias, udfCast, dataType, dateTimeUnit, null);
@@ -250,12 +221,10 @@ public class ModelBuilder {
     return colWithTable;
   }
 
-  private void parseDimension(Relation srcRel, List<YmlDimension> list, Container ctx) {
+  private void parseDimension(List<YmlDimension> list, ModelPartCollector ctx) {
     if (list == null || list.isEmpty()) {
-      ctx.setDimensions(EMPTY_LIST);
       return;
     }
-    List<Column> dims = new ArrayList<>(list.size());
 
     for (YmlDimension col : list) {
       String name = col.getName();
@@ -269,9 +238,8 @@ public class ModelBuilder {
       Identifier expr = new Identifier(ctx.getName().getValue(), refCol.getAlias());
       Column dim = new Column(refCol.getAlias(), expr, refCol.getDataType(), refCol.getDatePart(),
           null);
-      dims.add(dim);
+      ctx.addDimension(dim);
     }
-    ctx.setDimensions(dims);
   }
 
   private YmlModel requireModel(String name) {

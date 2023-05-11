@@ -7,6 +7,9 @@ import com.google.common.collect.ImmutableList;
 import java.util.List;
 import lombok.Getter;
 
+/**
+ * metric 对应一张已经准备好的 大宽表, 用用后续的计算
+ */
 @SuppressWarnings("unchecked")
 @Getter
 public class Model extends Relation {

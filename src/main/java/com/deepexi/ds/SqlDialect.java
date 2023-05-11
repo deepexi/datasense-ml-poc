@@ -1,4 +1,4 @@
-package com.deepexi.ds.ast;
+package com.deepexi.ds;
 
 import java.util.Arrays;
 import java.util.Objects;

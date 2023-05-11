@@ -10,7 +10,7 @@ import com.deepexi.ds.ast.AstNode;
 import com.deepexi.ds.ast.visitor.generator.SqlGenerator;
 import com.deepexi.ds.ast.visitor.generator.SqlGeneratorContext;
 import com.deepexi.ds.ast.visitor.generator.SqlGeneratorPgContext;
-import com.deepexi.ds.builder.MetricBindQueryBuilder;
+import com.deepexi.ds.builder.AstBuilder;
 import com.deepexi.ds.ymlmodel.YmlDebug;
 import com.deepexi.ds.ymlmodel.YmlFullQuery;
 import com.deepexi.ds.ymlmodel.factory.YmlFullQueryParser;
@@ -28,7 +28,7 @@ public class SqlValidateTest {
 
   @Test
   public void testVisitMetricBindQuery_case04() {
-    count_equal("tpcds/02_biz/case04_e2e.yml");
+    rows_data_equal("tpcds/02_biz/case04_e2e.yml");
   }
 
   @Test
@@ -65,7 +65,7 @@ public class SqlValidateTest {
     String manualSql = ymlDebug.getSql();
 
     // generate sql
-    AstNode node = new MetricBindQueryBuilder(ctx).build();
+    AstNode node = new AstBuilder(ctx).build();
     SqlGenerator generator = new SqlGenerator();
     SqlGeneratorContext context = new SqlGeneratorPgContext(node);
     String autoSql = generator.process(context.getRoot(), context);
@@ -85,7 +85,7 @@ public class SqlValidateTest {
     String manualSql = ymlDebug.getSql();
 
     // generate sql
-    AstNode node = new MetricBindQueryBuilder(ctx).build();
+    AstNode node = new AstBuilder(ctx).build();
     SqlGenerator generator = new SqlGenerator();
     SqlGeneratorContext context = new SqlGeneratorPgContext(node);
     String autoSql = generator.process(context.getRoot(), context);

@@ -13,7 +13,7 @@ import com.deepexi.ds.ast.AstNode;
 import com.deepexi.ds.ast.AstNodeVisitor;
 import com.deepexi.ds.ast.Column;
 import com.deepexi.ds.ast.Join;
-import com.deepexi.ds.ast.MetricBindQuery;
+import com.deepexi.ds.ast.MetricQuery;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.OrderBy;
 import com.deepexi.ds.ast.Relation;
@@ -113,7 +113,7 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
   }
 
   @Override
-  public String visitMetricBindQuery(MetricBindQuery node, SqlGeneratorContext context) {
+  public String visitMetricBindQuery(MetricQuery node, SqlGeneratorContext context) {
     String aliasSql = process(node.getSource().getTableName(), context);
     String cteSql = utilCreateCte(node, context);
 
@@ -418,10 +418,6 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
   public String visitModel(Model node, SqlGeneratorContext context) {
     final String ALL_COLUMN = "*";
 
-    // sourceAlias
-    Relation source = node.getSource();
-    String sourceTableAlias = process(source.getTableName(), context);
-
     // cteSql
     String cteSql = utilCreateCte(node, context);
 
@@ -441,6 +437,9 @@ public class SqlGenerator implements AstNodeVisitor<String, SqlGeneratorContext>
       }
       selectSql = builder.toString();
     }
+
+    // sourceAlias
+    String sourceTableAlias = process(node.getSource().getTableName(), context);
 
     // joinSql
     String joinSql = ""; // no join

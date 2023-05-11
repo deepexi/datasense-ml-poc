@@ -14,7 +14,6 @@ import java.util.Objects;
  */
 public class ColumnTableNameReplacer extends BaseColumnIdentifierRewriter {
 
-  private final boolean debug = false;
   private final Identifier fromTable;
   private final Identifier toTable;
 

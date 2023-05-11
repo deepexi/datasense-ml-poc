@@ -2,17 +2,13 @@ package com.deepexi.ds.ast.visitor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.deepexi.ds.ast.AstNode;
 import com.deepexi.ds.ast.Model;
-import com.deepexi.ds.ast.visitor.analyzer.ModelNodeRef;
 import com.deepexi.ds.ast.visitor.analyzer.ScopeCollector;
 import com.deepexi.ds.ast.visitor.analyzer.ScopeCollectorContext;
-import com.deepexi.ds.builder.ModelBuilder;
+import com.deepexi.ds.astbuilder.model.ModelBuilder;
 import com.deepexi.ds.ymlmodel.YmlModel;
 import com.deepexi.ds.ymlmodel.factory.YmlModelParser;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 public class ScopeCollectorTest {

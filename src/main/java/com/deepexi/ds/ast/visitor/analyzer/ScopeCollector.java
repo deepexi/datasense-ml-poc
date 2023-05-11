@@ -4,7 +4,7 @@ import com.deepexi.ds.ModelException.UnsupportedException;
 import com.deepexi.ds.ast.AstNodeVisitor;
 import com.deepexi.ds.ast.Column;
 import com.deepexi.ds.ast.Join;
-import com.deepexi.ds.ast.MetricBindQuery;
+import com.deepexi.ds.ast.MetricQuery;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.OrderBy;
 import com.deepexi.ds.ast.Relation;
@@ -78,7 +78,7 @@ public class ScopeCollector implements AstNodeVisitor<Void, ScopeCollectorContex
   }
 
   @Override
-  public Void visitMetricBindQuery(MetricBindQuery node, ScopeCollectorContext context) {
+  public Void visitMetricBindQuery(MetricQuery node, ScopeCollectorContext context) {
     // Model model = node.getModel();
     Relation relation = node.getSource();
     ScopeCollectorContext subContext = new ScopeCollectorContext(relation);

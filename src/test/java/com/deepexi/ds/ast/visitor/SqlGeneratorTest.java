@@ -8,18 +8,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.deepexi.ds.DevConfig;
 import com.deepexi.ds.ast.AstNode;
-import com.deepexi.ds.ast.MetricBindQuery;
+import com.deepexi.ds.ast.MetricQuery;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.Relation;
-import com.deepexi.ds.ast.SqlDialect;
+import com.deepexi.ds.SqlDialect;
 import com.deepexi.ds.ast.visitor.generator.IdentifierQuotePolicy.IdentifierPolicyBackTick;
 import com.deepexi.ds.ast.visitor.generator.IdentifierQuotePolicy.IdentifierPolicyNoQuote;
 import com.deepexi.ds.ast.visitor.generator.IdentifierShowPolicy;
 import com.deepexi.ds.ast.visitor.generator.SqlGenerator;
 import com.deepexi.ds.ast.visitor.generator.SqlGeneratorContext;
 import com.deepexi.ds.ast.visitor.generator.SqlGeneratorPgContext;
-import com.deepexi.ds.builder.MetricBindQueryBuilder;
-import com.deepexi.ds.builder.ModelBuilder;
+import com.deepexi.ds.builder.AstBuilder;
+import com.deepexi.ds.astbuilder.model.ModelBuilder;
 import com.deepexi.ds.ymlmodel.YmlFullQuery;
 import com.deepexi.ds.ymlmodel.YmlModel;
 import com.deepexi.ds.ymlmodel.factory.YmlFullQueryParser;
@@ -149,7 +149,7 @@ public class SqlGeneratorTest {
   @Test
   public void testVisitMetricBindQuery() {
     YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("debug/10_full.yml");
-    AstNode node = new MetricBindQueryBuilder(ctx).build();
+    AstNode node = new AstBuilder(ctx).build();
 
     // generate sql
     SqlGenerator generator = new SqlGenerator();
@@ -180,7 +180,7 @@ public class SqlGeneratorTest {
   @Test
   public void testVisitMetricBindQuery_case01() {
     YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("tpcds/02_biz/case01.yml");
-    AstNode node = new MetricBindQueryBuilder(ctx).build();
+    AstNode node = new AstBuilder(ctx).build();
 
     // generate sql
     SqlGenerator generator = new SqlGenerator();
@@ -195,7 +195,7 @@ public class SqlGeneratorTest {
   @Test
   public void testVisitMetricBindQuery_case02() {
     YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("tpcds/02_biz/case02.yml");
-    AstNode node = new MetricBindQueryBuilder(ctx).build();
+    AstNode node = new AstBuilder(ctx).build();
 
     // generate sql
     SqlGenerator generator = new SqlGenerator();
@@ -210,7 +210,7 @@ public class SqlGeneratorTest {
   @Test
   public void testVisitMetricBindQuery_case03() {
     YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("tpcds/02_biz/case03.yml");
-    AstNode node = new MetricBindQueryBuilder(ctx).build();
+    AstNode node = new AstBuilder(ctx).build();
 
     // generate sql
     SqlGenerator generator = new SqlGenerator();
@@ -225,7 +225,7 @@ public class SqlGeneratorTest {
   @Test
   public void testVisitMetricBindQuery_case04() {
     YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("tpcds/02_biz/case04_e2e.yml");
-    AstNode node = new MetricBindQueryBuilder(ctx).build();
+    AstNode node = new AstBuilder(ctx).build();
 
     // generate sql
     SqlGenerator generator = new SqlGenerator();
@@ -240,7 +240,7 @@ public class SqlGeneratorTest {
   @Test
   public void testVisitMetricBindQuery_case05() {
     YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("tpcds/02_biz/case05_e2e.yml");
-    MetricBindQuery node = (MetricBindQuery) new MetricBindQueryBuilder(ctx).build();
+    MetricQuery node = (MetricQuery) new AstBuilder(ctx).build();
     // 5列, 3个维度, 2个指标
     assertEquals(3, node.getGroupBy().size());
     assertEquals(5, node.getColumns().size());
@@ -258,7 +258,7 @@ public class SqlGeneratorTest {
   @Test
   public void testVisitMetricBindQuery_case06() {
     YmlFullQuery ctx = YmlFullQueryParser.loadFromRes("tpcds/02_biz/case06_order_by_e2e.yml");
-    MetricBindQuery node = (MetricBindQuery) new MetricBindQueryBuilder(ctx).build();
+    MetricQuery node = (MetricQuery) new AstBuilder(ctx).build();
     // 5列, 3个维度, 2个指标
     assertEquals(3, node.getGroupBy().size());
     assertEquals(5, node.getColumns().size());
@@ -277,7 +277,7 @@ public class SqlGeneratorTest {
   public void testVisitMetricBindQuery_case07() {
     YmlFullQuery ctx = YmlFullQueryParser.loadFromRes(
         "tpcds/02_biz/case07_window_unbounded_e2e.yml");
-    Relation node = new MetricBindQueryBuilder(ctx).build();
+    Relation node = new AstBuilder(ctx).build();
 
     // generate sql
     SqlGenerator generator = new SqlGenerator();
@@ -293,7 +293,7 @@ public class SqlGeneratorTest {
   public void testVisitMetricBindQuery_case08() {
     YmlFullQuery ctx = YmlFullQueryParser.loadFromRes(
         "tpcds/02_biz/case08_window_3_day_e2e.yml");
-    Relation node = new MetricBindQueryBuilder(ctx).build();
+    Relation node = new AstBuilder(ctx).build();
 
     // generate sql
     SqlGenerator generator = new SqlGenerator();
@@ -310,7 +310,7 @@ public class SqlGeneratorTest {
   public void testVisitMetricBindQuery_case09() {
     YmlFullQuery ctx = YmlFullQueryParser.loadFromRes(
         "tpcds/02_biz/case09_window_3_day_e2e.yml");
-    Relation node = new MetricBindQueryBuilder(ctx).build();
+    Relation node = new AstBuilder(ctx).build();
 
     // generate sql
     SqlGenerator generator = new SqlGenerator();

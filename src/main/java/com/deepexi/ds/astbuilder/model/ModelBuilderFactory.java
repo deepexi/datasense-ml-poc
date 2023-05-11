@@ -1,4 +1,4 @@
-package com.deepexi.ds.builder;
+package com.deepexi.ds.astbuilder.model;
 
 import com.deepexi.ds.ModelException.ModelHasCycleException;
 import com.deepexi.ds.ModelException.ModelHasManyRootException;

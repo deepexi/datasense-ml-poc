@@ -1,5 +1,7 @@
 package com.deepexi.ds.ast.expression;
 
+import static java.util.Collections.EMPTY_LIST;
+
 import com.deepexi.ds.ModelException;
 import com.deepexi.ds.ast.AstNodeVisitor;
 import com.deepexi.ds.ast.ColumnDataType;
@@ -18,7 +20,7 @@ public class UdfCastExpression extends UdfExpression {
   private static final String NAME = "cast";
   private final Expression castWhat;
   private final ColumnDataType toType;
-  private final List<Expression> castArgs;
+  private final ImmutableList<Expression> castArgs;
 
   /**
    * <pre>
@@ -28,7 +30,7 @@ public class UdfCastExpression extends UdfExpression {
    * </pre>
    */
   public UdfCastExpression(List<Expression> args) {
-    super(NAME, args);
+    super(NAME, EMPTY_LIST);
 
     castWhat = args.get(0);
 
@@ -48,6 +50,13 @@ public class UdfCastExpression extends UdfExpression {
       tmp.add(args.get(i));
     }
     this.castArgs = ImmutableList.copyOf(tmp);
+  }
+
+  public UdfCastExpression(Expression castWhat, ColumnDataType toType, List<Expression> castArgs) {
+    super(NAME, EMPTY_LIST);
+    this.castWhat = castWhat;
+    this.toType = toType;
+    this.castArgs = ImmutableList.copyOf(castArgs);
   }
 
   @Override

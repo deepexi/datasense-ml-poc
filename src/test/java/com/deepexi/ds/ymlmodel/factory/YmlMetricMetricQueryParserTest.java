@@ -8,7 +8,7 @@ import com.deepexi.ds.ymlmodel.YmlMetricQuery;
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
-public class YmlMetricQueryParserTest {
+public class YmlMetricMetricQueryParserTest {
 
   @Test
   void testParseMetricQueryFromResFile() {

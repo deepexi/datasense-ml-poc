@@ -2,7 +2,7 @@ package com.deepexi.ds.ast.utils;
 
 import com.deepexi.ds.DevConfig;
 import com.deepexi.ds.ModelException;
-import com.deepexi.ds.ast.SqlDialect;
+import com.deepexi.ds.SqlDialect;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;

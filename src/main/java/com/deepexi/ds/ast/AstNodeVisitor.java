@@ -56,7 +56,7 @@ public interface AstNodeVisitor<R, C> {
 
   R visitCompareExpression(CompareExpression node, C context);
 
-  R visitMetricBindQuery(MetricBindQuery node, C context);
+  R visitMetricBindQuery(MetricQuery node, C context);
 
   R visitOrderBy(OrderBy node, C context);
 

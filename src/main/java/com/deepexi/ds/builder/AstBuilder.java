@@ -10,12 +10,11 @@ import com.deepexi.ds.ModelException.TODOException;
 import com.deepexi.ds.ast.Column;
 import com.deepexi.ds.ast.ColumnDataType;
 import com.deepexi.ds.ast.DateTimeUnit;
-import com.deepexi.ds.ast.MetricBindQuery;
+import com.deepexi.ds.ast.MetricQuery;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.OrderBy;
 import com.deepexi.ds.ast.OrderBy.OrderByDirection;
 import com.deepexi.ds.ast.Relation;
-import com.deepexi.ds.ast.SqlDialect;
 import com.deepexi.ds.ast.expression.ArithmeticExpression;
 import com.deepexi.ds.ast.expression.Expression;
 import com.deepexi.ds.ast.expression.Identifier;
@@ -26,7 +25,7 @@ import com.deepexi.ds.ast.window.FrameBoundary;
 import com.deepexi.ds.ast.window.FrameBoundaryBase;
 import com.deepexi.ds.ast.window.FrameType;
 import com.deepexi.ds.ast.window.Window;
-import com.deepexi.ds.builder.express.BoolConditionParser;
+import com.deepexi.ds.astbuilder.model.ModelBuilder;
 import com.deepexi.ds.builder.express.ColumnNameRewriter;
 import com.deepexi.ds.builder.express.ColumnTableNameAdder;
 import com.deepexi.ds.builder.express.ColumnTableNameReplacer;
@@ -51,7 +50,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 @SuppressWarnings("unchecked")
-public class MetricBindQueryBuilder {
+public class AstBuilder {
 
   private YmlMetricQuery metricQuery;
 
@@ -61,7 +60,7 @@ public class MetricBindQueryBuilder {
   // 关联的 model, 如果一个孤立的model 不被引用, 将不会出现在此集合中
   private Model model4Metrics;
 
-  public MetricBindQueryBuilder(YmlFullQuery ymlFullQuery) {
+  public AstBuilder(YmlFullQuery ymlFullQuery) {
     parseAndCheckIntegrity(ymlFullQuery);
   }
 
@@ -95,8 +94,6 @@ public class MetricBindQueryBuilder {
     }
 
     ImmutableList<YmlModel> ymlModels = ymlFullQuery.getModels();
-    Map<String, YmlModel> ymlModelsLookup = ymlModels.stream()
-        .collect(Collectors.toMap(YmlModel::getName, Function.identity()));
     Set<String> minDims = new HashSet<>(this.metricQuery.getDimensions());
     for (YmlMetric ele : this.metrics) {
       // 所有 metrics.dimension 必定包含 query.dimension
@@ -114,7 +111,7 @@ public class MetricBindQueryBuilder {
         }
       }
 
-      model4Metrics = new ModelBuilder(ymlModels, ymlModelsLookup.get(ele.getModelName())).build();
+      model4Metrics = ModelBuilder.singleTreeModel(ymlModels);
     }
     if (metrics.size() == 0) {
       throw new ModelException("found no model_def");
@@ -184,7 +181,7 @@ public class MetricBindQueryBuilder {
     // modelFilters
     final List<Expression> modelFilters = new ArrayList<>();
     metricQuery.getModelFilters().forEach((String filterStr) -> {
-      Expression expr3 = new BoolConditionParser(filterStr, EMPTY_LIST, model4Metrics).parse();
+      Expression expr3 = ParserUtils.parseBooleanExpression(filterStr);
       modelFilters.add(expr3);
     });
 
@@ -203,7 +200,7 @@ public class MetricBindQueryBuilder {
     selectColumns.addAll(metricsCol);
 
     if (this.metricQuery.getWindow() == null) {
-      return new MetricBindQuery(
+      return new MetricQuery(
           metricQueryName,    // id
           model4Metrics,      // from
           modelFilters,       // where
@@ -216,6 +213,14 @@ public class MetricBindQueryBuilder {
           metricQuery.getOffset());
     }
 
+    /*
+     * 某些聚合函数不支持 group + window
+     * sum(col)   => group时 sum(col) + window中 再次sum
+     * count(col) => group时 count(col) + window中 再次sum
+     * avg(col)
+     * count(distinct col)
+     */
+
     // 包含 window, 需要创建一个额外的 MetricBindQuery, 记做 midMetric
     // 在 midMetric完成 group by
     // 之上还有一层 MetricBindQuery, 完成窗口运算, 记做 upper
@@ -223,7 +228,7 @@ public class MetricBindQueryBuilder {
     // ======== 处理 midMetric
     String midLayerName = generateMidLayerAlias(metricQuery);
     Identifier midMetricId = Identifier.of(midLayerName);
-    MetricBindQuery midMetric = new MetricBindQuery(
+    MetricQuery midMetric = new MetricQuery(
         midMetricId,    // id
         model4Metrics,  // relation
         modelFilters,   // where
@@ -266,7 +271,7 @@ public class MetricBindQueryBuilder {
     );
   }
 
-  private List<Column> buildColumnForUpperModel(MetricBindQuery midMetric,
+  private List<Column> buildColumnForUpperModel(MetricQuery midMetric,
       List<Column> metrics,
       Window window) {
     ColumnTableNameReplacer tableNameReplacer = new ColumnTableNameReplacer(
@@ -309,7 +314,7 @@ public class MetricBindQueryBuilder {
   /**
    * 构建 window, 返回的window已经处理过, 基于 fromRelation
    */
-  private Window buildWindow(MetricBindQuery fromRelation) {
+  private Window buildWindow(MetricQuery fromRelation) {
     YmlWindow ymlWindow = this.metricQuery.getWindow();
     if (ymlWindow == null) {
       return null;
@@ -343,7 +348,7 @@ public class MetricBindQueryBuilder {
     throw new ModelException("not support");
   }
 
-  private static Window buildWindowRange(MetricBindQuery from, int value, DateTimeUnit unit) {
+  private static Window buildWindowRange(MetricQuery from, int value, DateTimeUnit unit) {
     // partitions
     List<Identifier> partitions = EMPTY_LIST;
     if (from.getGroupBy().size() > 0) {
@@ -487,7 +492,7 @@ public class MetricBindQueryBuilder {
     return new Window(partitions, orderBys, frameType, start, end);
   }
 
-  private static Window buildWindowUnbounded(MetricBindQuery from, DateTimeUnit unit) {
+  private static Window buildWindowUnbounded(MetricQuery from, DateTimeUnit unit) {
     // partitions
     List<Identifier> partitions = EMPTY_LIST;
     if (from.getGroupBy().size() > 0) {

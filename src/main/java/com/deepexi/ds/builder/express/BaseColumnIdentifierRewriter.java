@@ -4,7 +4,7 @@ import com.deepexi.ds.ast.AstNode;
 import com.deepexi.ds.ast.AstNodeVisitor;
 import com.deepexi.ds.ast.Column;
 import com.deepexi.ds.ast.Join;
-import com.deepexi.ds.ast.MetricBindQuery;
+import com.deepexi.ds.ast.MetricQuery;
 import com.deepexi.ds.ast.Model;
 import com.deepexi.ds.ast.OrderBy;
 import com.deepexi.ds.ast.expression.ArithmeticExpression;
@@ -157,7 +157,11 @@ public abstract class BaseColumnIdentifierRewriter implements AstNodeVisitor<Ast
 
   @Override
   public AstNode visitUdfCastExpression(UdfCastExpression node, Void context) {
-    throw new RuntimeException("should not be visit");
+    Expression castWhat = (Expression) process(node.getCastWhat(), context);
+    List<Expression> cartArgs = node.getCastArgs().stream()
+        .map(a -> (Expression) process(a, context)).collect(
+            Collectors.toList());
+    return new UdfCastExpression(castWhat, node.getToType(), cartArgs);
   }
 
   @Override
@@ -174,7 +178,31 @@ public abstract class BaseColumnIdentifierRewriter implements AstNodeVisitor<Ast
 
   @Override
   public AstNode visitModel(Model node, Void context) {
-    throw new RuntimeException("should not be visit");
+    List<Column> columns = node.getColumns().stream()
+        .map(c -> (Column) process(c, context))
+        .collect(Collectors.toList());
+
+    List<Column> dimensions = node.getDimensions().stream()
+        .map(c -> (Column) process(c, context))
+        .collect(Collectors.toList());
+
+    List<Join> joins = node.getJoins().stream().map(j -> {
+      List<Expression> joinConditions = j.getConditions().stream()
+          .map(condition -> (Expression) process(condition, context))
+          .collect(Collectors.toList());
+      return new Join(j.getModel(), j.getJoinType(), joinConditions);
+    }).collect(Collectors.toList());
+
+    return new Model(
+        node.getName(),
+        node.getSource(),
+        joins,
+        columns,
+        dimensions,
+        node.getOrderBys(),
+        node.getLimit(),
+        node.getOffset()
+    );
   }
 
   @Override
@@ -198,7 +226,7 @@ public abstract class BaseColumnIdentifierRewriter implements AstNodeVisitor<Ast
   }
 
   @Override
-  public AstNode visitMetricBindQuery(MetricBindQuery node, Void context) {
+  public AstNode visitMetricBindQuery(MetricQuery node, Void context) {
     throw new RuntimeException("should not be visit");
   }
 

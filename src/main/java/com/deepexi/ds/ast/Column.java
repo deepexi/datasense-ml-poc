@@ -15,15 +15,6 @@ public class Column extends AstNode {
   private final DateTimeUnit datePart;    // 是否日期相关列, maybe null
   private final Window window;            // maybe null
 
-//  public Column(@NonNull String alias, @NonNull Expression expr, ColumnDataType dataType,
-//      DateTimeUnit datePart) {
-//    this.alias = alias;
-//    this.expr = expr;
-//    this.dataType = dataType;
-//    this.window = null;
-//    this.datePart = datePart;
-//  }
-
   public Column(String alias,
       Expression expr,
       ColumnDataType dataType,

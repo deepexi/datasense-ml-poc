@@ -64,42 +64,54 @@ columns:
 ---
 version: v1
 resource: metric_def
-name: metric_sum_ss_net_paid__store_sales # 命名规范 metric_[聚合描述]__[model]
+name: sum_paid
 model_name: store_sales
-dimensions: [ d_year, d_moy, s_store_name ]
+dimensions: [ s_store_name, d_year, d_moy ]
 agg: sum(ss_net_paid)
-
 
 ---
 version: v1
 resource: metrics_query
-# 命名规范 query_[query描述]__[metric_name]
-name: query_by_month__metric_sum_ss_net_paid__store_sales
-metric_names: [ metric_sum_ss_net_paid__store_sales ]
-dimensions: [ d_year, d_moy, s_store_name ]
-model_filters: [ d_year>=200, d_year<=2001 ]
-metric_filters: [ metric_sum_ss_net_paid__store_sales > 1000000 ] # 填写指标名称
+name: monthly_paid
+metric_names: [ sum_paid ]
+dimensions: [ s_store_name, d_year, d_moy ]
+model_filters: [ d_year>=2000, d_year<=2001 ]
+metric_filters: [ sum_paid > 1000000 ] # 填写指标名称
+order_bys:
+  - name: s_store_name
+    direction: asc
+  - name: d_year
+  - name: d_moy
 
 ---
 version: v1
 resource: model_debug
 sql: >-
-  with cte as (
+  with base_model as (
     select
-      ss_net_paid,
+      store.s_store_name,
       date_dim.d_year,
       date_dim.d_moy,
-      store.s_store_name
+      ss_net_paid
     from store_sales 
       inner join date_dim on ss_sold_date_sk=date_dim.d_date_sk
       inner join store on ss_store_sk=store.s_store_sk
   )
+  , sum_paid as (
+  	select
+      s_store_name,
+      d_year,
+      d_moy,
+      sum(ss_net_paid) as sum_paid
+  	from base_model
+    where d_year>=2000 and d_year<=2001
+    group by s_store_name, d_year, d_moy
+    having sum(ss_net_paid) > 1000000
+  )
   select 
+    s_store_name,
     d_year,
     d_moy,
-    s_store_name,
-    sum(ss_net_paid) as metric_sum_ss_net_paid__store_sales
-  from cte
-  where d_year>=200 and d_year<=2001
-  group by d_year, d_moy, s_store_name
-  having sum(ss_net_paid) > 1000000
+    sum_paid
+  from sum_paid
+  order by s_store_name, d_year, d_moy

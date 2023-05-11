@@ -9,7 +9,7 @@ import java.util.List;
 import lombok.Getter;
 
 @Getter
-public class MetricBindQuery extends Relation {
+public class MetricQuery extends Relation {
 
   private final Identifier name;                          // 该 metric 名
   private final Relation source;                          // 该查询所依赖的 "表", from 子句
@@ -25,7 +25,7 @@ public class MetricBindQuery extends Relation {
   private final Integer limit;
   private final Integer offset;
 
-  public MetricBindQuery(
+  public MetricQuery(
       Identifier queryName,
       Relation source,
       List<Expression> where,

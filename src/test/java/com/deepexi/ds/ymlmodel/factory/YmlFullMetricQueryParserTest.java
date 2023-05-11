@@ -10,7 +10,7 @@ import com.deepexi.ds.ymlmodel.YmlWindow;
 import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
 
-public class YmlFullQueryParserTest {
+public class YmlFullMetricQueryParserTest {
 
   @Test
   void testParseMetricFromResFile() {

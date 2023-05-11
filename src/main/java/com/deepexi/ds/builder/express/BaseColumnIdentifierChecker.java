@@ -122,12 +122,14 @@ public class BaseColumnIdentifierChecker implements AstNodeVisitor<Void, Void> {
 
   @Override
   public Void visitFunction(FunctionExpression node, Void context) {
-    throw new RuntimeException("should not be visit");
+    node.getArgs().forEach(e -> process(e, context));
+    return null;
   }
 
   @Override
   public Void visitUdfExpression(UdfExpression node, Void context) {
-    throw new RuntimeException("should not be visit");
+    node.getArgs().forEach(e -> process(e, context));
+    return null;
   }
 
   @Override
